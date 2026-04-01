@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clarity — AI Business Diagnostic | Two Birds Innovation</title>
-  <meta name="description" content="Free AI-powered business diagnostic tool. Answer 5 questions and get a SWOT analysis, priority recommendations, and a suggested next step for your business.">
+  <meta name="description" content="Free AI-powered business diagnostic tool. Answer a few questions and get a SWOT analysis, priority recommendations, quick wins, and a suggested next step for your business.">
   <meta property="og:title" content="Clarity — AI Business Diagnostic">
   <meta property="og:description" content="Free AI-powered business diagnostic. Get a SWOT analysis and actionable recommendations in minutes.">
   <meta property="og:type" content="website">
@@ -32,7 +32,7 @@
       --shadow: 0 2px 8px rgba(0,0,0,0.08);
       --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
       --radius: 10px;
-      --max-width: 720px;
+      --max-width: 760px;
     }
 
     html { scroll-behavior: smooth; }
@@ -58,7 +58,7 @@
       background: var(--charcoal);
       color: var(--white);
       padding: 1.25rem 1.5rem;
-      text-align: centre;
+      text-align: center;
     }
     .site-header h1 {
       font-size: 1.5rem;
@@ -81,7 +81,44 @@
       padding: 2rem 1.25rem;
     }
 
+    /* ── Setup Screen ─────────────────────────── */
+    .setup-screen {
+      display: none;
+      max-width: 480px;
+      margin: 3rem auto;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .setup-screen.active { display: block; }
+    .setup-screen h2 {
+      font-size: 1.4rem;
+      color: var(--olive-dark);
+      margin-bottom: 0.5rem;
+    }
+    .setup-screen .setup-sub {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 1.75rem;
+      line-height: 1.55;
+    }
+    .setup-screen .form-group {
+      text-align: left;
+      margin-bottom: 1.25rem;
+    }
+    .setup-screen .setup-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    /* ── Intro ─────────────────────────────────── */
     .intro {
+      display: none;
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -89,27 +126,20 @@
       margin-bottom: 2rem;
       box-shadow: var(--shadow);
     }
+    .intro.active { display: block; }
     .intro h2 { font-size: 1.2rem; color: var(--olive-dark); margin-bottom: 0.5rem; }
     .intro p { font-size: 0.92rem; color: var(--text-light); }
-    .intro .api-note {
-      margin-top: 1rem;
-      padding: 0.75rem 1rem;
-      background: #FFF8E1;
-      border-left: 3px solid var(--accent);
-      border-radius: 4px;
-      font-size: 0.85rem;
-      color: var(--charcoal-light);
-    }
-    .intro .api-note a { font-weight: 600; }
 
     /* ── Form ──────────────────────────────────── */
     .diagnostic-form {
+      display: none;
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1.75rem 1.5rem;
       box-shadow: var(--shadow);
     }
+    .diagnostic-form.active { display: block; }
     .diagnostic-form h2 {
       font-size: 1.15rem;
       color: var(--olive-dark);
@@ -160,10 +190,41 @@
       gap: 1rem;
     }
 
+    /* ── Checkbox Group ────────────────────────── */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1rem;
+    }
+    .checkbox-group label {
+      font-weight: 400;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--olive);
+      flex-shrink: 0;
+    }
+    .checkbox-group label.disabled-check {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .checkbox-hint {
+      font-size: 0.82rem;
+      color: var(--text-light);
+      margin-bottom: 0.4rem;
+    }
+
+    /* ── Buttons ───────────────────────────────── */
     .btn {
       display: inline-flex;
-      align-items: centre;
-      justify-content: centre;
+      align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
       border: none;
@@ -175,6 +236,7 @@
       transition: background 0.2s, transform 0.1s;
       min-height: 44px;
       min-width: 44px;
+      text-decoration: none;
     }
     .btn:active { transform: scale(0.98); }
 
@@ -204,11 +266,17 @@
     }
     .btn-outline:hover { background: var(--olive-light); }
 
+    .btn-accent {
+      background: var(--accent);
+      color: var(--white);
+    }
+    .btn-accent:hover { background: #7A6548; }
+
     /* ── Loading ───────────────────────────────── */
     .loading {
       display: none;
-      text-align: centre;
-      padding: 2.5rem 1.5rem;
+      text-align: center;
+      padding: 3rem 1.5rem;
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -216,31 +284,41 @@
       box-shadow: var(--shadow);
     }
     .loading.active { display: block; }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--olive-light);
-      border-top-color: var(--olive);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 1rem;
+    .loading-dots {
+      display: inline-flex;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-dots span {
+      width: 12px;
+      height: 12px;
+      background: var(--olive);
+      border-radius: 50%;
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
     .loading p { color: var(--text-light); font-size: 0.92rem; }
+    .loading p strong { color: var(--charcoal); }
 
     /* ── Error ─────────────────────────────────── */
     .error-box {
       display: none;
-      padding: 1.25rem;
+      padding: 1.5rem;
       background: #FDE8E8;
       border: 1px solid var(--error);
       border-radius: var(--radius);
       margin-top: 2rem;
-      color: var(--error);
-      font-size: 0.92rem;
+      text-align: center;
     }
     .error-box.active { display: block; }
-    .error-box strong { display: block; margin-bottom: 0.35rem; }
+    .error-box strong { display: block; margin-bottom: 0.35rem; color: var(--error); font-size: 1rem; }
+    .error-box p { color: var(--error); font-size: 0.92rem; margin-bottom: 1rem; }
+    .error-box .btn { margin: 0 auto; }
 
     /* ── Results ───────────────────────────────── */
     .results {
@@ -267,6 +345,7 @@
       box-shadow: var(--shadow-lg);
     }
 
+    /* ── SWOT Grid ─────────────────────────────── */
     .swot-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -294,8 +373,9 @@
     .swot-card ul { padding-left: 1.1rem; margin: 0; }
     .swot-card li { margin-bottom: 0.3rem; }
 
+    /* ── Recommendations ───────────────────────── */
     .recommendations {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
     }
     .recommendations h3 {
       font-size: 1rem;
@@ -305,7 +385,7 @@
       border-bottom: 2px solid var(--olive-light);
     }
     .rec-item {
-      padding: 1rem;
+      padding: 1rem 1rem 0.85rem;
       background: var(--cream);
       border-radius: 8px;
       margin-bottom: 0.75rem;
@@ -314,16 +394,71 @@
     .rec-item h4 {
       font-size: 0.92rem;
       color: var(--charcoal);
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.35rem;
     }
-    .rec-item p { font-size: 0.88rem; color: var(--text-light); }
+    .rec-item p { font-size: 0.88rem; color: var(--text-light); margin-bottom: 0.5rem; }
+    .rec-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .badge-effort { background: #E8EDE4; color: var(--olive-dark); }
+    .badge-impact-high { background: #C8E6C9; color: #2E7D32; }
+    .badge-impact-medium { background: #FFF9C4; color: #F57F17; }
+    .badge-impact-low { background: #FFECB3; color: #E65100; }
 
+    /* ── Quick Wins ────────────────────────────── */
+    .quick-wins {
+      margin-bottom: 1.75rem;
+    }
+    .quick-wins h3 {
+      font-size: 1rem;
+      color: var(--olive-dark);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--olive-light);
+    }
+    .qw-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.85rem 1rem;
+      background: #F0F7ED;
+      border: 1px solid #C5D9BC;
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .qw-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: var(--olive);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* ── Next Step ─────────────────────────────── */
     .next-step {
       padding: 1.25rem;
       background: var(--olive-light);
       border-radius: 8px;
       border: 1px solid #B8C4AD;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
     }
     .next-step h3 {
       font-size: 1rem;
@@ -332,44 +467,84 @@
     }
     .next-step p { font-size: 0.92rem; }
 
+    /* ── Consultation CTA ──────────────────────── */
+    .cta-card {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #F5F0E8 0%, #EDE8DF 100%);
+      border: 1px solid var(--accent-light);
+      border-radius: var(--radius);
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .cta-card h3 {
+      font-size: 1.05rem;
+      color: var(--charcoal);
+      margin-bottom: 0.3rem;
+    }
+    .cta-card p {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Results Actions ───────────────────────── */
     .results-actions {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
+    .results-actions .btn { flex: 1; min-width: 160px; justify-content: center; }
 
     /* ── Footer ────────────────────────────────── */
     .site-footer {
       background: var(--charcoal);
       color: #B0B0A8;
-      text-align: centre;
+      text-align: center;
       padding: 1.25rem;
       font-size: 0.82rem;
     }
     .site-footer a { color: var(--accent-light); }
+    .footer-links {
+      margin-top: 0.5rem;
+    }
+    .footer-links a {
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
 
     /* ── Print ─────────────────────────────────── */
     @media print {
       .site-header, .site-footer, .diagnostic-form, .intro,
-      .loading, .error-box, .results-actions, .api-note { display: none !important; }
+      .loading, .error-box, .results-actions, .cta-card, .setup-screen { display: none !important; }
       .results { display: block !important; margin-top: 0; }
       .results-header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .swot-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .qw-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       body { background: #fff; }
       main { max-width: 100%; padding: 0; }
     }
 
-    /* ── Responsive ────────────────────────────── */
+    /* ── Responsive: Tablet ────────────────────── */
+    @media (max-width: 768px) {
+      main { padding: 1.5rem 1rem; }
+    }
+
+    /* ── Responsive: Mobile ────────────────────── */
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
       .swot-grid { grid-template-columns: 1fr; }
+      .checkbox-group { grid-template-columns: 1fr; }
       main { padding: 1rem; }
       .diagnostic-form, .intro { padding: 1.25rem 1rem; }
+      .setup-screen { padding: 1.75rem 1.25rem; margin: 1.5rem auto; }
+      .results-actions { flex-direction: column; }
+      .results-actions .btn { min-width: unset; }
     }
 
     /* ── Reduced motion ────────────────────────── */
     @media (prefers-reduced-motion: reduce) {
-      .spinner { animation: none; border-top-color: var(--olive-dark); }
+      .loading-dots span { animation: none; opacity: 1; transform: scale(1); }
       html { scroll-behavior: auto; }
     }
 
@@ -397,23 +572,28 @@
   </header>
 
   <main id="main" role="main">
-    <div class="intro">
-      <h2>Get a clear picture of your business's AI readiness</h2>
-      <p>Answer five quick questions about your business. Clarity uses AI to generate a personalised SWOT analysis, three priority recommendations, and a concrete next step — all in under a minute.</p>
-      <div class="api-note">
-        <strong>API key required:</strong> This tool uses the Anthropic API to generate your diagnostic. You'll need your own API key.
-        <a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get a free API key &rarr;</a>
+
+    <!-- ── Setup Screen ──────────────────────── -->
+    <div class="setup-screen" id="setupScreen" aria-labelledby="setupHeading">
+      <h2 id="setupHeading">Set Up Clarity</h2>
+      <p class="setup-sub">Enter your Anthropic API key to activate Clarity. Your key stays in your browser — it is never stored or sent anywhere except directly to Anthropic.</p>
+      <div class="form-group">
+        <label for="setupApiKey">API Key</label>
+        <input type="password" id="setupApiKey" placeholder="sk-ant-..." autocomplete="off" aria-required="true">
       </div>
+      <button type="button" class="btn btn-primary" id="activateBtn">Activate Clarity</button>
+      <a href="https://console.anthropic.com/" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
     </div>
 
+    <!-- ── Intro ─────────────────────────────── -->
+    <div class="intro" id="introSection">
+      <h2>Get a clear picture of your business's AI readiness</h2>
+      <p>Answer a few quick questions about your business. Clarity uses AI to generate a personalised SWOT analysis, priority recommendations, quick wins, and a concrete next step — all in under a minute.</p>
+    </div>
+
+    <!-- ── Diagnostic Form ───────────────────── -->
     <form class="diagnostic-form" id="diagnosticForm" novalidate>
       <h2>Your Business Diagnostic</h2>
-
-      <div class="form-group">
-        <label for="apiKey">Anthropic API Key</label>
-        <span class="hint">Your key stays in your browser — it is never stored or sent anywhere except directly to Anthropic.</span>
-        <input type="password" id="apiKey" placeholder="sk-ant-..." required autocomplete="off" aria-describedby="apiKeyHint">
-      </div>
 
       <div class="form-row">
         <div class="form-group">
@@ -427,91 +607,94 @@
             <option value="Manufacturing">Manufacturing</option>
             <option value="Retail">Retail</option>
             <option value="Professional Services">Professional Services</option>
+            <option value="Trades">Trades</option>
             <option value="Healthcare">Healthcare</option>
-            <option value="Construction">Construction</option>
+            <option value="Non-Profit">Non-Profit</option>
             <option value="Other">Other</option>
           </select>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="q1">1. How is your business currently using AI or automation?</label>
-        <select id="q1" required>
-          <option value="">Select one</option>
-          <option value="Not at all — we haven't started">Not at all — we haven't started</option>
-          <option value="Basic tools only (e.g. spell check, simple templates)">Basic tools only (e.g. spell check, simple templates)</option>
-          <option value="Some AI tools (e.g. ChatGPT, Copilot) used informally">Some AI tools (e.g. ChatGPT, Copilot) used informally</option>
-          <option value="AI integrated into some workflows">AI integrated into some workflows</option>
-          <option value="AI is core to our operations">AI is core to our operations</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="yearsInBusiness">Years in Business</label>
+          <select id="yearsInBusiness" required>
+            <option value="">Select one</option>
+            <option value="Under 1 year">Under 1</option>
+            <option value="1-3 years">1 - 3</option>
+            <option value="3-10 years">3 - 10</option>
+            <option value="10+ years">10+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="teamSize">Team Size</label>
+          <select id="teamSize" required>
+            <option value="">Select one</option>
+            <option value="Solo">Solo</option>
+            <option value="2-5 people">2 - 5</option>
+            <option value="6-20 people">6 - 20</option>
+            <option value="20+ people">20+</option>
+          </select>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="q2">2. What is the biggest bottleneck in your business right now?</label>
-        <select id="q2" required>
-          <option value="">Select one</option>
-          <option value="Manual data entry and repetitive tasks">Manual data entry and repetitive tasks</option>
-          <option value="Customer communication and follow-up">Customer communication and follow-up</option>
-          <option value="Finding and retaining skilled staff">Finding and retaining skilled staff</option>
-          <option value="Marketing and lead generation">Marketing and lead generation</option>
-          <option value="Reporting, analytics, and decision-making">Reporting, analytics, and decision-making</option>
-          <option value="Other">Other</option>
-        </select>
+      <div class="form-group" id="challengeGroup">
+        <label>Top Challenges</label>
+        <p class="checkbox-hint" id="challengeHint">Select up to 3</p>
+        <div class="checkbox-group" role="group" aria-labelledby="challengeHint">
+          <label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>
+          <label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>
+          <label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>
+          <label><input type="checkbox" name="challenges" value="Don't know where to start"> Don't know where to start</label>
+          <label><input type="checkbox" name="challenges" value="Cost concerns"> Cost concerns</label>
+          <label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>
+          <label><input type="checkbox" name="challenges" value="Other"> Other</label>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="q3">3. How many people work in your business?</label>
-        <select id="q3" required>
-          <option value="">Select one</option>
-          <option value="Just me (solopreneur)">Just me (solopreneur)</option>
-          <option value="2–5 employees">2–5 employees</option>
-          <option value="6–20 employees">6–20 employees</option>
-          <option value="21–50 employees">21–50 employees</option>
-          <option value="50+ employees">50+ employees</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="q4">4. What budget range could you allocate to AI tools or consulting per month?</label>
-        <select id="q4" required>
-          <option value="">Select one</option>
-          <option value="$0 — just exploring for now">$0 — just exploring for now</option>
-          <option value="Under $100/month">Under $100/month</option>
-          <option value="$100–$500/month">$100–$500/month</option>
-          <option value="$500–$2,000/month">$500–$2,000/month</option>
-          <option value="$2,000+/month">$2,000+/month</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="q5">5. When would you ideally like to see AI making a difference in your business?</label>
-        <select id="q5" required>
-          <option value="">Select one</option>
-          <option value="Within the next month">Within the next month</option>
-          <option value="Within 3 months">Within 3 months</option>
-          <option value="Within 6 months">Within 6 months</option>
-          <option value="Within a year">Within a year</option>
-          <option value="No rush — just learning">No rush — just learning</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="aiUsage">Current AI Usage</label>
+          <select id="aiUsage" required>
+            <option value="">Select one</option>
+            <option value="None">None</option>
+            <option value="Tried a few things">Tried a few things</option>
+            <option value="Use regularly">Use regularly</option>
+            <option value="Have a dedicated process">Have a dedicated process</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="revenueGoal">Revenue Goal (Next 12 Months)</label>
+          <select id="revenueGoal" required>
+            <option value="">Select one</option>
+            <option value="Growth">Growth</option>
+            <option value="Stability">Stability</option>
+            <option value="Survival">Survival</option>
+            <option value="Exit / Sale">Exit / Sale</option>
+          </select>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
     </form>
 
-    <!-- Loading -->
+    <!-- ── Loading ───────────────────────────── -->
     <div class="loading" id="loading" role="status" aria-live="polite">
-      <div class="spinner" aria-hidden="true"></div>
-      <p><strong>Generating your diagnostic...</strong></p>
-      <p>This typically takes 15–30 seconds.</p>
+      <div class="loading-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p><strong>Analysing your business...</strong></p>
+      <p>This typically takes 15 - 30 seconds.</p>
     </div>
 
-    <!-- Error -->
+    <!-- ── Error ─────────────────────────────── -->
     <div class="error-box" id="errorBox" role="alert">
       <strong>Something went wrong</strong>
       <p id="errorMessage"></p>
+      <button type="button" class="btn btn-outline" id="tryAgainBtn">Try Again</button>
     </div>
 
-    <!-- Results -->
+    <!-- ── Results ───────────────────────────── -->
     <div class="results" id="results" aria-live="polite">
       <div class="results-header">
         <h2 id="resultsTitle">Diagnostic Results</h2>
@@ -520,10 +703,17 @@
       <div class="results-body">
         <div class="swot-grid" id="swotGrid"></div>
         <div class="recommendations" id="recommendations"></div>
+        <div class="quick-wins" id="quickWins"></div>
         <div class="next-step" id="nextStep"></div>
+        <div class="cta-card" id="ctaCard">
+          <h3>Want Aaron to walk through this with you?</h3>
+          <p>Free 30-minute consultation.</p>
+          <a class="btn btn-accent" id="ctaLink" href="#" target="_blank" rel="noopener">Book a Consultation</a>
+        </div>
         <div class="results-actions">
-          <button type="button" class="btn btn-secondary" onclick="window.print()">Print / Save as PDF</button>
-          <button type="button" class="btn btn-outline" onclick="resetForm()">Run Another Diagnostic</button>
+          <button type="button" class="btn btn-secondary" onclick="window.print()">Print Report</button>
+          <button type="button" class="btn btn-outline" id="saveReportBtn">Save Report</button>
+          <button type="button" class="btn btn-outline" id="runAnotherBtn">Run Another Diagnostic</button>
         </div>
       </div>
     </div>
@@ -532,47 +722,169 @@
   <footer class="site-footer" role="contentinfo">
     <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
     <p>Your API key and business data never leave your browser except to call the Anthropic API directly.</p>
+    <div class="footer-links">
+      <a href="#" id="resetKeyLink">Reset API Key</a>
+    </div>
   </footer>
 
   <script>
   (function() {
     'use strict';
 
-    var form = document.getElementById('diagnosticForm');
-    var loadingEl = document.getElementById('loading');
-    var errorBox = document.getElementById('errorBox');
+    /* ── Element References ─────────────────── */
+    var setupScreen  = document.getElementById('setupScreen');
+    var setupApiKey  = document.getElementById('setupApiKey');
+    var activateBtn  = document.getElementById('activateBtn');
+    var introSection = document.getElementById('introSection');
+    var form         = document.getElementById('diagnosticForm');
+    var loadingEl    = document.getElementById('loading');
+    var errorBox     = document.getElementById('errorBox');
     var errorMessage = document.getElementById('errorMessage');
-    var resultsEl = document.getElementById('results');
-    var submitBtn = document.getElementById('submitBtn');
+    var resultsEl    = document.getElementById('results');
+    var submitBtn    = document.getElementById('submitBtn');
+    var tryAgainBtn  = document.getElementById('tryAgainBtn');
+    var saveReportBtn = document.getElementById('saveReportBtn');
+    var runAnotherBtn = document.getElementById('runAnotherBtn');
+    var resetKeyLink  = document.getElementById('resetKeyLink');
 
+    var lastReportData = null;
+    var lastBusinessName = '';
+
+    /* ── Migrate old key name ──────────────── */
+    try {
+      var oldKey = localStorage.getItem('clarity-api-key');
+      if (oldKey && !localStorage.getItem('clarity_api_key')) {
+        localStorage.setItem('clarity_api_key', oldKey);
+        localStorage.removeItem('clarity-api-key');
+      }
+    } catch(e) {}
+
+    /* ── Init: check for API key ───────────── */
+    function init() {
+      hideAll();
+      var key = getApiKey();
+      if (key) {
+        showApp();
+      } else {
+        setupScreen.classList.add('active');
+      }
+    }
+
+    function getApiKey() {
+      try { return localStorage.getItem('clarity_api_key') || ''; } catch(e) { return ''; }
+    }
+
+    function showApp() {
+      setupScreen.classList.remove('active');
+      introSection.classList.add('active');
+      form.classList.add('active');
+    }
+
+    function hideApp() {
+      introSection.classList.remove('active');
+      form.classList.remove('active');
+      resultsEl.classList.remove('active');
+      loadingEl.classList.remove('active');
+      errorBox.classList.remove('active');
+    }
+
+    /* ── Setup: Activate ───────────────────── */
+    activateBtn.addEventListener('click', function() {
+      var key = setupApiKey.value.trim();
+      if (!key) {
+        setupApiKey.focus();
+        return;
+      }
+      try { localStorage.setItem('clarity_api_key', key); } catch(e) {}
+      showApp();
+    });
+
+    /* ── Reset API Key ─────────────────────── */
+    resetKeyLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      try {
+        localStorage.removeItem('clarity_api_key');
+        localStorage.removeItem('clarity-api-key');
+      } catch(e) {}
+      hideApp();
+      hideAll();
+      setupApiKey.value = '';
+      setupScreen.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ── Checkbox max-3 logic ──────────────── */
+    var checkboxes = document.querySelectorAll('input[name="challenges"]');
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', enforceMaxChecked);
+    });
+
+    function enforceMaxChecked() {
+      var checked = document.querySelectorAll('input[name="challenges"]:checked');
+      var labels = document.querySelectorAll('.checkbox-group label');
+      if (checked.length >= 3) {
+        labels.forEach(function(lbl) {
+          var input = lbl.querySelector('input');
+          if (!input.checked) {
+            lbl.classList.add('disabled-check');
+            input.disabled = true;
+          }
+        });
+      } else {
+        labels.forEach(function(lbl) {
+          var input = lbl.querySelector('input');
+          lbl.classList.remove('disabled-check');
+          input.disabled = false;
+        });
+      }
+    }
+
+    /* ── Form Submit ───────────────────────── */
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       runDiagnostic();
     });
 
+    function getCheckedChallenges() {
+      var checked = document.querySelectorAll('input[name="challenges"]:checked');
+      var vals = [];
+      checked.forEach(function(cb) { vals.push(cb.value); });
+      return vals;
+    }
+
     function runDiagnostic() {
-      var apiKey = document.getElementById('apiKey').value.trim();
+      var apiKey       = getApiKey();
       var businessName = document.getElementById('businessName').value.trim();
-      var industry = document.getElementById('industry').value;
-      var q1 = document.getElementById('q1').value;
-      var q2 = document.getElementById('q2').value;
-      var q3 = document.getElementById('q3').value;
-      var q4 = document.getElementById('q4').value;
-      var q5 = document.getElementById('q5').value;
+      var industry     = document.getElementById('industry').value;
+      var years        = document.getElementById('yearsInBusiness').value;
+      var teamSize     = document.getElementById('teamSize').value;
+      var challenges   = getCheckedChallenges();
+      var aiUsage      = document.getElementById('aiUsage').value;
+      var revenueGoal  = document.getElementById('revenueGoal').value;
 
       // Validate
-      if (!apiKey || !businessName || !industry || !q1 || !q2 || !q3 || !q4 || !q5) {
+      if (!apiKey) {
+        showError('No API key found. Please reset and re-enter your key.');
+        return;
+      }
+      if (!businessName || !industry || !years || !teamSize || !aiUsage || !revenueGoal) {
         showError('Please complete all fields before submitting.');
         return;
       }
+      if (challenges.length === 0) {
+        showError('Please select at least one challenge.');
+        return;
+      }
+
+      lastBusinessName = businessName;
 
       // Show loading
       hideAll();
       loadingEl.classList.add('active');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Generating...';
+      submitBtn.textContent = 'Analysing...';
 
-      var prompt = buildPrompt(businessName, industry, q1, q2, q3, q4, q5);
+      var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal);
 
       fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -611,17 +923,19 @@
       });
     }
 
-    function buildPrompt(name, industry, q1, q2, q3, q4, q5) {
+    /* ── Build Prompt ──────────────────────── */
+    function buildPrompt(name, industry, years, teamSize, challenges, aiUsage, revenueGoal) {
       return [
         'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses.',
         '',
         'A business owner has completed a diagnostic questionnaire. Based on their answers, provide:',
         '',
         '1. A SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) — 3 bullet points per category, specific to their situation.',
-        '2. Three numbered priority recommendations — each with a clear title and 2–3 sentence explanation. Recommendations must be actionable and realistic for their budget and team size.',
-        '3. A single "Suggested Next Step" — one concrete action they could take this week.',
+        '2. Three numbered priority recommendations — each with a clear title, 2-3 sentence explanation, and an effort rating (Low/Medium/High) and impact rating (Low/Medium/High). Recommendations must be actionable and realistic for their team size and goals.',
+        '3. Three quick wins — concrete actions the business can do in the next 30 days. Short, punchy, one sentence each.',
+        '4. A single "Suggested Next Step" — one concrete action they could take this week.',
         '',
-        'Use Canadian English (centre, organisation, analyse, etc.). Be specific — reference their industry, team size, and budget. Avoid jargon.',
+        'Use Canadian English (centre, organisation, analyse, colour, etc.). Be specific — reference their industry, team size, and challenges. Avoid jargon.',
         '',
         'IMPORTANT: Respond in this exact JSON format with no markdown, no code fences, just raw JSON:',
         '{',
@@ -630,30 +944,31 @@
         '  "opportunities": ["point 1", "point 2", "point 3"],',
         '  "threats": ["point 1", "point 2", "point 3"],',
         '  "recommendations": [',
-        '    {"title": "Title 1", "description": "Description 1"},',
-        '    {"title": "Title 2", "description": "Description 2"},',
-        '    {"title": "Title 3", "description": "Description 3"}',
+        '    {"title": "Title", "description": "Description", "effort": "Low|Medium|High", "impact": "Low|Medium|High"},',
+        '    {"title": "Title", "description": "Description", "effort": "Low|Medium|High", "impact": "Low|Medium|High"},',
+        '    {"title": "Title", "description": "Description", "effort": "Low|Medium|High", "impact": "Low|Medium|High"}',
         '  ],',
+        '  "quick_wins": ["action 1", "action 2", "action 3"],',
         '  "next_step": "The single next step they should take this week."',
         '}',
         '',
         'Business Details:',
         '- Name: ' + name,
         '- Industry: ' + industry,
-        '- Current AI usage: ' + q1,
-        '- Biggest bottleneck: ' + q2,
-        '- Team size: ' + q3,
-        '- Monthly AI budget: ' + q4,
-        '- Desired timeline: ' + q5
+        '- Years in business: ' + years,
+        '- Team size: ' + teamSize,
+        '- Top challenges: ' + challenges.join(', '),
+        '- Current AI usage: ' + aiUsage,
+        '- Revenue goal (next 12 months): ' + revenueGoal
       ].join('\n');
     }
 
+    /* ── Display Results ───────────────────── */
     function displayResults(name, industry, rawText) {
       hideAll();
 
       var data;
       try {
-        // Strip code fences if present
         var cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
         data = JSON.parse(cleaned);
       } catch (e) {
@@ -661,11 +976,14 @@
         return;
       }
 
+      lastReportData = data;
+      lastBusinessName = name;
+
       // Header
       document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
       document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
 
-      // SWOT
+      // SWOT Grid
       var swotGrid = document.getElementById('swotGrid');
       swotGrid.innerHTML = '';
       var categories = [
@@ -684,25 +1002,96 @@
         swotGrid.appendChild(card);
       });
 
-      // Recommendations
+      // Recommendations with effort/impact badges
       var recsEl = document.getElementById('recommendations');
       recsEl.innerHTML = '<h3>Priority Recommendations</h3>';
       (data.recommendations || []).forEach(function(rec, i) {
         var div = document.createElement('div');
         div.className = 'rec-item';
+        var effortCls = 'badge badge-effort';
+        var impactCls = 'badge badge-impact-' + (rec.impact || 'medium').toLowerCase();
         div.innerHTML = '<h4>' + (i + 1) + '. ' + escapeHtml(rec.title) + '</h4>' +
-          '<p>' + escapeHtml(rec.description) + '</p>';
+          '<p>' + escapeHtml(rec.description) + '</p>' +
+          '<div class="rec-badges">' +
+            '<span class="' + effortCls + '">Effort: ' + escapeHtml(rec.effort || 'Medium') + '</span>' +
+            '<span class="' + impactCls + '">Impact: ' + escapeHtml(rec.impact || 'Medium') + '</span>' +
+          '</div>';
         recsEl.appendChild(div);
       });
+
+      // Quick Wins
+      var qwEl = document.getElementById('quickWins');
+      var quickWins = data.quick_wins || [];
+      if (quickWins.length > 0) {
+        qwEl.innerHTML = '<h3>Quick Wins — Next 30 Days</h3>';
+        quickWins.forEach(function(win, i) {
+          var card = document.createElement('div');
+          card.className = 'qw-card';
+          card.innerHTML = '<span class="qw-num">' + (i + 1) + '</span><span>' + escapeHtml(win) + '</span>';
+          qwEl.appendChild(card);
+        });
+      } else {
+        qwEl.innerHTML = '';
+      }
 
       // Next Step
       var nextStepEl = document.getElementById('nextStep');
       nextStepEl.innerHTML = '<h3>Suggested Next Step</h3><p>' + escapeHtml(data.next_step || '') + '</p>';
 
+      // Consultation CTA mailto
+      var subject = encodeURIComponent('Clarity Consultation Request — ' + name);
+      var bodyLines = [
+        'Hi Aaron,',
+        '',
+        'I just ran a Clarity diagnostic for ' + name + ' and would love to walk through the results with you.',
+        '',
+        'Key highlights:',
+        '- Top recommendation: ' + (data.recommendations && data.recommendations[0] ? data.recommendations[0].title : 'N/A'),
+        '- Next step: ' + (data.next_step || 'N/A'),
+        '',
+        'Looking forward to connecting.',
+        '',
+        'Thanks'
+      ];
+      var mailBody = encodeURIComponent(bodyLines.join('\n'));
+      document.getElementById('ctaLink').href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + mailBody;
+
       resultsEl.classList.add('active');
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    /* ── Save Report ───────────────────────── */
+    saveReportBtn.addEventListener('click', function() {
+      if (!lastReportData) return;
+      var key = new Date().toISOString().split('T')[0] + '_' + lastBusinessName.replace(/[^a-zA-Z0-9]/g, '_');
+      try {
+        localStorage.setItem('clarity_report_' + key, JSON.stringify({
+          business: lastBusinessName,
+          date: new Date().toISOString(),
+          data: lastReportData
+        }));
+        saveReportBtn.textContent = 'Saved!';
+        setTimeout(function() { saveReportBtn.textContent = 'Save Report'; }, 2000);
+      } catch(e) {
+        saveReportBtn.textContent = 'Save failed';
+        setTimeout(function() { saveReportBtn.textContent = 'Save Report'; }, 2000);
+      }
+    });
+
+    /* ── Run Another ───────────────────────── */
+    runAnotherBtn.addEventListener('click', function() {
+      resetForm();
+    });
+
+    /* ── Try Again ─────────────────────────── */
+    tryAgainBtn.addEventListener('click', function() {
+      hideAll();
+      introSection.classList.add('active');
+      form.classList.add('active');
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ── Utility ───────────────────────────── */
     function showError(msg) {
       hideAll();
       errorMessage.textContent = msg;
@@ -725,18 +1114,18 @@
     window.resetForm = function() {
       hideAll();
       form.reset();
-      document.getElementById('apiKey').value = localStorage.getItem('clarity-api-key') || '';
+      // Re-enable all checkboxes
+      checkboxes.forEach(function(cb) {
+        cb.disabled = false;
+        cb.parentElement.classList.remove('disabled-check');
+      });
+      introSection.classList.add('active');
+      form.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Persist API key in localStorage for convenience
-    document.getElementById('apiKey').addEventListener('change', function() {
-      try { localStorage.setItem('clarity-api-key', this.value.trim()); } catch(e) {}
-    });
-    try {
-      var savedKey = localStorage.getItem('clarity-api-key');
-      if (savedKey) document.getElementById('apiKey').value = savedKey;
-    } catch(e) {}
+    /* ── Boot ──────────────────────────────── */
+    init();
 
   })();
   </script>
