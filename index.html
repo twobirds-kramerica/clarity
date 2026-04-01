@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clarity — AI Business Diagnostic | Two Birds Innovation</title>
+  <meta name="description" content="Free AI-powered business diagnostic tool. Answer 5 questions and get a SWOT analysis, priority recommendations, and a suggested next step for your business.">
+  <meta property="og:title" content="Clarity — AI Business Diagnostic">
+  <meta property="og:description" content="Free AI-powered business diagnostic. Get a SWOT analysis and actionable recommendations in minutes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://twobirds-kramerica.github.io/clarity/">
+  <meta property="og:locale" content="en_CA">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --olive: #5C6B4F;
+      --olive-dark: #4A5640;
+      --olive-light: #E8EDE4;
+      --charcoal: #2C2C2C;
+      --charcoal-light: #4A4A4A;
+      --white: #FAFAF8;
+      --cream: #F5F3EE;
+      --accent: #8B7355;
+      --accent-light: #C4A882;
+      --error: #B44D4D;
+      --success: #5C8A4F;
+      --text: #333333;
+      --text-light: #666666;
+      --border: #D4D0C8;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+      --radius: 10px;
+      --max-width: 720px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: var(--olive); }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--olive);
+      outline-offset: 2px;
+    }
+
+    /* ── Header ────────────────────────────────── */
+    .site-header {
+      background: var(--charcoal);
+      color: var(--white);
+      padding: 1.25rem 1.5rem;
+      text-align: centre;
+    }
+    .site-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .site-header h1 span { color: var(--accent-light); }
+    .site-header p {
+      font-size: 0.88rem;
+      color: #B0B0A8;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Main ──────────────────────────────────── */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+    }
+
+    .intro {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .intro h2 { font-size: 1.2rem; color: var(--olive-dark); margin-bottom: 0.5rem; }
+    .intro p { font-size: 0.92rem; color: var(--text-light); }
+    .intro .api-note {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: #FFF8E1;
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--charcoal-light);
+    }
+    .intro .api-note a { font-weight: 600; }
+
+    /* ── Form ──────────────────────────────────── */
+    .diagnostic-form {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .diagnostic-form h2 {
+      font-size: 1.15rem;
+      color: var(--olive-dark);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--olive-light);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 0.35rem;
+      color: var(--charcoal);
+    }
+    .form-group .hint {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-light);
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--olive);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: centre;
+      justify-content: centre;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--olive);
+      color: var(--white);
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .btn-primary:hover { background: var(--olive-dark); }
+    .btn-primary:disabled {
+      background: #999;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: var(--charcoal);
+      color: var(--white);
+    }
+    .btn-secondary:hover { background: var(--charcoal-light); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--olive);
+      border: 2px solid var(--olive);
+    }
+    .btn-outline:hover { background: var(--olive-light); }
+
+    /* ── Loading ───────────────────────────────── */
+    .loading {
+      display: none;
+      text-align: centre;
+      padding: 2.5rem 1.5rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .loading.active { display: block; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--olive-light);
+      border-top-color: var(--olive);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: var(--text-light); font-size: 0.92rem; }
+
+    /* ── Error ─────────────────────────────────── */
+    .error-box {
+      display: none;
+      padding: 1.25rem;
+      background: #FDE8E8;
+      border: 1px solid var(--error);
+      border-radius: var(--radius);
+      margin-top: 2rem;
+      color: var(--error);
+      font-size: 0.92rem;
+    }
+    .error-box.active { display: block; }
+    .error-box strong { display: block; margin-bottom: 0.35rem; }
+
+    /* ── Results ───────────────────────────────── */
+    .results {
+      display: none;
+      margin-top: 2rem;
+    }
+    .results.active { display: block; }
+
+    .results-header {
+      background: var(--olive);
+      color: var(--white);
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .results-header h2 { font-size: 1.15rem; margin-bottom: 0.25rem; }
+    .results-header p { font-size: 0.85rem; opacity: 0.85; }
+
+    .results-body {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .swot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .swot-card {
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .swot-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .swot-s { background: #E8F5E9; border: 1px solid #A5D6A7; }
+    .swot-s h3 { color: #2E7D32; }
+    .swot-w { background: #FFF3E0; border: 1px solid #FFCC80; }
+    .swot-w h3 { color: #E65100; }
+    .swot-o { background: #E3F2FD; border: 1px solid #90CAF9; }
+    .swot-o h3 { color: #1565C0; }
+    .swot-t { background: #FCE4EC; border: 1px solid #F48FB1; }
+    .swot-t h3 { color: #C62828; }
+    .swot-card ul { padding-left: 1.1rem; margin: 0; }
+    .swot-card li { margin-bottom: 0.3rem; }
+
+    .recommendations {
+      margin-bottom: 1.5rem;
+    }
+    .recommendations h3 {
+      font-size: 1rem;
+      color: var(--olive-dark);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--olive-light);
+    }
+    .rec-item {
+      padding: 1rem;
+      background: var(--cream);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid var(--olive);
+    }
+    .rec-item h4 {
+      font-size: 0.92rem;
+      color: var(--charcoal);
+      margin-bottom: 0.3rem;
+    }
+    .rec-item p { font-size: 0.88rem; color: var(--text-light); }
+
+    .next-step {
+      padding: 1.25rem;
+      background: var(--olive-light);
+      border-radius: 8px;
+      border: 1px solid #B8C4AD;
+      margin-bottom: 1.5rem;
+    }
+    .next-step h3 {
+      font-size: 1rem;
+      color: var(--olive-dark);
+      margin-bottom: 0.5rem;
+    }
+    .next-step p { font-size: 0.92rem; }
+
+    .results-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Footer ────────────────────────────────── */
+    .site-footer {
+      background: var(--charcoal);
+      color: #B0B0A8;
+      text-align: centre;
+      padding: 1.25rem;
+      font-size: 0.82rem;
+    }
+    .site-footer a { color: var(--accent-light); }
+
+    /* ── Print ─────────────────────────────────── */
+    @media print {
+      .site-header, .site-footer, .diagnostic-form, .intro,
+      .loading, .error-box, .results-actions, .api-note { display: none !important; }
+      .results { display: block !important; margin-top: 0; }
+      .results-header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .swot-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { background: #fff; }
+      main { max-width: 100%; padding: 0; }
+    }
+
+    /* ── Responsive ────────────────────────────── */
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .swot-grid { grid-template-columns: 1fr; }
+      main { padding: 1rem; }
+      .diagnostic-form, .intro { padding: 1.25rem 1rem; }
+    }
+
+    /* ── Reduced motion ────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation: none; border-top-color: var(--olive-dark); }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ── Skip link ─────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--olive);
+      color: var(--white);
+      padding: 0.5rem 1rem;
+      border-radius: 0 0 6px 6px;
+      z-index: 100;
+      font-size: 0.9rem;
+    }
+    .skip-link:focus { top: 0; }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <h1><span>Clarity</span> — AI Business Diagnostic</h1>
+    <p>By Two Birds Innovation &middot; St. Thomas, Ontario</p>
+  </header>
+
+  <main id="main" role="main">
+    <div class="intro">
+      <h2>Get a clear picture of your business's AI readiness</h2>
+      <p>Answer five quick questions about your business. Clarity uses AI to generate a personalised SWOT analysis, three priority recommendations, and a concrete next step — all in under a minute.</p>
+      <div class="api-note">
+        <strong>API key required:</strong> This tool uses the Anthropic API to generate your diagnostic. You'll need your own API key.
+        <a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get a free API key &rarr;</a>
+      </div>
+    </div>
+
+    <form class="diagnostic-form" id="diagnosticForm" novalidate>
+      <h2>Your Business Diagnostic</h2>
+
+      <div class="form-group">
+        <label for="apiKey">Anthropic API Key</label>
+        <span class="hint">Your key stays in your browser — it is never stored or sent anywhere except directly to Anthropic.</span>
+        <input type="password" id="apiKey" placeholder="sk-ant-..." required autocomplete="off" aria-describedby="apiKeyHint">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="businessName">Business Name</label>
+          <input type="text" id="businessName" placeholder="e.g. Maple Leaf Bakery" required>
+        </div>
+        <div class="form-group">
+          <label for="industry">Industry</label>
+          <select id="industry" required>
+            <option value="">Select your industry</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Retail">Retail</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Construction">Construction</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="q1">1. How is your business currently using AI or automation?</label>
+        <select id="q1" required>
+          <option value="">Select one</option>
+          <option value="Not at all — we haven't started">Not at all — we haven't started</option>
+          <option value="Basic tools only (e.g. spell check, simple templates)">Basic tools only (e.g. spell check, simple templates)</option>
+          <option value="Some AI tools (e.g. ChatGPT, Copilot) used informally">Some AI tools (e.g. ChatGPT, Copilot) used informally</option>
+          <option value="AI integrated into some workflows">AI integrated into some workflows</option>
+          <option value="AI is core to our operations">AI is core to our operations</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="q2">2. What is the biggest bottleneck in your business right now?</label>
+        <select id="q2" required>
+          <option value="">Select one</option>
+          <option value="Manual data entry and repetitive tasks">Manual data entry and repetitive tasks</option>
+          <option value="Customer communication and follow-up">Customer communication and follow-up</option>
+          <option value="Finding and retaining skilled staff">Finding and retaining skilled staff</option>
+          <option value="Marketing and lead generation">Marketing and lead generation</option>
+          <option value="Reporting, analytics, and decision-making">Reporting, analytics, and decision-making</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="q3">3. How many people work in your business?</label>
+        <select id="q3" required>
+          <option value="">Select one</option>
+          <option value="Just me (solopreneur)">Just me (solopreneur)</option>
+          <option value="2–5 employees">2–5 employees</option>
+          <option value="6–20 employees">6–20 employees</option>
+          <option value="21–50 employees">21–50 employees</option>
+          <option value="50+ employees">50+ employees</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="q4">4. What budget range could you allocate to AI tools or consulting per month?</label>
+        <select id="q4" required>
+          <option value="">Select one</option>
+          <option value="$0 — just exploring for now">$0 — just exploring for now</option>
+          <option value="Under $100/month">Under $100/month</option>
+          <option value="$100–$500/month">$100–$500/month</option>
+          <option value="$500–$2,000/month">$500–$2,000/month</option>
+          <option value="$2,000+/month">$2,000+/month</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="q5">5. When would you ideally like to see AI making a difference in your business?</label>
+        <select id="q5" required>
+          <option value="">Select one</option>
+          <option value="Within the next month">Within the next month</option>
+          <option value="Within 3 months">Within 3 months</option>
+          <option value="Within 6 months">Within 6 months</option>
+          <option value="Within a year">Within a year</option>
+          <option value="No rush — just learning">No rush — just learning</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
+    </form>
+
+    <!-- Loading -->
+    <div class="loading" id="loading" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p><strong>Generating your diagnostic...</strong></p>
+      <p>This typically takes 15–30 seconds.</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox" role="alert">
+      <strong>Something went wrong</strong>
+      <p id="errorMessage"></p>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results" aria-live="polite">
+      <div class="results-header">
+        <h2 id="resultsTitle">Diagnostic Results</h2>
+        <p id="resultsSubtitle"></p>
+      </div>
+      <div class="results-body">
+        <div class="swot-grid" id="swotGrid"></div>
+        <div class="recommendations" id="recommendations"></div>
+        <div class="next-step" id="nextStep"></div>
+        <div class="results-actions">
+          <button type="button" class="btn btn-secondary" onclick="window.print()">Print / Save as PDF</button>
+          <button type="button" class="btn btn-outline" onclick="resetForm()">Run Another Diagnostic</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
+    <p>Your API key and business data never leave your browser except to call the Anthropic API directly.</p>
+  </footer>
+
+  <script>
+  (function() {
+    'use strict';
+
+    var form = document.getElementById('diagnosticForm');
+    var loadingEl = document.getElementById('loading');
+    var errorBox = document.getElementById('errorBox');
+    var errorMessage = document.getElementById('errorMessage');
+    var resultsEl = document.getElementById('results');
+    var submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      runDiagnostic();
+    });
+
+    function runDiagnostic() {
+      var apiKey = document.getElementById('apiKey').value.trim();
+      var businessName = document.getElementById('businessName').value.trim();
+      var industry = document.getElementById('industry').value;
+      var q1 = document.getElementById('q1').value;
+      var q2 = document.getElementById('q2').value;
+      var q3 = document.getElementById('q3').value;
+      var q4 = document.getElementById('q4').value;
+      var q5 = document.getElementById('q5').value;
+
+      // Validate
+      if (!apiKey || !businessName || !industry || !q1 || !q2 || !q3 || !q4 || !q5) {
+        showError('Please complete all fields before submitting.');
+        return;
+      }
+
+      // Show loading
+      hideAll();
+      loadingEl.classList.add('active');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Generating...';
+
+      var prompt = buildPrompt(businessName, industry, q1, q2, q3, q4, q5);
+
+      fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2048,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          return response.json().then(function(data) {
+            throw new Error(data.error ? data.error.message : 'API request failed (HTTP ' + response.status + ')');
+          });
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        var text = data.content && data.content[0] ? data.content[0].text : '';
+        if (!text) throw new Error('No response received from the API.');
+        displayResults(businessName, industry, text);
+      })
+      .catch(function(err) {
+        showError(err.message || 'An unexpected error occurred. Please check your API key and try again.');
+      })
+      .finally(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Generate My Diagnostic';
+        loadingEl.classList.remove('active');
+      });
+    }
+
+    function buildPrompt(name, industry, q1, q2, q3, q4, q5) {
+      return [
+        'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses.',
+        '',
+        'A business owner has completed a diagnostic questionnaire. Based on their answers, provide:',
+        '',
+        '1. A SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) — 3 bullet points per category, specific to their situation.',
+        '2. Three numbered priority recommendations — each with a clear title and 2–3 sentence explanation. Recommendations must be actionable and realistic for their budget and team size.',
+        '3. A single "Suggested Next Step" — one concrete action they could take this week.',
+        '',
+        'Use Canadian English (centre, organisation, analyse, etc.). Be specific — reference their industry, team size, and budget. Avoid jargon.',
+        '',
+        'IMPORTANT: Respond in this exact JSON format with no markdown, no code fences, just raw JSON:',
+        '{',
+        '  "strengths": ["point 1", "point 2", "point 3"],',
+        '  "weaknesses": ["point 1", "point 2", "point 3"],',
+        '  "opportunities": ["point 1", "point 2", "point 3"],',
+        '  "threats": ["point 1", "point 2", "point 3"],',
+        '  "recommendations": [',
+        '    {"title": "Title 1", "description": "Description 1"},',
+        '    {"title": "Title 2", "description": "Description 2"},',
+        '    {"title": "Title 3", "description": "Description 3"}',
+        '  ],',
+        '  "next_step": "The single next step they should take this week."',
+        '}',
+        '',
+        'Business Details:',
+        '- Name: ' + name,
+        '- Industry: ' + industry,
+        '- Current AI usage: ' + q1,
+        '- Biggest bottleneck: ' + q2,
+        '- Team size: ' + q3,
+        '- Monthly AI budget: ' + q4,
+        '- Desired timeline: ' + q5
+      ].join('\n');
+    }
+
+    function displayResults(name, industry, rawText) {
+      hideAll();
+
+      var data;
+      try {
+        // Strip code fences if present
+        var cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+        data = JSON.parse(cleaned);
+      } catch (e) {
+        showError('The AI response could not be parsed. Please try again.');
+        return;
+      }
+
+      // Header
+      document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
+      document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
+
+      // SWOT
+      var swotGrid = document.getElementById('swotGrid');
+      swotGrid.innerHTML = '';
+      var categories = [
+        { key: 'strengths', label: 'Strengths', cls: 'swot-s' },
+        { key: 'weaknesses', label: 'Weaknesses', cls: 'swot-w' },
+        { key: 'opportunities', label: 'Opportunities', cls: 'swot-o' },
+        { key: 'threats', label: 'Threats', cls: 'swot-t' }
+      ];
+      categories.forEach(function(cat) {
+        var card = document.createElement('div');
+        card.className = 'swot-card ' + cat.cls;
+        var items = data[cat.key] || [];
+        card.innerHTML = '<h3>' + cat.label + '</h3><ul>' +
+          items.map(function(item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') +
+          '</ul>';
+        swotGrid.appendChild(card);
+      });
+
+      // Recommendations
+      var recsEl = document.getElementById('recommendations');
+      recsEl.innerHTML = '<h3>Priority Recommendations</h3>';
+      (data.recommendations || []).forEach(function(rec, i) {
+        var div = document.createElement('div');
+        div.className = 'rec-item';
+        div.innerHTML = '<h4>' + (i + 1) + '. ' + escapeHtml(rec.title) + '</h4>' +
+          '<p>' + escapeHtml(rec.description) + '</p>';
+        recsEl.appendChild(div);
+      });
+
+      // Next Step
+      var nextStepEl = document.getElementById('nextStep');
+      nextStepEl.innerHTML = '<h3>Suggested Next Step</h3><p>' + escapeHtml(data.next_step || '') + '</p>';
+
+      resultsEl.classList.add('active');
+      resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function showError(msg) {
+      hideAll();
+      errorMessage.textContent = msg;
+      errorBox.classList.add('active');
+      loadingEl.classList.remove('active');
+    }
+
+    function hideAll() {
+      errorBox.classList.remove('active');
+      resultsEl.classList.remove('active');
+      loadingEl.classList.remove('active');
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    window.resetForm = function() {
+      hideAll();
+      form.reset();
+      document.getElementById('apiKey').value = localStorage.getItem('clarity-api-key') || '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Persist API key in localStorage for convenience
+    document.getElementById('apiKey').addEventListener('change', function() {
+      try { localStorage.setItem('clarity-api-key', this.value.trim()); } catch(e) {}
+    });
+    try {
+      var savedKey = localStorage.getItem('clarity-api-key');
+      if (savedKey) document.getElementById('apiKey').value = savedKey;
+    } catch(e) {}
+
+  })();
+  </script>
+</body>
+</html>
