@@ -727,6 +727,7 @@
     </div>
   </footer>
 
+  <script src="llm-provider.js"></script>
   <script>
   (function() {
     'use strict';
@@ -886,30 +887,8 @@
 
       var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal);
 
-      fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2048,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      })
-      .then(function(response) {
-        if (!response.ok) {
-          return response.json().then(function(data) {
-            throw new Error(data.error ? data.error.message : 'API request failed (HTTP ' + response.status + ')');
-          });
-        }
-        return response.json();
-      })
-      .then(function(data) {
-        var text = data.content && data.content[0] ? data.content[0].text : '';
+      llmChat(prompt, { maxTokens: 2048, apiKey: apiKey, model: 'claude-sonnet-4-20250514' })
+      .then(function(text) {
         if (!text) throw new Error('No response received from the API.');
         displayResults(businessName, industry, text);
       })
