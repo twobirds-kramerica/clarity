@@ -542,6 +542,20 @@
       .results-actions .btn { min-width: unset; }
     }
 
+    /* ── 375px phone ──────────────────────────── */
+    @media (max-width: 375px) {
+      body { font-size: 16px; overflow-x: hidden; }
+      main { padding: 0.75rem; }
+      .diagnostic-form, .intro, .setup-screen { padding: 1rem 0.75rem; }
+      .btn { min-height: 44px; font-size: 1rem; width: 100%; }
+      .btn-accent { padding: 14px 20px; font-size: 1.1rem; }
+      img, iframe { max-width: 100%; height: auto; }
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+      .cta-card { padding: 1rem; }
+      .cta-card .btn { font-size: 1rem; padding: 14px; }
+    }
+
     /* ── Reduced motion ────────────────────────── */
     @media (prefers-reduced-motion: reduce) {
       .loading-dots span { animation: none; opacity: 1; transform: scale(1); }
