@@ -706,9 +706,11 @@
         <div class="quick-wins" id="quickWins"></div>
         <div class="next-step" id="nextStep"></div>
         <div class="cta-card" id="ctaCard">
-          <h3>Want Aaron to walk through this with you?</h3>
-          <p>Free 30-minute consultation.</p>
-          <a class="btn btn-accent" id="ctaLink" href="#" target="_blank" rel="noopener">Book a Consultation</a>
+          <h3>Want to turn this into an action plan?</h3>
+          <p style="margin-bottom:0.5rem;">This diagnostic shows <em>where</em> to focus. A 30-minute call with Aaron shows you <em>how</em> — and whether a full AI Workflow Audit (CA$2,500) makes sense for your business.</p>
+          <p style="font-size:0.85rem;color:#888;margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
+          <a class="btn btn-accent" id="ctaLink" href="#" target="_blank" rel="noopener">Book a Free 30-Minute Call</a>
+          <p style="font-size:0.78rem;color:#999;margin-top:0.75rem;">Aaron Patzalek · 20-year Senior PM · St. Thomas, Ontario</p>
         </div>
         <div class="results-actions">
           <button type="button" class="btn btn-secondary" onclick="window.print()">Print Report</button>
@@ -1022,13 +1024,15 @@
       var bodyLines = [
         'Hi Aaron,',
         '',
-        'I just ran a Clarity diagnostic for ' + name + ' and would love to walk through the results with you.',
+        'I just ran a Clarity diagnostic for ' + name + '.',
         '',
-        'Key highlights:',
+        'Key highlights from my results:',
         '- Top recommendation: ' + (data.recommendations && data.recommendations[0] ? data.recommendations[0].title : 'N/A'),
-        '- Next step: ' + (data.next_step || 'N/A'),
+        '- Suggested next step: ' + (data.next_step || 'N/A'),
         '',
-        'Looking forward to connecting.',
+        'I would like to schedule a 30-minute call to discuss whether an AI Workflow Audit would make sense for my business.',
+        '',
+        'Best times for me: [please fill in]',
         '',
         'Thanks'
       ];
