@@ -24,7 +24,7 @@
       --cream: #F5F3EE;
       --accent: #8B7355;
       --accent-light: #C4A882;
-      --error: #B44D4D;
+      --error: #962C2C; /* darkened from #B44D4D to meet WCAG AA (4.5:1) on #FDE8E8 */
       --success: #5C8A4F;
       --text: #333333;
       --text-light: #666666;
@@ -507,9 +507,36 @@
     .footer-links {
       margin-top: 0.5rem;
     }
-    .footer-links a {
+    .footer-links a,
+    .footer-links .footer-link-btn {
       font-size: 0.8rem;
       cursor: pointer;
+    }
+    .footer-link-btn {
+      background: none;
+      border: 0;
+      padding: 0;
+      color: var(--accent-light);
+      text-decoration: underline;
+      font-family: inherit;
+    }
+    .footer-link-btn:focus-visible {
+      outline: 2px solid var(--accent-light);
+      outline-offset: 3px;
+    }
+
+    /* ── Fieldset reset for checkbox group ─────── */
+    fieldset.form-group {
+      border: 0;
+      padding: 0;
+    }
+    fieldset.form-group legend {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 0.35rem;
+      color: var(--charcoal);
+      padding: 0;
     }
 
     /* ── Print ─────────────────────────────────── */
@@ -652,10 +679,10 @@
         </div>
       </div>
 
-      <div class="form-group" id="challengeGroup">
-        <label>Top Challenges</label>
+      <fieldset class="form-group" id="challengeGroup">
+        <legend>Top Challenges</legend>
         <p class="checkbox-hint" id="challengeHint">Select up to 3</p>
-        <div class="checkbox-group" role="group" aria-labelledby="challengeHint">
+        <div class="checkbox-group">
           <label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>
           <label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>
           <label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>
@@ -664,7 +691,7 @@
           <label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>
           <label><input type="checkbox" name="challenges" value="Other"> Other</label>
         </div>
-      </div>
+      </fieldset>
 
       <div class="form-row">
         <div class="form-group">
@@ -709,7 +736,7 @@
     </div>
 
     <!-- ── Results ───────────────────────────── -->
-    <div class="results" id="results" aria-live="polite">
+    <div class="results" id="results" aria-live="polite" tabindex="-1">
       <div class="results-header">
         <h2 id="resultsTitle">Diagnostic Results</h2>
         <p id="resultsSubtitle"></p>
@@ -739,7 +766,7 @@
     <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
     <p>Your API key and business data never leave your browser except to call the Anthropic API directly.</p>
     <div class="footer-links">
-      <a href="#" id="resetKeyLink">Reset API Key</a>
+      <button type="button" id="resetKeyLink" class="footer-link-btn">Reset API Key</button>
     </div>
   </footer>
 
@@ -903,7 +930,7 @@
 
       var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal);
 
-      llmChat(prompt, { maxTokens: 2048, apiKey: apiKey, model: 'claude-sonnet-4-20250514' })
+      llmChat(prompt, { maxTokens: 2048, apiKey: apiKey, model: 'claude-sonnet-4-6-20250929' })
       .then(function(text) {
         if (!text) throw new Error('No response received from the API.');
         displayResults(businessName, industry, text);
@@ -1055,6 +1082,8 @@
 
       resultsEl.classList.add('active');
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      /* Shift focus so screen readers reliably announce the results heading. */
+      try { resultsEl.focus({ preventScroll: true }); } catch(e) {}
     }
 
     /* ── Save Report ───────────────────────── */

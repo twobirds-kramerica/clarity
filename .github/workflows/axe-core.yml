@@ -1,0 +1,134 @@
+name: Accessibility (axe-core)
+
+# Automates the existing ?qa=true axe-core overlay as a CI check.
+# Runs on every push to main, every PR, and can be triggered manually.
+# Fails the build on any critical WCAG violation. Serious / moderate / minor
+# are reported in the job summary + uploaded artifact but do not block.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+      - '**.css'
+      - '**.js'
+      - '.github/workflows/axe-core.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  axe:
+    name: axe-core scan (WCAG 2.0 + 2.1 A/AA)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install axe-core CLI and http-server
+        run: |
+          npm install -g @axe-core/cli@4.10.0 http-server@14.1.1
+
+      - name: Serve site on localhost:8080
+        run: |
+          http-server . -p 8080 -s &
+          echo $! > /tmp/http-server.pid
+          for i in 1 2 3 4 5; do
+            if curl -sSf http://localhost:8080/ > /dev/null; then
+              echo "Server up."
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run axe-core on Clarity
+        id: axe
+        run: |
+          mkdir -p axe-reports
+          set +e
+
+          # Clarity is a single-page app — only index.html matters.
+          # We scan it once; the app itself progressively reveals form,
+          # results, and error states via JS. Static scan catches the
+          # baseline surface (setup screen + intro + form).
+          axe "http://localhost:8080/index.html" \
+            --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
+            --save "axe-reports/index.json" \
+            --exit
+          echo "axe_exit=$?"
+
+          exit 0
+
+      - name: Summarise violations
+        id: summary
+        run: |
+          CRITICAL=0
+          SERIOUS=0
+          MODERATE=0
+          MINOR=0
+
+          for f in axe-reports/*.json; do
+            [ -f "$f" ] || continue
+            C=$(jq '[.[].violations[]? | select(.impact=="critical")] | length' "$f" 2>/dev/null || echo 0)
+            S=$(jq '[.[].violations[]? | select(.impact=="serious")] | length' "$f" 2>/dev/null || echo 0)
+            M=$(jq '[.[].violations[]? | select(.impact=="moderate")] | length' "$f" 2>/dev/null || echo 0)
+            N=$(jq '[.[].violations[]? | select(.impact=="minor")] | length' "$f" 2>/dev/null || echo 0)
+            if [ "$C" = "0" ] && [ "$S" = "0" ] && [ "$M" = "0" ] && [ "$N" = "0" ]; then
+              C=$(jq '[.violations[]? | select(.impact=="critical")] | length' "$f" 2>/dev/null || echo 0)
+              S=$(jq '[.violations[]? | select(.impact=="serious")] | length' "$f" 2>/dev/null || echo 0)
+              M=$(jq '[.violations[]? | select(.impact=="moderate")] | length' "$f" 2>/dev/null || echo 0)
+              N=$(jq '[.violations[]? | select(.impact=="minor")] | length' "$f" 2>/dev/null || echo 0)
+            fi
+            CRITICAL=$((CRITICAL + C))
+            SERIOUS=$((SERIOUS + S))
+            MODERATE=$((MODERATE + M))
+            MINOR=$((MINOR + N))
+          done
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "serious=$SERIOUS"   >> $GITHUB_OUTPUT
+
+          {
+            echo "## axe-core accessibility report"
+            echo ""
+            echo "Tags: WCAG 2.0 + 2.1, levels A + AA"
+            echo ""
+            echo "| Impact | Count |"
+            echo "|--------|-------|"
+            echo "| Critical | $CRITICAL |"
+            echo "| Serious  | $SERIOUS |"
+            echo "| Moderate | $MODERATE |"
+            echo "| Minor    | $MINOR |"
+            echo ""
+            echo "Full JSON: axe-reports artifact."
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload axe reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-reports
+          path: axe-reports/
+          retention-days: 30
+
+      - name: Stop http-server
+        if: always()
+        run: |
+          if [ -f /tmp/http-server.pid ]; then
+            kill "$(cat /tmp/http-server.pid)" 2>/dev/null || true
+          fi
+
+      - name: Fail on critical violations
+        if: steps.summary.outputs.critical != '0'
+        run: |
+          echo "::error::axe-core found ${{ steps.summary.outputs.critical }} critical WCAG violation(s)."
+          exit 1
