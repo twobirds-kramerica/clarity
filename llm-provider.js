@@ -15,7 +15,7 @@ var LLM_PROVIDERS = {
   anthropic: {
     name: 'Claude (Anthropic)',
     url: 'https://api.anthropic.com/v1/messages',
-    defaultModel: 'claude-haiku-4-5-20251001',
+    defaultModel: 'claude-sonnet-4-6-20250929',
     buildRequest: function(apiKey, model, prompt, system, maxTokens) {
       var body = { model: model, max_tokens: maxTokens || 2048, messages: [{ role: 'user', content: prompt }] };
       if (system) body.system = system;

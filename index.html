@@ -617,13 +617,22 @@
     <!-- ── Setup Screen ──────────────────────── -->
     <div class="setup-screen" id="setupScreen" aria-labelledby="setupHeading">
       <h2 id="setupHeading">Set Up Clarity</h2>
-      <p class="setup-sub">Enter your Anthropic API key to activate Clarity. Your key stays in your browser — it is never stored or sent anywhere except directly to Anthropic.</p>
+      <p class="setup-sub">Pick your AI provider and paste a key. The key stays in your browser — it's never stored anywhere except the call going straight to the provider.</p>
       <div class="form-group">
-        <label for="setupApiKey">API Key</label>
+        <label for="setupProvider">AI provider</label>
+        <select id="setupProvider">
+          <option value="anthropic">Claude (Anthropic)</option>
+          <option value="openai">GPT-4o (OpenAI)</option>
+          <option value="gemini">Gemini (Google)</option>
+          <option value="ollama">Ollama (local, no key)</option>
+        </select>
+      </div>
+      <div class="form-group" id="setupApiKeyGroup">
+        <label for="setupApiKey"><span id="setupApiKeyLabel">API key</span></label>
         <input type="password" id="setupApiKey" placeholder="sk-ant-..." autocomplete="off" aria-required="true">
       </div>
       <button type="button" class="btn btn-primary" id="activateBtn">Activate Clarity</button>
-      <a href="https://console.anthropic.com/" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
+      <a href="#" id="getKeyLink" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
     </div>
 
     <!-- ── Intro ─────────────────────────────── -->
@@ -764,9 +773,9 @@
 
   <footer class="site-footer" role="contentinfo">
     <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
-    <p>Your API key and business data never leave your browser except to call the Anthropic API directly.</p>
+    <p id="providerNote">Your API key and business data never leave your browser except to call the provider directly.</p>
     <div class="footer-links">
-      <button type="button" id="resetKeyLink" class="footer-link-btn">Reset API Key</button>
+      <button type="button" id="resetKeyLink" class="footer-link-btn">Reset provider &amp; key</button>
     </div>
   </footer>
 
@@ -776,8 +785,12 @@
     'use strict';
 
     /* ── Element References ─────────────────── */
-    var setupScreen  = document.getElementById('setupScreen');
-    var setupApiKey  = document.getElementById('setupApiKey');
+    var setupScreen        = document.getElementById('setupScreen');
+    var setupProvider      = document.getElementById('setupProvider');
+    var setupApiKey        = document.getElementById('setupApiKey');
+    var setupApiKeyGroup   = document.getElementById('setupApiKeyGroup');
+    var setupApiKeyLabel   = document.getElementById('setupApiKeyLabel');
+    var getKeyLink         = document.getElementById('getKeyLink');
     var activateBtn  = document.getElementById('activateBtn');
     var introSection = document.getElementById('introSection');
     var form         = document.getElementById('diagnosticForm');
@@ -794,7 +807,43 @@
     var lastReportData = null;
     var lastBusinessName = '';
 
-    /* ── Migrate old key name ──────────────── */
+    /* ── Provider metadata (mirrors llm-provider.js) ── */
+    var PROVIDER_META = {
+      anthropic: {
+        label:      'Claude (Anthropic)',
+        keyLabel:   'Anthropic API key',
+        placeholder:'sk-ant-...',
+        signupUrl:  'https://console.anthropic.com/',
+        signupText: 'Get a free Anthropic API key →',
+        needsKey:   true
+      },
+      openai: {
+        label:      'GPT-4o (OpenAI)',
+        keyLabel:   'OpenAI API key',
+        placeholder:'sk-...',
+        signupUrl:  'https://platform.openai.com/api-keys',
+        signupText: 'Get an OpenAI API key →',
+        needsKey:   true
+      },
+      gemini: {
+        label:      'Gemini (Google)',
+        keyLabel:   'Google AI Studio API key',
+        placeholder:'AIza...',
+        signupUrl:  'https://aistudio.google.com/apikey',
+        signupText: 'Get a free Gemini API key →',
+        needsKey:   true
+      },
+      ollama: {
+        label:      'Ollama (local, no key)',
+        keyLabel:   '',
+        placeholder:'',
+        signupUrl:  'https://ollama.com/download',
+        signupText: 'Download Ollama (runs on localhost:11434) →',
+        needsKey:   false
+      }
+    };
+
+    /* ── Migrate old key name + ensure provider set ─── */
     try {
       var oldKey = localStorage.getItem('clarity-api-key');
       if (oldKey && !localStorage.getItem('clarity_api_key')) {
@@ -803,19 +852,67 @@
       }
     } catch(e) {}
 
-    /* ── Init: check for API key ───────────── */
+    /* ── Init: check for provider + key ───── */
     function init() {
       hideAll();
+      var provider = getProvider();
+      if (setupProvider) setupProvider.value = provider;
+      renderSetupForProvider(provider);
+      renderActiveProviderNote();
+
+      var meta = PROVIDER_META[provider];
       var key = getApiKey();
-      if (key) {
+      if (meta && (!meta.needsKey || key)) {
         showApp();
       } else {
         setupScreen.classList.add('active');
       }
     }
 
+    function getProvider() {
+      try { return localStorage.getItem('llm_provider') || 'anthropic'; }
+      catch(e) { return 'anthropic'; }
+    }
+
     function getApiKey() {
-      try { return localStorage.getItem('clarity_api_key') || ''; } catch(e) { return ''; }
+      try {
+        return localStorage.getItem('llm_api_key')
+            || localStorage.getItem('clarity_api_key')
+            || '';
+      } catch(e) { return ''; }
+    }
+
+    function renderActiveProviderNote() {
+      var note = document.getElementById('providerNote');
+      if (!note) return;
+      var provider = getProvider();
+      var meta = PROVIDER_META[provider] || PROVIDER_META.anthropic;
+      note.textContent = 'Provider: ' + meta.label +
+        '. Your key and business data never leave your browser except to call ' +
+        meta.label + ' directly.';
+    }
+
+    function renderSetupForProvider(provider) {
+      var meta = PROVIDER_META[provider] || PROVIDER_META.anthropic;
+      if (setupApiKeyLabel) setupApiKeyLabel.textContent = meta.keyLabel || 'API key';
+      if (setupApiKey) {
+        setupApiKey.placeholder = meta.placeholder;
+        setupApiKey.value = '';
+        setupApiKey.required = meta.needsKey;
+      }
+      if (setupApiKeyGroup) {
+        setupApiKeyGroup.style.display = meta.needsKey ? '' : 'none';
+      }
+      if (getKeyLink) {
+        getKeyLink.href = meta.signupUrl;
+        getKeyLink.textContent = meta.signupText;
+      }
+    }
+
+    if (setupProvider) {
+      setupProvider.addEventListener('change', function() {
+        renderSetupForProvider(setupProvider.value);
+      });
     }
 
     function showApp() {
@@ -834,26 +931,47 @@
 
     /* ── Setup: Activate ───────────────────── */
     activateBtn.addEventListener('click', function() {
-      var key = setupApiKey.value.trim();
-      if (!key) {
+      var provider = (setupProvider && setupProvider.value) || 'anthropic';
+      var meta = PROVIDER_META[provider] || PROVIDER_META.anthropic;
+      var key = (setupApiKey.value || '').trim();
+
+      if (meta.needsKey && !key) {
         setupApiKey.focus();
         return;
       }
-      try { localStorage.setItem('clarity_api_key', key); } catch(e) {}
+
+      try {
+        localStorage.setItem('llm_provider', provider);
+        if (meta.needsKey) {
+          localStorage.setItem('llm_api_key', key);
+          /* keep legacy key name in sync for anyone watching storage */
+          localStorage.setItem('clarity_api_key', key);
+        } else {
+          localStorage.removeItem('llm_api_key');
+          localStorage.removeItem('clarity_api_key');
+        }
+      } catch(e) {}
       showApp();
+      renderActiveProviderNote();
     });
 
-    /* ── Reset API Key ─────────────────────── */
+    /* ── Reset API Key + provider ──────────── */
     resetKeyLink.addEventListener('click', function(e) {
       e.preventDefault();
       try {
+        localStorage.removeItem('llm_provider');
+        localStorage.removeItem('llm_api_key');
+        localStorage.removeItem('llm_model');
         localStorage.removeItem('clarity_api_key');
         localStorage.removeItem('clarity-api-key');
       } catch(e) {}
       hideApp();
       hideAll();
       setupApiKey.value = '';
+      if (setupProvider) setupProvider.value = 'anthropic';
+      renderSetupForProvider('anthropic');
       setupScreen.classList.add('active');
+      renderActiveProviderNote();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -897,6 +1015,8 @@
     }
 
     function runDiagnostic() {
+      var provider     = getProvider();
+      var meta         = PROVIDER_META[provider] || PROVIDER_META.anthropic;
       var apiKey       = getApiKey();
       var businessName = document.getElementById('businessName').value.trim();
       var industry     = document.getElementById('industry').value;
@@ -907,7 +1027,7 @@
       var revenueGoal  = document.getElementById('revenueGoal').value;
 
       // Validate
-      if (!apiKey) {
+      if (meta.needsKey && !apiKey) {
         showError('No API key found. Please reset and re-enter your key.');
         return;
       }
@@ -930,7 +1050,11 @@
 
       var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal);
 
-      llmChat(prompt, { maxTokens: 2048, apiKey: apiKey, model: 'claude-sonnet-4-6-20250929' })
+      /* Provider-aware call: llmChat picks the provider + default model
+         from localStorage (set by the Activate flow). Anthropic callers
+         still get Sonnet 4.6 by default via LLM_PROVIDERS.anthropic;
+         OpenAI gets gpt-4o; Gemini gets gemini-2.0-flash; Ollama gets llama3. */
+      llmChat(prompt, { maxTokens: 2048, provider: provider, apiKey: apiKey })
       .then(function(text) {
         if (!text) throw new Error('No response received from the API.');
         displayResults(businessName, industry, text);
