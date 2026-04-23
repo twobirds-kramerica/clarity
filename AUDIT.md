@@ -1,5 +1,17 @@
 # Clarity — HAL Stack Rigor Audit
 
+> **⚠ PROGRESS UPDATE 2026-04-22** — 2 of 5 §9 Top-5 next-actions have SHIPPED; 3 remain open. Do NOT treat §9 as an untouched backlog; re-audit before proposing Clarity work.
+>
+> | # | Action | Status |
+> |---|---|---|
+> | 1 | Mailto to Calendly | **Open** — blocked on Aaron providing Calendly URL (P1 in aaron-todos-2026-04-21) |
+> | 2 | Pricing page or section | **Open** — not shipped |
+> | 3 | Email capture before Save Report | **Open** — not shipped |
+> | 4 | LLM portability Route B | **Shipped** in `a5a0d4d` S-CLARITY-PORTABILITY + `acfa927` llm-provider.js |
+> | 5 | Testimonial or portfolio-evidence block | **Shipped** (factual variant) in `e4e79b7` portfolio-evidence line under CTA |
+
+
+
 **Audit date:** 2026-04-21
 **Auditor:** Claude Code (Opus 4.7 · max-mode autonomous) for Aaron Patzalek
 **Sprint:** S-CLARITY (Notion `348a09cf-876a-8193-896b-f10b6c7c44f9`)
