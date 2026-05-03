@@ -602,6 +602,43 @@
       font-size: 0.9rem;
     }
     .skip-link:focus { top: 0; }
+
+    /* ── Why I built this ───────────────────────── */
+    .why-built {
+      background: var(--olive-light);
+      border-top: 2px solid var(--border);
+      padding: 2.5rem 1.5rem;
+    }
+    .why-built-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .why-built h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--olive-dark);
+      margin-bottom: 1.25rem;
+      padding-left: 0.75rem;
+      border-left: 3px solid var(--olive);
+    }
+    .why-built-content p {
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .why-built-sig {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+    .why-built-sig strong {
+      color: var(--olive-dark);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -788,6 +825,23 @@
       </div>
     </div>
   </main>
+
+  <section class="why-built" id="why-built" aria-labelledby="whyBuiltHeading">
+    <div class="why-built-inner">
+      <h2 id="whyBuiltHeading">Why I built this</h2>
+      <div class="why-built-content">
+        <p>I spent 20+ years as a product manager at TELUS, Staples, and Start.ca. In that time, I watched the gap between large enterprises and small businesses grow wider with every technology wave.</p>
+        <p>When AI arrived, it was the same story. Big companies had dedicated teams, outside consultants, and technology budgets. Small businesses in Southwestern Ontario had YouTube videos and vendor pitches that turned confusion into expense.</p>
+        <p>I built Clarity because I wanted small business owners to have access to the same quality of strategic thinking that enterprise PMs apply internally &mdash; without needing an IT department, a consultant on retainer, or a subscription that auto-renews every month.</p>
+        <p>It runs on your own API key. Your business data never leaves your browser. It costs a few cents per diagnostic. No subscription. No lock-in. Just a clear picture of where you stand with AI, and what to actually do next.</p>
+        <div class="why-built-sig">
+          <strong>Aaron Patzalek</strong><br>
+          Founder, Two Birds Innovation &mdash; St. Thomas, Ontario<br>
+          20-year Senior PM &nbsp;&middot;&nbsp; <a href="https://twobirds-kramerica.github.io/two-birds-innovation/" target="_blank" rel="noopener">twobirds-innovation.ca</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <footer class="site-footer" role="contentinfo">
     <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
