@@ -180,7 +180,7 @@ This is the section where the audit scope gets opinionated. Aaron asked specific
 
 - Canadian English throughout (`centre`, `organisation`, `analyse`). Not cosmetic — signals genuine Canadian SME focus.
 - The problem framing in the diagnostic questionnaire (cost concerns, staff resistance, "don't know where to start") is *exactly* how Canadian SME owners describe their AI hesitancy. Research-grade wording.
-- Solo parent / St. Thomas origin is trust-building for the target demographic. Don't remove it. Lean in: a "Why I built this" paragraph on an About section would close more deals than any feature.
+- Parent of twins / St. Thomas origin is trust-building for the target demographic. Don't remove it. Lean in: a "Why I built this" paragraph on an About section would close more deals than any feature.
 
 ### B2B positioning — what's missing
 
