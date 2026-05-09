@@ -639,6 +639,30 @@
       color: var(--olive-dark);
       font-weight: 600;
     }
+
+    /* ── Canadian Economic Context card (Bank of Canada Valet) ── */
+    .econ-context {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+    }
+    .econ-context-header {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.65rem;
+    }
+    .econ-metrics { display: flex; gap: 1.75rem; flex-wrap: wrap; }
+    .econ-metric { display: flex; flex-direction: column; gap: 2px; }
+    .econ-metric-value { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .econ-metric-label { font-size: 0.75rem; color: var(--text-light); }
+    .econ-source { font-size: 0.73rem; color: var(--text-light); margin-top: 0.55rem; font-style: italic; }
   </style>
 </head>
 <body>
@@ -792,6 +816,7 @@
         <div class="recommendations" id="recommendations"></div>
         <div class="quick-wins" id="quickWins"></div>
         <div class="next-step" id="nextStep"></div>
+        <div id="econContextPlaceholder"></div>
         <div class="cta-card" id="ctaCard">
           <h3>Want to turn this into an action plan?</h3>
           <p style="margin-bottom:0.5rem;">This diagnostic shows <em>where</em> to focus. A 30-minute call with Aaron shows you <em>how</em> — and whether a full AI Workflow Audit (CA$2,500) makes sense for your business.</p>
@@ -854,5 +879,33 @@
   <script src="llm-provider.js"></script>
   <script src="js/clarity.js" defer></script>
   <script src="qa-audit.js" defer></script>
+  <script>
+  (function () {
+    fetch('https://www.bankofcanada.ca/valet/observations/FXCADUSD,AVG.INTWO/json?recent=5')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var obs = (data.observations || []).slice().reverse();
+        var cadUsd = null, corra = null, date = null;
+        obs.forEach(function (o) {
+          if (!cadUsd && o.FXCADUSD)    { cadUsd = parseFloat(o.FXCADUSD['v']).toFixed(4); date = o.d; }
+          if (!corra  && o['AVG.INTWO']) { corra  = parseFloat(o['AVG.INTWO']['v']).toFixed(2) + '%'; }
+        });
+        if (!cadUsd && !corra) return;
+        var ph = document.getElementById('econContextPlaceholder');
+        if (!ph) return;
+        ph.innerHTML =
+          '<div class="econ-context">'
+          + '<div class="econ-context-header">Canadian Economic Context</div>'
+          + '<div class="econ-metrics">'
+          + (cadUsd ? '<div class="econ-metric"><span class="econ-metric-value">' + cadUsd + '</span><span class="econ-metric-label">CAD / USD</span></div>' : '')
+          + (corra  ? '<div class="econ-metric"><span class="econ-metric-value">' + corra  + '</span><span class="econ-metric-label">Overnight Rate (CORRA)</span></div>' : '')
+          + (date   ? '<div class="econ-metric"><span class="econ-metric-value">' + date   + '</span><span class="econ-metric-label">BoC data as of</span></div>' : '')
+          + '</div>'
+          + '<div class="econ-source">Source: Bank of Canada Valet API · updated daily · no data stored</div>'
+          + '</div>';
+      })
+      .catch(function () {}); // silent fail — card stays absent
+  }());
+  </script>
 </body>
 </html>
