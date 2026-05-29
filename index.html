@@ -332,9 +332,49 @@
       color: var(--white);
       padding: 1.25rem 1.5rem;
       border-radius: var(--radius) var(--radius) 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
-    .results-header h2 { font-size: 1.15rem; margin-bottom: 0.25rem; }
-    .results-header p { font-size: 0.85rem; opacity: 0.85; }
+    .results-header-text h2 { font-size: 1.15rem; margin-bottom: 0.25rem; }
+    .results-header-text p { font-size: 0.85rem; opacity: 0.85; }
+    .readiness-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      padding: 0.5rem 0.9rem;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .readiness-badge-score {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .readiness-badge-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.8;
+      white-space: nowrap;
+    }
+    .demo-banner {
+      background: #FFF9C4;
+      border: 1.5px solid #F9A825;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      color: #5D4037;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
     .results-body {
       background: var(--white);
@@ -694,6 +734,10 @@
       </div>
       <button type="button" class="btn btn-primary" id="activateBtn">Activate Clarity</button>
       <a href="#" id="getKeyLink" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
+      <p style="text-align:center;margin-top:1.25rem;font-size:0.85rem;color:var(--text-light);">
+        Not sure if Clarity is right for you?
+        <a href="#" id="showSampleBtn" style="color:var(--olive);font-weight:600;">See a sample report &rarr;</a>
+      </p>
     </div>
 
     <!-- ── Intro ─────────────────────────────── -->
@@ -715,12 +759,20 @@
           <label for="industry">Industry</label>
           <select id="industry" required>
             <option value="">Select your industry</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Retail">Retail</option>
-            <option value="Professional Services">Professional Services</option>
-            <option value="Trades">Trades</option>
+            <option value="Automotive">Automotive</option>
+            <option value="Construction">Construction</option>
+            <option value="Agriculture">Agriculture / Farming</option>
+            <option value="Food &amp; Hospitality">Food &amp; Hospitality</option>
             <option value="Healthcare">Healthcare</option>
+            <option value="Legal &amp; Accounting">Legal &amp; Accounting</option>
+            <option value="Manufacturing">Manufacturing</option>
             <option value="Non-Profit">Non-Profit</option>
+            <option value="Personal Services">Personal Services</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Real Estate">Real Estate</option>
+            <option value="Retail">Retail</option>
+            <option value="Trades">Trades</option>
+            <option value="Transportation &amp; Logistics">Transportation &amp; Logistics</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -808,10 +860,20 @@
     <!-- ── Results ───────────────────────────── -->
     <div class="results" id="results" aria-live="polite" tabindex="-1">
       <div class="results-header">
-        <h2 id="resultsTitle">Diagnostic Results</h2>
-        <p id="resultsSubtitle"></p>
+        <div class="results-header-text">
+          <h2 id="resultsTitle">Diagnostic Results</h2>
+          <p id="resultsSubtitle"></p>
+        </div>
+        <div class="readiness-badge" id="readinessBadge" style="display:none" aria-label="AI Readiness Score">
+          <span class="readiness-badge-score" id="readinessScore">—</span>
+          <span class="readiness-badge-label">AI Readiness</span>
+        </div>
       </div>
       <div class="results-body">
+        <div class="demo-banner" id="demoBanner" style="display:none">
+          <span>👁️</span>
+          <span>This is a <strong>sample report</strong> for a fictional business. <a href="#" id="dismissDemo" style="color:var(--olive-dark)">Run your own diagnostic →</a></span>
+        </div>
         <div class="swot-grid" id="swotGrid"></div>
         <div class="recommendations" id="recommendations"></div>
         <div class="quick-wins" id="quickWins"></div>
@@ -821,7 +883,16 @@
           <h3>Want to turn this into an action plan?</h3>
           <p style="margin-bottom:0.5rem;">This diagnostic shows <em>where</em> to focus. A 30-minute call with Aaron shows you <em>how</em> — and whether a full AI Workflow Audit (CA$2,500) makes sense for your business.</p>
           <p style="font-size:0.85rem;color:#5C584E;margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
-          <a class="btn btn-accent" id="ctaLink" href="https://calendly.com/aaronpatzalek" target="_blank" rel="noopener">Book a Free 30-Minute Call</a>
+
+          <!-- Lead capture — submits to Formspree; configure FORMSPREE_ENDPOINT in clarity.js -->
+          <form id="leadCaptureForm" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;" novalidate>
+            <input type="email" id="leadEmail" placeholder="your@email.com" aria-label="Your email address"
+              style="flex:1;min-width:200px;padding:0.6rem 0.75rem;border:1px solid #C4A882;border-radius:6px;font-size:0.9rem;background:#FAFAF8;color:#333;">
+            <button type="submit" class="btn btn-accent" id="leadSubmitBtn" style="white-space:nowrap;">Send Me My Results</button>
+          </form>
+          <p id="leadCaptureConfirm" style="display:none;font-size:0.85rem;color:#5C6B4F;font-weight:600;margin-bottom:0.75rem;">✓ Thanks — Aaron will follow up within 24 hours.</p>
+
+          <a class="btn btn-outline" id="ctaLink" href="https://calendly.com/aaronpatzalek" target="_blank" rel="noopener" style="font-size:0.88rem;">Or book a 30-minute call directly →</a>
           <p style="font-size:0.78rem;color:#5C584E;margin-top:0.75rem;">Aaron Patzalek · 20-year Senior PM · St. Thomas, Ontario</p>
           <p style="font-size:0.78rem;color:#5C584E;margin-top:0.5rem;">Portfolio evidence of shipping: <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener" style="color:#4A5640;">Digital Confidence Centre</a> · <a href="https://twobirds-kramerica.github.io/kevins-apartment-search/" target="_blank" rel="noopener" style="color:#4A5640;">Kevin's Apartment Search</a> · <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener" style="color:#4A5640;">Career Coach</a></p>
         </div>

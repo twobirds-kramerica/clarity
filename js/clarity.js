@@ -292,19 +292,21 @@
     /* ── Build Prompt ──────────────────────── */
     function buildPrompt(name, industry, years, teamSize, challenges, aiUsage, revenueGoal) {
       return [
-        'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses.',
+        'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses in Ontario.',
         '',
         'A business owner has completed a diagnostic questionnaire. Based on their answers, provide:',
         '',
-        '1. A SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) — 3 bullet points per category, specific to their situation.',
-        '2. Three numbered priority recommendations — each with a clear title, 2-3 sentence explanation, and an effort rating (Low/Medium/High) and impact rating (Low/Medium/High). Recommendations must be actionable and realistic for their team size and goals.',
-        '3. Three quick wins — concrete actions the business can do in the next 30 days. Short, punchy, one sentence each.',
-        '4. A single "Suggested Next Step" — one concrete action they could take this week.',
+        '1. An AI Readiness Score from 1–10, where 1 = no readiness and 10 = fully optimised for AI. Be honest and specific — most SMEs score between 2 and 6.',
+        '2. A SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) — 3 bullet points per category, specific to their situation and Canadian business context.',
+        '3. Three numbered priority recommendations — each with a clear title, 2-3 sentence explanation, an effort rating (Low/Medium/High), and an impact rating (Low/Medium/High). Recommendations must name specific, available tools or approaches (e.g. "Claude", "Microsoft Copilot", "Zapier", "QuickBooks AI") where relevant.',
+        '4. Three quick wins — concrete actions the business can do in the next 30 days. Short, punchy, one sentence each.',
+        '5. A single "Suggested Next Step" — one concrete action they could take this week.',
         '',
-        'Use Canadian English (centre, organisation, analyse, colour, etc.). Be specific — reference their industry, team size, and challenges. Avoid jargon.',
+        'Use Canadian English (centre, organisation, analyse, colour, programme, etc.). Be specific — reference their industry, team size, and challenges directly. Avoid generic jargon.',
         '',
         'IMPORTANT: Respond in this exact JSON format with no markdown, no code fences, just raw JSON:',
         '{',
+        '  "readiness_score": 5,',
         '  "strengths": ["point 1", "point 2", "point 3"],',
         '  "weaknesses": ["point 1", "point 2", "point 3"],',
         '  "opportunities": ["point 1", "point 2", "point 3"],',
@@ -330,16 +332,21 @@
     }
 
     /* ── Display Results ───────────────────── */
-    function displayResults(name, industry, rawText) {
+    /* rawTextOrData: string (from API) or pre-parsed object (demo mode) */
+    function displayResults(name, industry, rawTextOrData) {
       hideAll();
 
       var data;
-      try {
-        var cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
-        data = JSON.parse(cleaned);
-      } catch (e) {
-        showError('The AI response could not be parsed. Please try again.');
-        return;
+      if (rawTextOrData && typeof rawTextOrData === 'object') {
+        data = rawTextOrData;
+      } else {
+        try {
+          var cleaned = rawTextOrData.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+          data = JSON.parse(cleaned);
+        } catch (e) {
+          showError('The AI response could not be parsed. Please try again.');
+          return;
+        }
       }
 
       lastReportData = data;
@@ -348,6 +355,17 @@
       // Header
       document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
       document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
+
+      // Readiness score badge
+      var badge = document.getElementById('readinessBadge');
+      var scoreEl = document.getElementById('readinessScore');
+      if (badge && scoreEl && data.readiness_score) {
+        var score = parseInt(data.readiness_score, 10);
+        if (!isNaN(score) && score >= 1 && score <= 10) {
+          scoreEl.textContent = score + '/10';
+          badge.style.display = '';
+        }
+      }
 
       // SWOT Grid
       var swotGrid = document.getElementById('swotGrid');
@@ -422,7 +440,9 @@
         'Thanks'
       ];
       var mailBody = encodeURIComponent(bodyLines.join('\n'));
-      document.getElementById('ctaLink').href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + mailBody;
+      var ctaLink = document.getElementById('ctaLink');
+      ctaLink.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + mailBody;
+      ctaLink.textContent = 'Email Aaron about my results →';
 
       resultsEl.classList.add('active');
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -473,6 +493,9 @@
       errorBox.classList.remove('active');
       resultsEl.classList.remove('active');
       loadingEl.classList.remove('active');
+      var badge = document.getElementById('readinessBadge');
+      if (badge) badge.style.display = 'none';
+      if (demoBanner) demoBanner.style.display = 'none';
     }
 
     function escapeHtml(str) {
@@ -493,6 +516,149 @@
       form.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    /* ── Lead Capture ──────────────────────── */
+    /* Set FORMSPREE_ENDPOINT to your Formspree form URL to enable.
+       Get one free at formspree.io — no backend needed.
+       Leave as empty string to disable the form silently. */
+    var FORMSPREE_ENDPOINT = '';
+
+    var leadCaptureForm = document.getElementById('leadCaptureForm');
+    var leadSubmitBtn   = document.getElementById('leadSubmitBtn');
+    var leadConfirm     = document.getElementById('leadCaptureConfirm');
+
+    if (leadCaptureForm) {
+      leadCaptureForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var email = (document.getElementById('leadEmail').value || '').trim();
+        if (!email || !email.includes('@')) {
+          document.getElementById('leadEmail').focus();
+          return;
+        }
+
+        if (!FORMSPREE_ENDPOINT) {
+          /* No endpoint configured — fall back to mailto so Aaron still gets the lead */
+          var subject = encodeURIComponent('Clarity Lead — ' + lastBusinessName);
+          var body = encodeURIComponent(
+            'Lead email: ' + email + '\n' +
+            'Business: ' + lastBusinessName + '\n' +
+            'Readiness score: ' + (lastReportData && lastReportData.readiness_score ? lastReportData.readiness_score + '/10' : 'n/a') + '\n' +
+            'Top rec: ' + (lastReportData && lastReportData.recommendations && lastReportData.recommendations[0] ? lastReportData.recommendations[0].title : 'n/a')
+          );
+          window.location.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
+          leadCaptureForm.style.display = 'none';
+          if (leadConfirm) leadConfirm.style.display = '';
+          return;
+        }
+
+        leadSubmitBtn.disabled = true;
+        leadSubmitBtn.textContent = 'Sending…';
+
+        var payload = {
+          email: email,
+          business: lastBusinessName,
+          readiness_score: lastReportData && lastReportData.readiness_score ? lastReportData.readiness_score + '/10' : 'n/a',
+          top_recommendation: lastReportData && lastReportData.recommendations && lastReportData.recommendations[0] ? lastReportData.recommendations[0].title : 'n/a',
+          next_step: lastReportData && lastReportData.next_step ? lastReportData.next_step : 'n/a',
+          _subject: 'Clarity Lead — ' + lastBusinessName
+        };
+
+        fetch(FORMSPREE_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(function(r) {
+          leadCaptureForm.style.display = 'none';
+          if (leadConfirm) leadConfirm.style.display = '';
+        })
+        .catch(function() {
+          leadSubmitBtn.disabled = false;
+          leadSubmitBtn.textContent = 'Send Me My Results';
+        });
+      });
+    }
+
+    /* ── Demo Mode ─────────────────────────── */
+    var SAMPLE_DATA = {
+      readiness_score: 3,
+      strengths: [
+        "Strong customer relationships built over a decade in the trades — clients trust you and refer others, giving you a reliable base to introduce new tools gradually.",
+        "Lean team structure means any AI workflow you adopt can be deployed across the whole business quickly, without complex change-management processes.",
+        "Established local reputation in Southwestern Ontario reduces your need for paid advertising — AI can amplify organic word-of-mouth rather than replace it."
+      ],
+      weaknesses: [
+        "No current documentation of repeatable processes — without this foundation, AI tools have nothing consistent to learn from or automate.",
+        "Estimating and quoting is still done manually, creating a bottleneck that limits how many jobs you can quote per week.",
+        "Staff capacity is stretched during peak season, leaving no time to learn or trial new tools even when the value is clear."
+      ],
+      opportunities: [
+        "AI-assisted estimating tools (e.g. Knowify, BuildOps) could cut quoting time by 40–60%, letting you quote more jobs without adding headcount.",
+        "Automated follow-up sequences for leads (via a tool like Jobber + AI-drafted messages) could convert more estimates to booked jobs without manual chasing.",
+        "Ontario's WSIB and Ministry of Labour compliance requirements create ongoing documentation overhead — AI can draft and maintain safety documentation at a fraction of the current cost."
+      ],
+      threats: [
+        "Larger regional contractors are beginning to adopt AI estimating and project management tools, which will allow them to underbid on speed and responsiveness.",
+        "Labour shortages in the trades will worsen — businesses without AI-assisted scheduling and coordination will struggle to deliver on their backlog.",
+        "If a competitor launches a customer-facing self-service booking portal before you do, clients who value convenience will shift their preference."
+      ],
+      recommendations: [
+        {
+          title: "Start with AI-Assisted Estimating",
+          description: "Tools like Knowify or BuildOps integrate with your job types and materials lists to generate accurate quotes in minutes. Start with your 3 most common job types. The payback on a single additional job per month covers the tool cost entirely.",
+          effort: "Medium",
+          impact: "High"
+        },
+        {
+          title: "Automate Your Follow-Up Sequence",
+          description: "Most trades businesses lose 30–40% of quoted jobs simply by not following up. Use Jobber's built-in automation (or a free Zapier workflow) to send a personalised check-in 3 days after every quote. Claude can draft your message templates in 10 minutes.",
+          effort: "Low",
+          impact: "High"
+        },
+        {
+          title: "Document Your Top 5 Processes with AI",
+          description: "Before you can automate anything, you need written processes. Use Claude or ChatGPT to record yourself explaining how you handle a job from enquiry to invoice — 15 minutes of voice notes becomes a clean SOP. Do this for your top 5 workflows first.",
+          effort: "Low",
+          impact: "Medium"
+        }
+      ],
+      quick_wins: [
+        "Use Claude or ChatGPT to draft a templated follow-up email for every quote you send — takes 20 minutes once, saves time on every job.",
+        "Ask an AI tool to turn your 3 most common job scopes into reusable quote templates with standard line items.",
+        "Record yourself explaining your onboarding process for a new job, then paste the transcript into Claude and ask it to turn it into a one-page checklist."
+      ],
+      next_step: "This week: open a free Claude account (claude.ai) and ask it to write a follow-up email template for a quoted plumbing job. Use your own voice — paste in a rough draft and ask it to polish. Send that template to your next 5 leads and see if your conversion rate changes."
+    };
+
+    var showSampleBtn = document.getElementById('showSampleBtn');
+    var demoBanner = document.getElementById('demoBanner');
+    var dismissDemo = document.getElementById('dismissDemo');
+
+    if (showSampleBtn) {
+      showSampleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        setupScreen.classList.remove('active');
+        if (demoBanner) demoBanner.style.display = '';
+        displayResults('Riverside Plumbing & Heating', 'Trades', SAMPLE_DATA);
+      });
+    }
+
+    if (dismissDemo) {
+      dismissDemo.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (demoBanner) demoBanner.style.display = 'none';
+        hideAll();
+        var provider = getProvider();
+        var meta = PROVIDER_META[provider];
+        var key = getApiKey();
+        if (meta && (!meta.needsKey || key)) {
+          showApp();
+        } else {
+          setupScreen.classList.add('active');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
 
     /* ── Boot ──────────────────────────────── */
     init();
