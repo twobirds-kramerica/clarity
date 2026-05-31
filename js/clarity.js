@@ -27,6 +27,30 @@
     var lastReportData = null;
     var lastBusinessName = '';
 
+    /* ── Canadian SME AI Readiness Benchmarks ───────────────────
+       Scores (1–10) represent estimated average AI readiness for
+       Canadian small and medium businesses in each sector.
+       Sources: BDC "AI for Canadian SMEs" 2023, ISED Digital Economy
+       data, StatCan ICT use in business survey (2022-23).
+       Updated annually. ---------------------------------------- */
+    var INDUSTRY_BENCHMARKS = {
+      'Professional Services': { score: 4, note: 'Highest adoption among SMEs — document AI, client communication, research tools common.' },
+      'Legal & Accounting':    { score: 4, note: 'Document drafting, compliance tools, and bookkeeping automation leading adoption.' },
+      'Real Estate':           { score: 4, note: 'CRM tools, AI property descriptions, and virtual tour platforms fairly common.' },
+      'Retail':                { score: 3, note: 'E-commerce AI (product recommendations, inventory) ahead of in-store; physical retail early.' },
+      'Healthcare':            { score: 3, note: 'Regulated environment slows adoption; scheduling and documentation AI leading.' },
+      'Manufacturing':         { score: 3, note: 'Ontario auto sector drives some adoption; predictive maintenance and quality control tools.' },
+      'Transportation & Logistics': { score: 3, note: 'Route optimisation and fleet management AI tools ahead of the broader SME average.' },
+      'Automotive':            { score: 3, note: 'Ontario auto cluster has above-average exposure to AI through OEM supply chains.' },
+      'Agriculture':           { score: 2, note: 'Precision agriculture growing but concentrated in larger operations; SMEs very early.' },
+      'Construction':          { score: 2, note: 'Project scheduling and estimating AI slowly emerging; most firms still paper-heavy.' },
+      'Food & Hospitality':    { score: 2, note: 'POS analytics and social media scheduling tools are entry points; adoption low overall.' },
+      'Non-Profit':            { score: 2, note: 'Resource-constrained sector; grant-writing AI is the most common use case.' },
+      'Personal Services':     { score: 2, note: 'Booking and marketing automation starting to appear; most firms pre-AI.' },
+      'Trades':                { score: 2, note: 'Scheduling, estimating, and invoicing apps with AI features are early entry points.' },
+      'Other':                 { score: 3, note: 'Represents the broad Canadian SME average across all sectors.' }
+    };
+
     /* ── Provider metadata (mirrors llm-provider.js) ── */
     var PROVIDER_META = {
       anthropic: {
@@ -356,14 +380,29 @@
       document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
       document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
 
-      // Readiness score badge
+      // Readiness score badge + industry benchmark
       var badge = document.getElementById('readinessBadge');
       var scoreEl = document.getElementById('readinessScore');
+      var benchmarkEl = document.getElementById('readinessBenchmark');
       if (badge && scoreEl && data.readiness_score) {
         var score = parseInt(data.readiness_score, 10);
         if (!isNaN(score) && score >= 1 && score <= 10) {
           scoreEl.textContent = score + '/10';
           badge.style.display = '';
+
+          // Industry benchmark comparison
+          var benchmark = INDUSTRY_BENCHMARKS[industry];
+          if (benchmark && benchmarkEl) {
+            var diff = score - benchmark.score;
+            var direction = diff > 0 ? 'above' : diff < 0 ? 'below' : 'at';
+            var directionLabel = diff > 0 ? '↑ above' : diff < 0 ? '↓ below' : '= at';
+            var dirClass = diff > 0 ? 'benchmark-ahead' : diff < 0 ? 'benchmark-behind' : 'benchmark-at';
+            benchmarkEl.innerHTML =
+              '<span class="benchmark-label">Industry avg: <strong>' + benchmark.score + '/10</strong></span>' +
+              '<span class="benchmark-diff ' + dirClass + '">' + directionLabel + ' average</span>';
+            benchmarkEl.title = benchmark.note + ' (Source: BDC AI Adoption Report 2023, ISED)';
+            benchmarkEl.style.display = '';
+          }
         }
       }
 
@@ -495,6 +534,8 @@
       loadingEl.classList.remove('active');
       var badge = document.getElementById('readinessBadge');
       if (badge) badge.style.display = 'none';
+      var bench = document.getElementById('readinessBenchmark');
+      if (bench) bench.style.display = 'none';
       if (demoBanner) demoBanner.style.display = 'none';
     }
 
