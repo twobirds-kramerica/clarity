@@ -269,6 +269,7 @@
       var challenges   = getCheckedChallenges();
       var aiUsage      = document.getElementById('aiUsage').value;
       var revenueGoal  = document.getElementById('revenueGoal').value;
+      var personalData = (document.getElementById('personalData') || {}).value || '';
 
       // Validate
       if (meta.needsKey && !apiKey) {
@@ -292,7 +293,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Analysing...';
 
-      var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal);
+      var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal, personalData);
 
       /* Provider-aware call: llmChat picks the provider + default model
          from localStorage (set by the Activate flow). Anthropic callers
@@ -314,7 +315,7 @@
     }
 
     /* ── Build Prompt ──────────────────────── */
-    function buildPrompt(name, industry, years, teamSize, challenges, aiUsage, revenueGoal) {
+    function buildPrompt(name, industry, years, teamSize, challenges, aiUsage, revenueGoal, personalData) {
       return [
         'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses in Ontario.',
         '',
@@ -351,8 +352,14 @@
         '- Team size: ' + teamSize,
         '- Top challenges: ' + challenges.join(', '),
         '- Current AI usage: ' + aiUsage,
-        '- Revenue goal (next 12 months): ' + revenueGoal
-      ].join('\n');
+        '- Revenue goal (next 12 months): ' + revenueGoal,
+        personalData ? ('- Customer personal data: ' + personalData) : ''
+      ].filter(Boolean).concat(
+        personalData && personalData.indexOf('No') === -1 ? [
+          '',
+          'PIPEDA NOTE: This business collects or handles customer personal information. In your recommendations, include one specific note about Canadian privacy obligations under PIPEDA (Personal Information Protection and Electronic Documents Act) — specifically how any AI tools they adopt must handle personal data lawfully. Flag if their described data handling raises any compliance considerations. Keep it brief (2 sentences max) and practical, not alarmist.'
+        ] : []
+      ).join('\n');
     }
 
     /* ── Display Results ───────────────────── */

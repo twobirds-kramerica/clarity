@@ -858,6 +858,18 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label for="personalData">Customer Personal Information</label>
+        <select id="personalData">
+          <option value="">Select one (optional)</option>
+          <option value="Yes — we store names, emails, and purchase history">Yes — we store customer data (names, emails, purchase history)</option>
+          <option value="Yes — we handle sensitive data (health, financial, or government ID)">Yes — we handle sensitive data (health, financial, or government ID)</option>
+          <option value="Minimal — we collect only what's needed for a transaction">Minimal — we only collect what's needed for a transaction</option>
+          <option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>
+        </select>
+        <p style="font-size:0.75rem;color:#666;margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
+      </div>
+
       <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
     </form>
 
