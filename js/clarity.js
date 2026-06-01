@@ -468,6 +468,18 @@
       var nextStepEl = document.getElementById('nextStep');
       nextStepEl.innerHTML = '<h3>Suggested Next Step</h3><p>' + escapeHtml(data.next_step || '') + '</p>';
 
+      // PIPEDA privacy note (shown when business collects personal data)
+      var pipedaEl = document.getElementById('pipedaNote');
+      var pipedaText = data.pipeda_note || '';
+      if (pipedaEl) {
+        if (pipedaText) {
+          pipedaEl.innerHTML = '<h3>🔒 Canadian Privacy Note (PIPEDA)</h3><p>' + escapeHtml(pipedaText) + '</p>';
+          pipedaEl.style.display = '';
+        } else {
+          pipedaEl.style.display = 'none';
+        }
+      }
+
       // Consultation CTA mailto
       var subject = encodeURIComponent('Clarity Consultation Request — ' + name);
       var bodyLines = [
@@ -630,6 +642,7 @@
     /* ── Demo Mode ─────────────────────────── */
     var SAMPLE_DATA = {
       readiness_score: 3,
+      pipeda_note: 'Riverside Plumbing collects customer contact information (name, address, phone) for job scheduling. Under PIPEDA, you must obtain consent before using customer data with third-party AI tools like ChatGPT — avoid pasting customer names or addresses into AI prompts. Consider a simple privacy notice on your booking form stating that contact data is used for service coordination only.',
       strengths: [
         "Strong customer relationships built over a decade in the trades — clients trust you and refer others, giving you a reliable base to introduce new tools gradually.",
         "Lean team structure means any AI workflow you adopt can be deployed across the whole business quickly, without complex change-management processes.",
