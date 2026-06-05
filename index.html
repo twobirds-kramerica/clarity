@@ -1000,25 +1000,25 @@
   <script src="qa-audit.js" defer></script>
   <script>
   (function () {
-    fetch('https://www.bankofcanada.ca/valet/observations/FXCADUSD,AVG.INTWO/json?recent=5')
+    fetch('https://www.bankofcanada.ca/valet/observations/FXCADUSD,V122514/json?recent=5')
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var obs = (data.observations || []).slice().reverse();
-        var cadUsd = null, corra = null, date = null;
+        var cadUsd = null, overnightRate = null, date = null;
         obs.forEach(function (o) {
-          if (!cadUsd && o.FXCADUSD)    { cadUsd = parseFloat(o.FXCADUSD['v']).toFixed(4); date = o.d; }
-          if (!corra  && o['AVG.INTWO']) { corra  = parseFloat(o['AVG.INTWO']['v']).toFixed(2) + '%'; }
+          if (!cadUsd        && o.FXCADUSD) { cadUsd        = parseFloat(o.FXCADUSD['v']).toFixed(4); date = o.d; }
+          if (!overnightRate && o.V122514)   { overnightRate = parseFloat(o.V122514['v']).toFixed(2) + '%'; }
         });
-        if (!cadUsd && !corra) return;
+        if (!cadUsd && !overnightRate) return;
         var ph = document.getElementById('econContextPlaceholder');
         if (!ph) return;
         ph.innerHTML =
           '<div class="econ-context">'
           + '<div class="econ-context-header">Canadian Economic Context</div>'
           + '<div class="econ-metrics">'
-          + (cadUsd ? '<div class="econ-metric"><span class="econ-metric-value">' + cadUsd + '</span><span class="econ-metric-label">CAD / USD</span></div>' : '')
-          + (corra  ? '<div class="econ-metric"><span class="econ-metric-value">' + corra  + '</span><span class="econ-metric-label">Overnight Rate (CORRA)</span></div>' : '')
-          + (date   ? '<div class="econ-metric"><span class="econ-metric-value">' + date   + '</span><span class="econ-metric-label">BoC data as of</span></div>' : '')
+          + (cadUsd        ? '<div class="econ-metric"><span class="econ-metric-value">' + cadUsd        + '</span><span class="econ-metric-label">CAD / USD</span></div>' : '')
+          + (overnightRate ? '<div class="econ-metric"><span class="econ-metric-value">' + overnightRate + '</span><span class="econ-metric-label">Overnight Rate (BoC)</span></div>' : '')
+          + (date          ? '<div class="econ-metric"><span class="econ-metric-value">' + date          + '</span><span class="econ-metric-label">BoC data as of</span></div>' : '')
           + '</div>'
           + '<div class="econ-source">Source: Bank of Canada Valet API · updated daily · no data stored</div>'
           + '</div>';
