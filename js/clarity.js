@@ -629,7 +629,12 @@
        Until then, the mailto fallback below still delivers every lead to Aaron,
        so capture is NEVER silently lost.
        Legacy: FORMSPREE_ENDPOINT retained as an optional override if ever needed. */
-    var WEB3FORMS_KEY    = '';   // paste a Clarity-specific key to enable silent submit
+    /* Active key: shared Two Birds Web3Forms inbox (same key DCC uses in
+       feedback-github.js). Web3Forms access keys are public-by-design — they
+       identify the destination inbox, contain no secret, and are safe in
+       client-side static code. Replace with a Clarity-dedicated key later if
+       lead volume warrants its own inbox. Wired 2026-06-06 (S-CLARITY-EMAIL-CAPTURE). */
+    var WEB3FORMS_KEY    = '5e0ecf7e-fb33-4541-be2e-1938bce868f4';
     var FORMSPREE_ENDPOINT = ''; // optional override; leave empty to use Web3Forms/mailto
 
     var leadCaptureForm = document.getElementById('leadCaptureForm');
@@ -639,6 +644,20 @@
     function showLeadConfirm() {
       leadCaptureForm.style.display = 'none';
       if (leadConfirm) leadConfirm.style.display = '';
+    }
+
+    /* mailto fallback — guarantees a lead is never lost if Web3Forms is
+       unreachable. Shared by Path 3 and the Web3Forms failure handler. */
+    function leadMailtoFallback(email, business, score, topRec) {
+      var subject = encodeURIComponent('Clarity Lead — ' + business);
+      var body = encodeURIComponent(
+        'Lead email: ' + email + '\n' +
+        'Business: ' + business + '\n' +
+        'Readiness score: ' + score + '\n' +
+        'Top rec: ' + topRec
+      );
+      window.location.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
+      showLeadConfirm();
     }
 
     if (leadCaptureForm) {
@@ -670,8 +689,14 @@
               next_step: (lastReportData && lastReportData.next_step) ? lastReportData.next_step : 'n/a'
             })
           })
-          .then(showLeadConfirm)
-          .catch(function() { leadSubmitBtn.disabled = false; leadSubmitBtn.textContent = 'Send Me My Results'; });
+          .then(function(r) {
+            if (r && r.ok) { showLeadConfirm(); }
+            else { leadMailtoFallback(email, lastBusinessName, score, topRec); }
+          })
+          .catch(function() {
+            /* network failure — never strand the lead; hand off to mailto */
+            leadMailtoFallback(email, lastBusinessName, score, topRec);
+          });
           return;
         }
 
@@ -695,15 +720,7 @@
         }
 
         /* Path 3: mailto fallback — lead is never lost even with no key set */
-        var subject = encodeURIComponent('Clarity Lead — ' + lastBusinessName);
-        var body = encodeURIComponent(
-          'Lead email: ' + email + '\n' +
-          'Business: ' + lastBusinessName + '\n' +
-          'Readiness score: ' + score + '\n' +
-          'Top rec: ' + topRec
-        );
-        window.location.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
-        showLeadConfirm();
+        leadMailtoFallback(email, lastBusinessName, score, topRec);
       });
     }
 
