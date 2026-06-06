@@ -621,14 +621,25 @@
     };
 
     /* ── Lead Capture ──────────────────────── */
-    /* Set FORMSPREE_ENDPOINT to your Formspree form URL to enable.
-       Get one free at formspree.io — no backend needed.
-       Leave as empty string to disable the form silently. */
-    var FORMSPREE_ENDPOINT = '';
+    /* Lead capture uses Web3Forms — the sovereign form backend already in the
+       Two Birds stack (decapitation checklist #5; DCC uses it in feedback-github.js).
+       No backend, no account required for basic use, CORS-safe for static sites.
+       To route Clarity leads to a dedicated inbox, paste a free Web3Forms access
+       key (web3forms.com — 30s, no signup needed beyond an email confirmation).
+       Until then, the mailto fallback below still delivers every lead to Aaron,
+       so capture is NEVER silently lost.
+       Legacy: FORMSPREE_ENDPOINT retained as an optional override if ever needed. */
+    var WEB3FORMS_KEY    = '';   // paste a Clarity-specific key to enable silent submit
+    var FORMSPREE_ENDPOINT = ''; // optional override; leave empty to use Web3Forms/mailto
 
     var leadCaptureForm = document.getElementById('leadCaptureForm');
     var leadSubmitBtn   = document.getElementById('leadSubmitBtn');
     var leadConfirm     = document.getElementById('leadCaptureConfirm');
+
+    function showLeadConfirm() {
+      leadCaptureForm.style.display = 'none';
+      if (leadConfirm) leadConfirm.style.display = '';
+    }
 
     if (leadCaptureForm) {
       leadCaptureForm.addEventListener('submit', function(e) {
@@ -639,46 +650,60 @@
           return;
         }
 
-        if (!FORMSPREE_ENDPOINT) {
-          /* No endpoint configured — fall back to mailto so Aaron still gets the lead */
-          var subject = encodeURIComponent('Clarity Lead — ' + lastBusinessName);
-          var body = encodeURIComponent(
-            'Lead email: ' + email + '\n' +
-            'Business: ' + lastBusinessName + '\n' +
-            'Readiness score: ' + (lastReportData && lastReportData.readiness_score ? lastReportData.readiness_score + '/10' : 'n/a') + '\n' +
-            'Top rec: ' + (lastReportData && lastReportData.recommendations && lastReportData.recommendations[0] ? lastReportData.recommendations[0].title : 'n/a')
-          );
-          window.location.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
-          leadCaptureForm.style.display = 'none';
-          if (leadConfirm) leadConfirm.style.display = '';
+        var topRec = (lastReportData && lastReportData.recommendations && lastReportData.recommendations[0]) ? lastReportData.recommendations[0].title : 'n/a';
+        var score  = (lastReportData && lastReportData.readiness_score) ? lastReportData.readiness_score + '/10' : 'n/a';
+
+        /* Path 1: Web3Forms (sovereign, silent submit) */
+        if (WEB3FORMS_KEY) {
+          leadSubmitBtn.disabled = true;
+          leadSubmitBtn.textContent = 'Sending…';
+          fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              access_key: WEB3FORMS_KEY,
+              subject: 'Clarity Lead — ' + lastBusinessName,
+              from_name: lastBusinessName || 'Clarity diagnostic',
+              email: email,
+              readiness_score: score,
+              top_recommendation: topRec,
+              next_step: (lastReportData && lastReportData.next_step) ? lastReportData.next_step : 'n/a'
+            })
+          })
+          .then(showLeadConfirm)
+          .catch(function() { leadSubmitBtn.disabled = false; leadSubmitBtn.textContent = 'Send Me My Results'; });
           return;
         }
 
-        leadSubmitBtn.disabled = true;
-        leadSubmitBtn.textContent = 'Sending…';
+        /* Path 2: Formspree override (optional, legacy) */
+        if (FORMSPREE_ENDPOINT) {
+          leadSubmitBtn.disabled = true;
+          leadSubmitBtn.textContent = 'Sending…';
+          fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              email: email, business: lastBusinessName, readiness_score: score,
+              top_recommendation: topRec,
+              next_step: (lastReportData && lastReportData.next_step) ? lastReportData.next_step : 'n/a',
+              _subject: 'Clarity Lead — ' + lastBusinessName
+            })
+          })
+          .then(showLeadConfirm)
+          .catch(function() { leadSubmitBtn.disabled = false; leadSubmitBtn.textContent = 'Send Me My Results'; });
+          return;
+        }
 
-        var payload = {
-          email: email,
-          business: lastBusinessName,
-          readiness_score: lastReportData && lastReportData.readiness_score ? lastReportData.readiness_score + '/10' : 'n/a',
-          top_recommendation: lastReportData && lastReportData.recommendations && lastReportData.recommendations[0] ? lastReportData.recommendations[0].title : 'n/a',
-          next_step: lastReportData && lastReportData.next_step ? lastReportData.next_step : 'n/a',
-          _subject: 'Clarity Lead — ' + lastBusinessName
-        };
-
-        fetch(FORMSPREE_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-        .then(function(r) {
-          leadCaptureForm.style.display = 'none';
-          if (leadConfirm) leadConfirm.style.display = '';
-        })
-        .catch(function() {
-          leadSubmitBtn.disabled = false;
-          leadSubmitBtn.textContent = 'Send Me My Results';
-        });
+        /* Path 3: mailto fallback — lead is never lost even with no key set */
+        var subject = encodeURIComponent('Clarity Lead — ' + lastBusinessName);
+        var body = encodeURIComponent(
+          'Lead email: ' + email + '\n' +
+          'Business: ' + lastBusinessName + '\n' +
+          'Readiness score: ' + score + '\n' +
+          'Top rec: ' + topRec
+        );
+        window.location.href = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
+        showLeadConfirm();
       });
     }
 
