@@ -391,29 +391,20 @@
       document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
       document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
 
-      // Readiness score badge + industry benchmark
-      var badge = document.getElementById('readinessBadge');
-      var scoreEl = document.getElementById('readinessScore');
-      var benchmarkEl = document.getElementById('readinessBenchmark');
-      if (badge && scoreEl && data.readiness_score) {
+      // Readiness score + industry benchmark (plain sentence, no hero-metric card)
+      var readinessLine = document.getElementById('readinessLine');
+      if (readinessLine && data.readiness_score) {
         var score = parseInt(data.readiness_score, 10);
         if (!isNaN(score) && score >= 1 && score <= 10) {
-          scoreEl.textContent = score + '/10';
-          badge.style.display = '';
-
-          // Industry benchmark comparison
           var benchmark = INDUSTRY_BENCHMARKS[industry];
-          if (benchmark && benchmarkEl) {
+          var lineText = 'AI Readiness: ' + score + '/10';
+          if (benchmark) {
             var diff = score - benchmark.score;
-            var direction = diff > 0 ? 'above' : diff < 0 ? 'below' : 'at';
-            var directionLabel = diff > 0 ? '↑ above' : diff < 0 ? '↓ below' : '= at';
-            var dirClass = diff > 0 ? 'benchmark-ahead' : diff < 0 ? 'benchmark-behind' : 'benchmark-at';
-            benchmarkEl.innerHTML =
-              '<span class="benchmark-label">Industry avg: <strong>' + benchmark.score + '/10</strong></span>' +
-              '<span class="benchmark-diff ' + dirClass + '">' + directionLabel + ' average</span>';
-            benchmarkEl.title = benchmark.note + ' (Source: BDC AI Adoption Report 2023, ISED)';
-            benchmarkEl.style.display = '';
+            var rel = diff > 0 ? 'above' : diff < 0 ? 'below' : 'at';
+            lineText += ' — ' + rel + ' the ' + industry + ' average (' + benchmark.score + '/10)';
           }
+          readinessLine.textContent = lineText;
+          readinessLine.style.display = '';
         }
       }
 
@@ -598,10 +589,8 @@
       errorBox.classList.remove('active');
       resultsEl.classList.remove('active');
       loadingEl.classList.remove('active');
-      var badge = document.getElementById('readinessBadge');
-      if (badge) badge.style.display = 'none';
-      var bench = document.getElementById('readinessBenchmark');
-      if (bench) bench.style.display = 'none';
+      var readinessLine = document.getElementById('readinessLine');
+      if (readinessLine) readinessLine.style.display = 'none';
       if (demoBanner) demoBanner.style.display = 'none';
     }
 

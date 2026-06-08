@@ -335,57 +335,14 @@
       color: var(--white);
       padding: 1.25rem 1.5rem;
       border-radius: var(--radius) var(--radius) 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
     }
     .results-header-text h2 { font-size: 1.15rem; margin-bottom: 0.25rem; }
     .results-header-text p { font-size: 0.85rem; opacity: 0.85; }
-    .readiness-badge {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: rgba(255,255,255,0.15);
-      border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: 10px;
-      padding: 0.5rem 0.9rem;
-      min-width: 80px;
-      flex-shrink: 0;
-    }
-    .readiness-badge-score {
-      font-size: 1.6rem;
-      font-weight: 700;
-      line-height: 1.1;
-    }
-    .readiness-badge-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      opacity: 0.8;
-      white-space: nowrap;
-    }
-    .readiness-benchmark {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.2rem;
-      font-size: 0.78rem;
+    .readiness-line {
+      font-size: 0.82rem;
       opacity: 0.9;
-      flex-shrink: 0;
+      margin-top: 0.2rem;
     }
-    .benchmark-label { white-space: nowrap; }
-    .benchmark-diff {
-      font-size: 0.72rem;
-      font-weight: 700;
-      border-radius: 10px;
-      padding: 0.1rem 0.5rem;
-      white-space: nowrap;
-    }
-    .benchmark-ahead  { background: rgba(76,175,80,0.25); color: #c8ffca; }
-    .benchmark-behind { background: rgba(244,67,54,0.2);  color: #ffc8c5; }
-    .benchmark-at     { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
     .demo-banner {
       background: #FFF9C4;
       border: 1.5px solid #F9A825;
@@ -927,12 +884,8 @@
         <div class="results-header-text">
           <h2 id="resultsTitle">Diagnostic Results</h2>
           <p id="resultsSubtitle"></p>
+          <p class="readiness-line" id="readinessLine" style="display:none"></p>
         </div>
-        <div class="readiness-badge" id="readinessBadge" style="display:none" aria-label="AI Readiness Score">
-          <span class="readiness-badge-score" id="readinessScore">—</span>
-          <span class="readiness-badge-label">AI Readiness</span>
-        </div>
-        <div class="readiness-benchmark" id="readinessBenchmark" style="display:none" aria-label="Industry benchmark comparison"></div>
       </div>
       <div class="results-body">
         <div class="demo-banner" id="demoBanner" style="display:none">
