@@ -27,7 +27,7 @@
       --error: #962C2C; /* darkened from #B44D4D to meet WCAG AA (4.5:1) on #FDE8E8 */
       --success: #5C8A4F;
       --text: #333333;
-      --text-light: #666666;
+      --text-light: #5A5A5A;
       --border: #D4D0C8;
       --shadow: 0 2px 8px rgba(0,0,0,0.08);
       --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
@@ -422,20 +422,21 @@
       font-size: 0.95rem;
       margin-bottom: 0.5rem;
     }
-    .swot-s { background: #E8F5E9; border: 1px solid #A5D6A7; }
-    .swot-s h3 { color: #2E7D32; }
-    .swot-w { background: #FFF3E0; border: 1px solid #FFCC80; }
-    .swot-w h3 { color: #E65100; }
-    .swot-o { background: #E3F2FD; border: 1px solid #90CAF9; }
-    .swot-o h3 { color: #1565C0; }
-    .swot-t { background: #FCE4EC; border: 1px solid #F48FB1; }
-    .swot-t h3 { color: #C62828; }
+    .swot-s { background: var(--olive-light); border: 1px solid #A8BA9E; }
+    .swot-s h3 { color: var(--olive-dark); }
+    .swot-w { background: var(--cream); border: 1px solid var(--accent-light); }
+    .swot-w h3 { color: var(--accent); }
+    .swot-o { background: #EEF1ED; border: 1px solid #B5C4AF; }
+    .swot-o h3 { color: #3D5232; }
+    .swot-t { background: #F2EDEA; border: 1px solid #D4B99A; }
+    .swot-t h3 { color: #7A5C3A; }
     .swot-card ul { padding-left: 1.1rem; margin: 0; }
     .swot-card li { margin-bottom: 0.3rem; }
 
     /* ── Recommendations ───────────────────────── */
     .recommendations {
       margin-bottom: 1.75rem;
+      counter-reset: rec-counter;
     }
     .recommendations h3 {
       font-size: 1rem;
@@ -449,7 +450,19 @@
       background: var(--cream);
       border-radius: 8px;
       margin-bottom: 0.75rem;
-      border-left: 3px solid var(--olive);
+      border: 1px solid var(--border);
+      counter-increment: rec-counter;
+      position: relative;
+    }
+    .rec-item::before {
+      content: counter(rec-counter);
+      position: absolute;
+      top: 0.85rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--olive);
+      opacity: 0.55;
     }
     .rec-item h4 {
       font-size: 0.92rem;
@@ -692,8 +705,8 @@
       font-weight: 700;
       color: var(--olive-dark);
       margin-bottom: 1.25rem;
-      padding-left: 0.75rem;
-      border-left: 3px solid var(--olive);
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--olive-light);
     }
     .why-built-content p {
       color: var(--text);
@@ -718,7 +731,7 @@
     .econ-context {
       background: var(--white);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
+      border-top: 3px solid var(--accent);
       border-radius: var(--radius);
       padding: 0.85rem 1.1rem;
       margin-bottom: 1.25rem;
@@ -881,7 +894,7 @@
           <option value="Minimal — we collect only what's needed for a transaction">Minimal — we only collect what's needed for a transaction</option>
           <option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>
         </select>
-        <p style="font-size:0.75rem;color:#666;margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
+        <p style="font-size:0.75rem;color:#5A5A5A;margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
       </div>
 
       <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
@@ -904,7 +917,7 @@
     </div>
 
     <!-- ── Results ───────────────────────────── -->
-    <div class="results" id="results" aria-live="polite" tabindex="-1">
+    <div class="results" id="results" aria-live="polite" aria-atomic="false" tabindex="-1">
       <div class="results-header">
         <div class="results-header-text">
           <h2 id="resultsTitle">Diagnostic Results</h2>
@@ -998,6 +1011,26 @@
   <script src="llm-provider.js"></script>
   <script src="js/clarity.js" defer></script>
   <script src="qa-audit.js" defer></script>
+  <script>
+  (function () {
+    var setup = document.getElementById('setupScreen');
+    if (!setup) return;
+    var FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    setup.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab' || !setup.classList.contains('active')) return;
+      var nodes = Array.from(setup.querySelectorAll(FOCUSABLE)).filter(function (n) {
+        return !n.closest('[hidden]') && n.offsetParent !== null;
+      });
+      if (!nodes.length) return;
+      var first = nodes[0], last = nodes[nodes.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+  }());
+  </script>
   <script>
   (function () {
     fetch('https://www.bankofcanada.ca/valet/observations/FXCADUSD,V122514/json?recent=5')
