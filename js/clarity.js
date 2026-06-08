@@ -110,6 +110,7 @@
         showApp();
       } else {
         setupScreen.classList.add('active');
+        if (setupProvider) setupProvider.focus();
       }
     }
 
@@ -215,6 +216,7 @@
       if (setupProvider) setupProvider.value = 'anthropic';
       renderSetupForProvider('anthropic');
       setupScreen.classList.add('active');
+      if (setupProvider) setupProvider.focus();
       renderActiveProviderNote();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -801,6 +803,7 @@
           showApp();
         } else {
           setupScreen.classList.add('active');
+          if (setupProvider) setupProvider.focus();
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
