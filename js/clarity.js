@@ -294,6 +294,7 @@
       loadingEl.classList.add('active');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Analysing...';
+      document.getElementById('diagnosticForm').setAttribute('aria-busy', 'true');
 
       var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal, personalData);
 
@@ -313,6 +314,7 @@
         submitBtn.disabled = false;
         submitBtn.textContent = 'Generate My Diagnostic';
         loadingEl.classList.remove('active');
+        document.getElementById('diagnosticForm').setAttribute('aria-busy', 'false');
       });
     }
 
