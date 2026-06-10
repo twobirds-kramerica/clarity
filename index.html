@@ -507,6 +507,17 @@
       margin-bottom: 0.4rem;
     }
     .pipeda-note p { margin: 0; color: #333; line-height: 1.6; }
+    .benchmark-note {
+      padding: 0.75rem 1rem;
+      background: var(--olive-light);
+      border: 1px solid #BEC9B9;
+      border-radius: 8px;
+      margin-bottom: 1.75rem;
+      font-size: 0.82rem;
+      color: var(--text-light);
+      line-height: 1.55;
+    }
+    .benchmark-note strong { color: var(--olive-dark); }
     .next-step h3 {
       font-size: 1rem;
       color: var(--olive-dark);
@@ -897,6 +908,7 @@
         <div class="quick-wins" id="quickWins"></div>
         <div class="next-step" id="nextStep"></div>
         <div class="pipeda-note" id="pipedaNote" style="display:none"></div>
+        <div id="benchmarkContextNote"></div>
         <div id="econContextPlaceholder"></div>
         <div class="cta-card" id="ctaCard">
           <h3>Want to turn this into an action plan?</h3>
