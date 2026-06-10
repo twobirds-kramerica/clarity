@@ -98,9 +98,10 @@
     }
     .setup-screen.active { display: block; }
     .setup-screen h2 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       color: var(--olive-dark);
       margin-bottom: 0.5rem;
+      text-wrap: balance;
     }
     .setup-screen .setup-sub {
       font-size: 0.9rem;
@@ -737,8 +738,18 @@
 
     <!-- ── Setup Screen ──────────────────────── -->
     <div class="setup-screen" id="setupScreen" aria-labelledby="setupHeading">
-      <h2 id="setupHeading">Set Up Clarity</h2>
-      <p class="setup-sub">Pick your AI provider and paste a key. The key stays in your browser — it's never stored anywhere except the call going straight to the provider.</p>
+      <h2 id="setupHeading">Is your business ready for AI?</h2>
+      <p class="setup-sub">Answer 7 questions. Get a personalised SWOT analysis, priority recommendations, and a concrete next step — benchmarked against 15 Canadian industries.</p>
+
+      <a href="#" id="showSampleBtn" class="btn btn-primary" style="display:inline-block;width:100%;box-sizing:border-box;margin-bottom:0.75rem;text-align:center;text-decoration:none;">See a sample diagnostic &rarr;</a>
+      <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1.5rem;">No sign-up. No API key. Free to try.</p>
+
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:0.82rem;color:var(--text-light);white-space:nowrap;">or run your own diagnostic</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
       <div class="form-group">
         <label for="setupProvider">AI provider</label>
         <select id="setupProvider">
@@ -752,12 +763,9 @@
         <label for="setupApiKey"><span id="setupApiKeyLabel">API key</span></label>
         <input type="password" id="setupApiKey" placeholder="sk-ant-..." autocomplete="off" aria-required="true">
       </div>
-      <button type="button" class="btn btn-primary" id="activateBtn">Activate Clarity</button>
+      <button type="button" class="btn btn-secondary" id="activateBtn" style="width:100%;box-sizing:border-box;">Use my own API key</button>
       <a href="#" id="getKeyLink" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
-      <p style="text-align:center;margin-top:1.25rem;font-size:0.85rem;color:var(--text-light);">
-        Not sure if Clarity is right for you?
-        <a href="#" id="showSampleBtn" style="color:var(--olive);font-weight:600;">See a sample report &rarr;</a>
-      </p>
+      <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-light);">Your key never leaves your browser. Costs a few cents per diagnostic. No subscription.</p>
     </div>
 
     <!-- ── Intro ─────────────────────────────── -->
