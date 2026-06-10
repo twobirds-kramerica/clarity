@@ -111,6 +111,12 @@
       } else {
         setupScreen.classList.add('active');
         if (setupProvider) setupProvider.focus();
+        /* Track setup screen view */
+        try {
+          var stats = JSON.parse(localStorage.getItem('clarity_stats') || '{}');
+          stats.setup_views = (stats.setup_views || 0) + 1;
+          localStorage.setItem('clarity_stats', JSON.stringify(stats));
+        } catch(e) {}
       }
     }
 
@@ -490,6 +496,16 @@
       resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       /* Shift focus so screen readers reliably announce the results heading. */
       try { resultsEl.focus({ preventScroll: true }); } catch(e) {}
+
+      /* Track completion — sovereign localStorage counter.
+         Read with: JSON.parse(localStorage.getItem('clarity_stats') || '{}') in devtools. */
+      try {
+        var stats = JSON.parse(localStorage.getItem('clarity_stats') || '{}');
+        stats.completions = (stats.completions || 0) + 1;
+        stats.last_completion = new Date().toISOString();
+        stats.last_industry = (typeof industry !== 'undefined') ? industry : 'unknown';
+        localStorage.setItem('clarity_stats', JSON.stringify(stats));
+      } catch(e) {}
     }
 
     /* ── Save Report — downloads as formatted text file ── */
@@ -765,6 +781,12 @@
     if (showSampleBtn) {
       showSampleBtn.addEventListener('click', function(e) {
         e.preventDefault();
+        /* Track demo click */
+        try {
+          var stats = JSON.parse(localStorage.getItem('clarity_stats') || '{}');
+          stats.demo_clicks = (stats.demo_clicks || 0) + 1;
+          localStorage.setItem('clarity_stats', JSON.stringify(stats));
+        } catch(e) {}
         setupScreen.classList.remove('active');
         if (demoBanner) demoBanner.style.display = '';
         displayResults('Riverside Plumbing & Heating', 'Trades', SAMPLE_DATA);
@@ -791,5 +813,11 @@
 
     /* ── Boot ──────────────────────────────── */
     init();
+
+    /* Debug helper: clarityStats() in devtools shows funnel data. */
+    window.clarityStats = function() {
+      try { return JSON.parse(localStorage.getItem('clarity_stats') || '{}'); }
+      catch(e) { return {}; }
+    };
 
   })();
