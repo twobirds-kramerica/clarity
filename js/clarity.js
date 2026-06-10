@@ -397,7 +397,7 @@
       document.getElementById('resultsTitle').textContent = 'Diagnostic: ' + name;
       document.getElementById('resultsSubtitle').textContent = industry + ' — Generated ' + new Date().toLocaleDateString('en-CA');
 
-      // Readiness score + industry benchmark (plain sentence, no hero-metric card)
+      // Readiness score + industry benchmark + plain-language band interpretation
       var readinessLine = document.getElementById('readinessLine');
       if (readinessLine && data.readiness_score) {
         var score = parseInt(data.readiness_score, 10);
@@ -407,9 +407,14 @@
           if (benchmark) {
             var diff = score - benchmark.score;
             var rel = diff > 0 ? 'above' : diff < 0 ? 'below' : 'at';
-            lineText += ' — ' + rel + ' the ' + industry + ' average (' + benchmark.score + '/10)';
+            lineText += ' (' + rel + ' the ' + industry + ' sector average of ' + benchmark.score + '/10)';
           }
-          readinessLine.textContent = lineText;
+          var bandNote = score <= 3
+            ? 'Most businesses at this stage benefit from documenting processes before adopting AI tools.'
+            : score <= 6
+            ? 'You have a foundation in place. Targeted improvements in your weakest areas will get you ready for meaningful AI adoption.'
+            : 'Your readiness puts you ahead of most Canadian SMEs. The opportunity is deploying AI into processes that are already working.';
+          readinessLine.innerHTML = escapeHtml(lineText) + '<br><span style="font-size:0.9em;opacity:0.82;">' + escapeHtml(bandNote) + '</span>';
           readinessLine.style.display = '';
         }
       }
