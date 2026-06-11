@@ -8,9 +8,9 @@
 (function() {
   if (!new URLSearchParams(window.location.search).has('qa')) return;
 
-  // Load axe-core from CDN
+  // Load axe-core — self-hosted at js/axe.min.js (MIT licence, pinned 4.7.0)
   var s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js';
+  s.src = 'js/axe.min.js';
   s.onload = function() {
     axe.run().then(function(results) {
       // Layout checks

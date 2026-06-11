@@ -31,6 +31,7 @@
       --success: #5C8A4F;
       --text: #333333;
       --text-light: #5A5A5A;
+      --text-warm: #5C584E;
       --border: #D4D0C8;
       --shadow: 0 2px 8px rgba(0,0,0,0.08);
       --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
@@ -829,7 +830,7 @@
         </div>
       </div>
 
-      <fieldset class="form-group" id="challengeGroup">
+      <fieldset class="form-group" id="challengeGroup" aria-describedby="challengeHint">
         <legend>Top Challenges</legend>
         <p class="checkbox-hint" id="challengeHint">Select up to 3</p>
         <div class="checkbox-group">
@@ -875,7 +876,7 @@
           <option value="Minimal — we collect only what's needed for a transaction">Minimal — we only collect what's needed for a transaction</option>
           <option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>
         </select>
-        <p style="font-size:0.75rem;color:#5A5A5A;margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
+        <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
       </div>
 
       <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
@@ -921,19 +922,19 @@
         <div class="cta-card" id="ctaCard">
           <h3>Want to turn this into an action plan?</h3>
           <p style="margin-bottom:0.5rem;">This diagnostic shows <em>where</em> to focus. A 30-minute call with Aaron shows you <em>how</em> — and whether a full AI Workflow Audit (CA$2,500) makes sense for your business.</p>
-          <p style="font-size:0.85rem;color:#5C584E;margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
+          <p style="font-size:0.85rem;color:var(--text-warm);margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
 
           <!-- Lead capture — submits to Formspree; configure FORMSPREE_ENDPOINT in clarity.js -->
           <form id="leadCaptureForm" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;" novalidate>
             <input type="email" id="leadEmail" placeholder="your@email.com" aria-label="Your email address"
-              style="flex:1;min-width:200px;padding:0.6rem 0.75rem;border:1px solid #C4A882;border-radius:6px;font-size:0.9rem;background:#FAFAF8;color:#333;">
+              style="flex:1;min-width:200px;padding:0.6rem 0.75rem;border:1px solid var(--accent-light);border-radius:6px;font-size:0.9rem;background:var(--white);color:var(--text);">
             <button type="submit" class="btn btn-accent" id="leadSubmitBtn" style="white-space:nowrap;">Send Me My Results</button>
           </form>
-          <p id="leadCaptureConfirm" style="display:none;font-size:0.85rem;color:#5C6B4F;font-weight:600;margin-bottom:0.75rem;">✓ Thanks — Aaron will follow up within 24 hours.</p>
+          <p id="leadCaptureConfirm" style="display:none;font-size:0.85rem;color:var(--olive);font-weight:600;margin-bottom:0.75rem;">✓ Thanks — Aaron will follow up within 24 hours.</p>
 
           <a class="btn btn-outline" id="ctaLink" href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener" style="font-size:0.88rem;">Or book a 30-minute call directly →</a>
-          <p style="font-size:0.78rem;color:#5C584E;margin-top:0.75rem;">Aaron Patzalek · 20-year Senior PM · St. Thomas, Ontario</p>
-          <p style="font-size:0.78rem;color:#5C584E;margin-top:0.5rem;">Portfolio evidence of shipping: <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener" style="color:#4A5640;">Digital Confidence Centre</a> · <a href="https://twobirds-kramerica.github.io/kevins-apartment-search/" target="_blank" rel="noopener" style="color:#4A5640;">Kevin's Apartment Search</a> · <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener" style="color:#4A5640;">Career Coach</a></p>
+          <p style="font-size:0.78rem;color:var(--text-warm);margin-top:0.75rem;">Aaron Patzalek · 20-year Senior PM · St. Thomas, Ontario</p>
+          <p style="font-size:0.78rem;color:var(--text-warm);margin-top:0.5rem;">Portfolio evidence of shipping: <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener" style="color:#4A5640;">Digital Confidence Centre</a> · <a href="https://twobirds-kramerica.github.io/kevins-apartment-search/" target="_blank" rel="noopener" style="color:#4A5640;">Kevin's Apartment Search</a> · <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener" style="color:#4A5640;">Career Coach</a></p>
         </div>
 
         <!-- Cross-promo: other free tools from Two Birds Innovation -->
