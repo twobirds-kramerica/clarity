@@ -4,3 +4,9 @@ compatibility_date = "2024-09-23"
 
 # Secrets (set after deploy with: wrangler secret put ANTHROPIC_API_KEY)
 # Do NOT put the API key here — use wrangler secrets for all credentials.
+
+# Beta feedback storage (POST /feedback). Namespace created 2026-06-12
+# via Cloudflare MCP; holds beta feedback from DCC and Clarity.
+[[kv_namespaces]]
+binding = "FEEDBACK"
+id = "96d2302dab424abd8d85bed80b4bd25b"

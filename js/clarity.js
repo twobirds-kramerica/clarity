@@ -408,7 +408,13 @@
         displayResults(businessName, industry, text);
       })
       .catch(function(err) {
-        showError(err.message || 'An unexpected error occurred. Please check your API key and try again.');
+        /* Proxy failures surface as cryptic network errors — give the
+           no-key user a path forward instead of a dead end. */
+        if (provider === 'proxy') {
+          showError('Clarity’s built-in AI is temporarily unavailable. You can see a sample diagnostic right now, or choose your own AI provider using the Change AI provider link at the bottom of the page.');
+        } else {
+          showError(err.message || 'An unexpected error occurred. Please check your API key and try again.');
+        }
       })
       .finally(function() {
         submitBtn.disabled = false;
