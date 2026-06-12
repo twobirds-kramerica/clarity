@@ -235,8 +235,10 @@
       hideApp();
       hideAll();
       setupApiKey.value = '';
-      if (setupProvider) setupProvider.value = 'anthropic';
-      renderSetupForProvider('anthropic');
+      /* Default back to the built-in proxy — the no-key path is the product
+         default; BYOK providers remain selectable in the dropdown. */
+      if (setupProvider) setupProvider.value = 'proxy';
+      renderSetupForProvider('proxy');
       setupScreen.classList.add('active');
       if (setupProvider) setupProvider.focus();
       renderActiveProviderNote();
