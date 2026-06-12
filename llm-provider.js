@@ -6,12 +6,32 @@
  *   var result = await llmChat(prompt, { system: '...', maxTokens: 1500 });
  *
  * Configuration:
- *   llmSetProvider('anthropic', apiKey);        // default
+ *   llmSetProvider('proxy');                    // default — no key needed
+ *   llmSetProvider('anthropic', apiKey);        // bring your own key
  *   llmSetProvider('openai', apiKey);           // GPT-4o
  *   llmSetProvider('ollama');                   // local, no key
  */
 
+/* Update this URL after running: cd workers/clarity-proxy && wrangler deploy */
+var CLARITY_PROXY_URL = 'https://clarity-proxy.PLACEHOLDER.workers.dev';
+
 var LLM_PROVIDERS = {
+  proxy: {
+    name: 'Clarity (built-in)',
+    defaultModel: 'claude-sonnet-4-6-20250929',
+    buildRequest: function(apiKey, model, prompt, system, maxTokens) {
+      var body = { model: model, max_tokens: maxTokens || 2048, messages: [{ role: 'user', content: prompt }] };
+      if (system) body.system = system;
+      return {
+        url: CLARITY_PROXY_URL,
+        headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify(body)
+      };
+    },
+    parseResponse: function(data) { return data.content[0].text; }
+  },
+
+
   anthropic: {
     name: 'Claude (Anthropic)',
     url: 'https://api.anthropic.com/v1/messages',

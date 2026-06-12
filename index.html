@@ -798,6 +798,106 @@
     .econ-metric-value { font-size: 1.05rem; font-weight: 700; color: var(--text); }
     .econ-metric-label { font-size: 0.75rem; color: var(--text-light); }
     .econ-source { font-size: 0.73rem; color: var(--text-light); margin-top: 0.55rem; font-style: italic; }
+
+    /* ── Question step cards ─────────────────────────────────────── */
+    .question-card { display: none; }
+    .question-card.active {
+      display: block;
+      animation: stepIn 0.25s ease forwards;
+    }
+    .question-card.slide-in-right { animation: stepInRight 0.25s ease forwards; }
+    .question-card.slide-in-left  { animation: stepInLeft  0.25s ease forwards; }
+    .question-card.slide-out-left {
+      display: block;
+      animation: stepOutLeft 0.2s ease forwards;
+      pointer-events: none;
+    }
+    .question-card.slide-out-right {
+      display: block;
+      animation: stepOutRight 0.2s ease forwards;
+      pointer-events: none;
+    }
+    @keyframes stepIn        { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes stepInRight   { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes stepInLeft    { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes stepOutLeft   { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-20px); } }
+    @keyframes stepOutRight  { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+    @media (prefers-reduced-motion: reduce) {
+      .question-card.active, .question-card.slide-in-right, .question-card.slide-in-left,
+      .question-card.slide-out-left, .question-card.slide-out-right {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+    .step-progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .step-progress-bar > div {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    #progressLabel {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    .question-heading {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--olive-dark);
+      margin-bottom: 1.25rem;
+      line-height: 1.3;
+    }
+    .step-nav {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .step-nav.has-back { justify-content: space-between; }
+    .btn-ghost {
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0.4rem 0;
+      font-family: inherit;
+    }
+    .btn-ghost:hover { color: var(--text); }
+    .field-hint { font-size: 0.75rem; color: var(--text-light); margin-top: 0.3rem; }
+
+    /* ── Prominent book-call CTA ─────────────────────────────────── */
+    .cta-primary-action {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.9rem 1.25rem;
+      background: var(--olive);
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      border-radius: var(--radius);
+      text-decoration: none;
+      margin-bottom: 0.75rem;
+      transition: background 0.15s;
+    }
+    .cta-primary-action:hover { background: var(--olive-dark); }
   </style>
 </head>
 <body>
@@ -827,9 +927,10 @@
       <div class="form-group">
         <label for="setupProvider">AI provider</label>
         <select id="setupProvider">
-          <option value="anthropic">Claude (Anthropic)</option>
-          <option value="openai">GPT-4o (OpenAI)</option>
-          <option value="gemini">Gemini (Google)</option>
+          <option value="proxy" selected>Clarity (built-in, no key needed)</option>
+          <option value="anthropic">Claude (Anthropic — your own key)</option>
+          <option value="openai">GPT-4o (OpenAI — your own key)</option>
+          <option value="gemini">Gemini (Google — your own key)</option>
           <option value="ollama">Ollama (local, no key)</option>
         </select>
       </div>
@@ -850,13 +951,28 @@
 
     <!-- ── Diagnostic Form ───────────────────── -->
     <form class="diagnostic-form" id="diagnosticForm" novalidate>
-      <h2>Your Business Diagnostic</h2>
 
-      <div class="form-row">
+      <div class="step-progress" id="stepProgress" aria-label="Diagnostic progress">
+        <div class="step-progress-bar"><div id="progressFill" style="width:17%"></div></div>
+        <span id="progressLabel" aria-live="polite">Question 1 of 6</span>
+      </div>
+
+      <!-- Step 1: Business Name -->
+      <div class="question-card active" id="step1">
+        <h2 class="question-heading">What's your business called?</h2>
         <div class="form-group">
           <label for="businessName">Business Name</label>
-          <input type="text" id="businessName" placeholder="e.g. Maple Leaf Bakery" required>
+          <input type="text" id="businessName" placeholder="e.g. Maple Leaf Bakery" autocomplete="organization">
         </div>
+        <div class="step-nav">
+          <a href="#" id="showSampleBtn2" style="font-size:0.82rem;color:var(--text-light);align-self:center;">See a sample first &rarr;</a>
+          <button type="button" class="btn btn-primary next-btn" data-next="2">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Industry -->
+      <div class="question-card" id="step2">
+        <h2 class="question-heading">What industry are you in?</h2>
         <div class="form-group">
           <label for="industry">Industry</label>
           <select id="industry" required>
@@ -878,81 +994,116 @@
             <option value="Other">Other</option>
           </select>
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="yearsInBusiness">Years in Business</label>
-          <select id="yearsInBusiness" required>
-            <option value="">Select one</option>
-            <option value="Under 1 year">Under 1</option>
-            <option value="1-3 years">1 - 3</option>
-            <option value="3-10 years">3 - 10</option>
-            <option value="10+ years">10+</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="teamSize">Team Size</label>
-          <select id="teamSize" required>
-            <option value="">Select one</option>
-            <option value="Solo">Solo</option>
-            <option value="2-5 people">2 - 5</option>
-            <option value="6-20 people">6 - 20</option>
-            <option value="20+ people">20+</option>
-          </select>
+        <div class="step-nav has-back">
+          <button type="button" class="btn-ghost back-btn" data-back="1">&larr; Back</button>
+          <button type="button" class="btn btn-primary next-btn" data-next="3">Continue &rarr;</button>
         </div>
       </div>
 
-      <fieldset class="form-group" id="challengeGroup" aria-describedby="challengeHint">
-        <legend>Top Challenges</legend>
-        <p class="checkbox-hint" id="challengeHint">Select up to 3</p>
-        <div class="checkbox-group">
-          <label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>
-          <label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>
-          <label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>
-          <label><input type="checkbox" name="challenges" value="Don't know where to start"> Don't know where to start</label>
-          <label><input type="checkbox" name="challenges" value="Cost concerns"> Cost concerns</label>
-          <label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>
-          <label><input type="checkbox" name="challenges" value="Other"> Other</label>
+      <!-- Step 3: Years in Business + Team Size -->
+      <div class="question-card" id="step3">
+        <h2 class="question-heading">Tell us a bit about your team</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="yearsInBusiness">Years in Business</label>
+            <select id="yearsInBusiness" required>
+              <option value="">Select one</option>
+              <option value="Under 1 year">Under 1</option>
+              <option value="1-3 years">1 &ndash; 3</option>
+              <option value="3-10 years">3 &ndash; 10</option>
+              <option value="10+ years">10+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="teamSize">Team Size</label>
+            <select id="teamSize" required>
+              <option value="">Select one</option>
+              <option value="Solo">Solo</option>
+              <option value="2-5 people">2 &ndash; 5</option>
+              <option value="6-20 people">6 &ndash; 20</option>
+              <option value="20+ people">20+</option>
+            </select>
+          </div>
         </div>
-      </fieldset>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="aiUsage">Current AI Usage</label>
-          <select id="aiUsage" required>
-            <option value="">Select one</option>
-            <option value="None">None</option>
-            <option value="Tried a few things">Tried a few things</option>
-            <option value="Use regularly">Use regularly</option>
-            <option value="Have a dedicated process">Have a dedicated process</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="revenueGoal">Revenue Goal (Next 12 Months)</label>
-          <select id="revenueGoal" required>
-            <option value="">Select one</option>
-            <option value="Growth">Growth</option>
-            <option value="Stability">Stability</option>
-            <option value="Survival">Survival</option>
-            <option value="Exit / Sale">Exit / Sale</option>
-          </select>
+        <div class="step-nav has-back">
+          <button type="button" class="btn-ghost back-btn" data-back="2">&larr; Back</button>
+          <button type="button" class="btn btn-primary next-btn" data-next="4">Continue &rarr;</button>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="personalData">Customer Personal Information</label>
-        <select id="personalData">
-          <option value="">Select one (optional)</option>
-          <option value="Yes — we store names, emails, and purchase history">Yes — we store customer data (names, emails, purchase history)</option>
-          <option value="Yes — we handle sensitive data (health, financial, or government ID)">Yes — we handle sensitive data (health, financial, or government ID)</option>
-          <option value="Minimal — we collect only what's needed for a transaction">Minimal — we only collect what's needed for a transaction</option>
-          <option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>
-        </select>
-        <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.3rem">This helps identify any PIPEDA (Canadian privacy law) considerations for your AI adoption.</p>
+      <!-- Step 4: Top Challenges -->
+      <div class="question-card" id="step4">
+        <h2 class="question-heading">What are your biggest challenges right now?</h2>
+        <fieldset class="form-group" id="challengeGroup" aria-describedby="challengeHint">
+          <legend style="display:none">Top Challenges</legend>
+          <p class="checkbox-hint" id="challengeHint">Select up to 3</p>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>
+            <label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>
+            <label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>
+            <label><input type="checkbox" name="challenges" value="Don't know where to start"> Don&rsquo;t know where to start</label>
+            <label><input type="checkbox" name="challenges" value="Cost concerns"> Cost concerns</label>
+            <label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>
+            <label><input type="checkbox" name="challenges" value="Other"> Other</label>
+          </div>
+        </fieldset>
+        <div class="step-nav has-back">
+          <button type="button" class="btn-ghost back-btn" data-back="3">&larr; Back</button>
+          <button type="button" class="btn btn-primary next-btn" data-next="5">Continue &rarr;</button>
+        </div>
       </div>
 
-      <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic</button>
+      <!-- Step 5: Current AI Usage + Revenue Goal -->
+      <div class="question-card" id="step5">
+        <h2 class="question-heading">Where are you today with AI?</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="aiUsage">Current AI Usage</label>
+            <select id="aiUsage" required>
+              <option value="">Select one</option>
+              <option value="None">None</option>
+              <option value="Tried a few things">Tried a few things</option>
+              <option value="Use regularly">Use regularly</option>
+              <option value="Have a dedicated process">Have a dedicated process</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="revenueGoal">Revenue Goal (Next 12 Months)</label>
+            <select id="revenueGoal" required>
+              <option value="">Select one</option>
+              <option value="Growth">Growth</option>
+              <option value="Stability">Stability</option>
+              <option value="Survival">Survival</option>
+              <option value="Exit / Sale">Exit / Sale</option>
+            </select>
+          </div>
+        </div>
+        <div class="step-nav has-back">
+          <button type="button" class="btn-ghost back-btn" data-back="4">&larr; Back</button>
+          <button type="button" class="btn btn-primary next-btn" data-next="6">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 6: Personal Data + Submit -->
+      <div class="question-card" id="step6">
+        <h2 class="question-heading">One last question</h2>
+        <div class="form-group">
+          <label for="personalData">Do you collect customer personal information?</label>
+          <select id="personalData">
+            <option value="">Select one (optional)</option>
+            <option value="Yes — we store names, emails, and purchase history">Yes &mdash; we store customer data (names, emails, purchase history)</option>
+            <option value="Yes — we handle sensitive data (health, financial, or government ID)">Yes &mdash; we handle sensitive data (health, financial, or government ID)</option>
+            <option value="Minimal — we collect only what's needed for a transaction">Minimal &mdash; we only collect what&rsquo;s needed for a transaction</option>
+            <option value="No — we do not collect or store personal information">No &mdash; we do not collect or store personal information</option>
+          </select>
+          <p class="field-hint">This helps identify Canadian privacy law (PIPEDA) considerations for your AI adoption.</p>
+        </div>
+        <div class="step-nav has-back">
+          <button type="button" class="btn-ghost back-btn" data-back="5">&larr; Back</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic &rarr;</button>
+        </div>
+      </div>
+
     </form>
 
     <!-- ── Loading ───────────────────────────── -->
@@ -994,8 +1145,9 @@
         <div id="econContextPlaceholder"></div>
         <div class="cta-card" id="ctaCard">
           <h3>Want to turn this into an action plan?</h3>
-          <p style="margin-bottom:0.5rem;">This diagnostic shows <em>where</em> to focus. A 30-minute call with Aaron shows you <em>how</em> — and whether a full AI Workflow Audit (CA$2,500) makes sense for your business.</p>
-          <p style="font-size:0.85rem;color:var(--text-warm);margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
+          <p style="margin-bottom:1rem;">This diagnostic shows <em>where</em> to focus. A free 30-minute call shows you <em>how</em> &mdash; and whether a full AI Workflow Audit makes sense for your business.</p>
+          <a class="cta-primary-action" href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener">Book a free 30-minute call &rarr;</a>
+          <p style="font-size:0.82rem;color:var(--text-warm);margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
 
           <!-- Lead capture — submits to Formspree; configure FORMSPREE_ENDPOINT in clarity.js -->
           <form id="leadCaptureForm" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;" novalidate>
@@ -1042,7 +1194,7 @@
         <p>I spent 20+ years as a product manager at TELUS, Staples, and Start.ca. In that time, I watched the gap between large enterprises and small businesses grow wider with every technology wave.</p>
         <p>When AI arrived, it was the same story. Big companies had dedicated teams, outside consultants, and technology budgets. Small businesses in Southwestern Ontario had YouTube videos and vendor pitches that turned confusion into expense.</p>
         <p>I built Clarity because I wanted small business owners to have access to the same quality of strategic thinking that enterprise PMs apply internally &mdash; without needing an IT department, a consultant on retainer, or a subscription that auto-renews every month.</p>
-        <p>It runs on your own API key. Your business data never leaves your browser. It costs a few cents per diagnostic. No subscription. No lock-in. Just a clear picture of where you stand with AI, and what to actually do next.</p>
+        <p>It runs on a secure proxy I built. Your business data is used only to generate your diagnostic and is never stored or shared. No account. No API key. No subscription. No lock-in. Just a clear picture of where you stand with AI, and what to do next.</p>
         <div class="why-built-sig">
           <strong>Aaron Patzalek</strong><br>
           Founder, Two Birds Innovation &mdash; St. Thomas, Ontario<br>

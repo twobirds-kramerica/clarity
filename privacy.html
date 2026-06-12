@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy — Clarity by Two Birds Innovation</title>
-  <meta name="description" content="Privacy Policy for Clarity. Your business data and API key never leave your browser except for direct calls to your chosen AI provider. No accounts. No tracking.">
+  <meta name="description" content="Privacy Policy for Clarity. Your diagnostic answers are sent only to generate your report — never stored or sold. No accounts. No tracking.">
   <meta property="og:title" content="Privacy Policy — Clarity AI Business Diagnostic">
-  <meta property="og:description" content="Clarity stores your business data locally. Only your AI provider receives your diagnostic inputs. Plain-language privacy policy.">
+  <meta property="og:description" content="Clarity sends your answers only to generate your diagnostic. Nothing is stored by Two Birds Innovation. Plain-language privacy policy.">
   <meta property="og:type" content="website">
   <meta name="robots" content="index, follow">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
@@ -119,39 +119,39 @@
     <p class="last-updated">Clarity by Two Birds Innovation &nbsp;|&nbsp; Last updated: June 2026</p>
 
     <div class="summary-box">
-      <p><strong>Plain language summary:</strong> Clarity runs in your browser. Your business diagnostic answers and API key are stored only on your device. They are never sent to Two Birds Innovation. If you choose to enter an email address to receive your results, that email is sent to a third-party form service. Clarity has no accounts, no cookies, and no analytics.</p>
+      <p><strong>Plain language summary:</strong> When you run a diagnostic, your answers are sent through a secure Two Birds Innovation proxy to generate your report. The proxy does not log or store your answers &mdash; they are used only to produce the result and then discarded. If you choose to enter an email address to receive your results, that email is sent to a third-party form service. Clarity has no accounts, no cookies, and no analytics.</p>
     </div>
 
     <section>
       <h2>What Two Birds Innovation Does Not Collect</h2>
-      <p>We do not collect, receive, or store:</p>
+      <p>We do not collect, log, or store:</p>
       <ul>
-        <li>Your business name or industry answers</li>
-        <li>Your diagnostic results or SWOT analysis</li>
-        <li>Your AI provider API key</li>
+        <li>Your business name or diagnostic answers</li>
+        <li>Your SWOT analysis or recommendations</li>
         <li>Any analytics or usage data</li>
       </ul>
-      <p>Clarity has no backend server and no user accounts.</p>
+      <p>Clarity has no user accounts and sets no cookies.</p>
     </section>
 
     <section>
       <h2>What Is Stored on Your Device</h2>
       <p>Your browser's <strong>localStorage</strong> saves:</p>
       <ul>
-        <li>Your AI provider selection and API key</li>
-        <li>Your diagnostic answers (business type, sector, team size, challenge)</li>
-        <li>Your SWOT analysis and recommendations from the last session</li>
+        <li>Your provider selection (and API key, if you choose to use your own)</li>
+        <li>An anonymous usage counter (number of diagnostics run, last completion date)</li>
       </ul>
       <p>This data stays on your device. Clearing your browser's localStorage removes it completely.</p>
     </section>
 
     <section>
-      <h2>API Calls to Your AI Provider</h2>
-      <p>When Clarity generates your diagnostic report, your browser sends your answers directly to your chosen AI provider (Anthropic, OpenAI, or another). These requests go from your device to the provider — they do not pass through our servers.</p>
-      <p>Your API key is sent directly to the provider. We never see or store your key. Review your provider's privacy policy for how they handle your inputs:</p>
+      <h2>How Your Diagnostic Answers Are Processed</h2>
+      <p><strong>Default (built-in AI):</strong> When you generate a diagnostic, your answers are sent from your browser to a secure Cloudflare Worker proxy operated by Two Birds Innovation. The proxy forwards your request to Anthropic (the AI provider) and returns the result. Your answers are used only to produce your report &mdash; they are not logged, stored, or used for any other purpose by Two Birds Innovation or Cloudflare. Cloudflare processes the request in transit as a sub-processor.</p>
+      <p><strong>Optional (bring your own key):</strong> If you choose to use your own AI provider key (Anthropic, OpenAI, Gemini, or Ollama), your answers are sent directly from your browser to that provider. They do not pass through our proxy. Your API key is stored only in your browser and is never sent to Two Birds Innovation. Review your provider's privacy policy:</p>
       <ul>
         <li><a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">Anthropic Privacy Policy</a></li>
         <li><a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer">OpenAI Privacy Policy</a></li>
+        <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a></li>
+        <li><a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare Privacy Policy</a></li>
       </ul>
     </section>
 

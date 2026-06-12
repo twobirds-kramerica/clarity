@@ -53,6 +53,14 @@
 
     /* ── Provider metadata (mirrors llm-provider.js) ── */
     var PROVIDER_META = {
+      proxy: {
+        label:      'Clarity (built-in)',
+        keyLabel:   '',
+        placeholder:'',
+        signupUrl:  '',
+        signupText: '',
+        needsKey:   false
+      },
       anthropic: {
         label:      'Claude (Anthropic)',
         keyLabel:   'Anthropic API key',
@@ -121,8 +129,8 @@
     }
 
     function getProvider() {
-      try { return localStorage.getItem('llm_provider') || 'anthropic'; }
-      catch(e) { return 'anthropic'; }
+      try { return localStorage.getItem('llm_provider') || 'proxy'; }
+      catch(e) { return 'proxy'; }
     }
 
     function getApiKey() {
@@ -137,14 +145,18 @@
       var note = document.getElementById('providerNote');
       if (!note) return;
       var provider = getProvider();
-      var meta = PROVIDER_META[provider] || PROVIDER_META.anthropic;
-      note.textContent = 'Provider: ' + meta.label +
-        '. Your key and business data never leave your browser except to call ' +
-        meta.label + ' directly.';
+      var meta = PROVIDER_META[provider] || PROVIDER_META.proxy;
+      if (provider === 'proxy') {
+        note.textContent = 'Powered by Clarity\'s built-in AI. Your business data is used only to generate your report and is never stored or shared.';
+      } else {
+        note.textContent = 'Provider: ' + meta.label +
+          '. Your key and business data never leave your browser except to call ' +
+          meta.label + ' directly.';
+      }
     }
 
     function renderSetupForProvider(provider) {
-      var meta = PROVIDER_META[provider] || PROVIDER_META.anthropic;
+      var meta = PROVIDER_META[provider] || PROVIDER_META.proxy;
       if (setupApiKeyLabel) setupApiKeyLabel.textContent = meta.keyLabel || 'API key';
       if (setupApiKey) {
         setupApiKey.placeholder = meta.placeholder;
@@ -155,8 +167,12 @@
         setupApiKeyGroup.style.display = meta.needsKey ? '' : 'none';
       }
       if (getKeyLink) {
-        getKeyLink.href = meta.signupUrl;
+        getKeyLink.style.display = meta.signupUrl ? '' : 'none';
+        getKeyLink.href = meta.signupUrl || '#';
         getKeyLink.textContent = meta.signupText;
+      }
+      if (activateBtn) {
+        activateBtn.textContent = provider === 'proxy' ? 'Use Clarity (built-in) →' : 'Use my own API key';
       }
     }
 
@@ -252,6 +268,82 @@
         });
       }
     }
+
+    /* ── Step navigation ──────────────────── */
+    var currentStep = 1;
+    var totalSteps  = 6;
+
+    function updateProgress() {
+      var fill  = document.getElementById('progressFill');
+      var label = document.getElementById('progressLabel');
+      if (fill)  fill.style.width = Math.round((currentStep / totalSteps) * 100) + '%';
+      if (label) label.textContent = 'Question ' + currentStep + ' of ' + totalSteps;
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        var name = document.getElementById('businessName').value.trim();
+        if (!name) { document.getElementById('businessName').focus(); return false; }
+      } else if (step === 2) {
+        if (!document.getElementById('industry').value) { document.getElementById('industry').focus(); return false; }
+      } else if (step === 3) {
+        if (!document.getElementById('yearsInBusiness').value) { document.getElementById('yearsInBusiness').focus(); return false; }
+        if (!document.getElementById('teamSize').value) { document.getElementById('teamSize').focus(); return false; }
+      } else if (step === 4) {
+        if (document.querySelectorAll('input[name="challenges"]:checked').length === 0) {
+          var firstCb = document.querySelector('input[name="challenges"]');
+          if (firstCb) firstCb.focus();
+          return false;
+        }
+      } else if (step === 5) {
+        if (!document.getElementById('aiUsage').value) { document.getElementById('aiUsage').focus(); return false; }
+        if (!document.getElementById('revenueGoal').value) { document.getElementById('revenueGoal').focus(); return false; }
+      }
+      return true;
+    }
+
+    function showStep(toStep, direction) {
+      var outEl = document.getElementById('step' + currentStep);
+      var inEl  = document.getElementById('step' + toStep);
+      if (!outEl || !inEl) return;
+      var outClass = direction === 'forward' ? 'slide-out-left' : 'slide-out-right';
+      var inClass  = direction === 'forward' ? 'slide-in-right' : 'slide-in-left';
+      outEl.classList.add(outClass);
+      setTimeout(function() {
+        outEl.classList.remove('active', outClass);
+        inEl.classList.add('active', inClass);
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { inEl.classList.remove(inClass); });
+        });
+        currentStep = toStep;
+        updateProgress();
+        var firstInput = inEl.querySelector('input:not([type="checkbox"]), select');
+        if (firstInput) firstInput.focus();
+      }, 220);
+    }
+
+    function resetSteps() {
+      currentStep = 1;
+      document.querySelectorAll('.question-card').forEach(function(card) {
+        card.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-right', 'slide-in-left');
+      });
+      var first = document.getElementById('step1');
+      if (first) first.classList.add('active');
+      updateProgress();
+    }
+
+    document.querySelectorAll('.next-btn[data-next]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!validateStep(currentStep)) return;
+        showStep(parseInt(btn.getAttribute('data-next'), 10), 'forward');
+      });
+    });
+
+    document.querySelectorAll('.back-btn[data-back]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        showStep(parseInt(btn.getAttribute('data-back'), 10), 'back');
+      });
+    });
 
     /* ── Form Submit ───────────────────────── */
     form.addEventListener('submit', function(e) {
@@ -613,11 +705,11 @@
     window.resetForm = function() {
       hideAll();
       form.reset();
-      // Re-enable all checkboxes
       checkboxes.forEach(function(cb) {
         cb.disabled = false;
         cb.parentElement.classList.remove('disabled-check');
       });
+      resetSteps();
       introSection.classList.add('active');
       form.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -783,19 +875,24 @@
     var demoBanner = document.getElementById('demoBanner');
     var dismissDemo = document.getElementById('dismissDemo');
 
+    function runDemoMode() {
+      try {
+        var stats = JSON.parse(localStorage.getItem('clarity_stats') || '{}');
+        stats.demo_clicks = (stats.demo_clicks || 0) + 1;
+        localStorage.setItem('clarity_stats', JSON.stringify(stats));
+      } catch(e) {}
+      setupScreen.classList.remove('active');
+      if (demoBanner) demoBanner.style.display = '';
+      displayResults('Riverside Plumbing & Heating', 'Trades', SAMPLE_DATA);
+    }
+
     if (showSampleBtn) {
-      showSampleBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        /* Track demo click */
-        try {
-          var stats = JSON.parse(localStorage.getItem('clarity_stats') || '{}');
-          stats.demo_clicks = (stats.demo_clicks || 0) + 1;
-          localStorage.setItem('clarity_stats', JSON.stringify(stats));
-        } catch(e) {}
-        setupScreen.classList.remove('active');
-        if (demoBanner) demoBanner.style.display = '';
-        displayResults('Riverside Plumbing & Heating', 'Trades', SAMPLE_DATA);
-      });
+      showSampleBtn.addEventListener('click', function(e) { e.preventDefault(); runDemoMode(); });
+    }
+
+    var showSampleBtn2 = document.getElementById('showSampleBtn2');
+    if (showSampleBtn2) {
+      showSampleBtn2.addEventListener('click', function(e) { e.preventDefault(); runDemoMode(); });
     }
 
     if (dismissDemo) {
