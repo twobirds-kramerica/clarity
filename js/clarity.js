@@ -117,6 +117,8 @@
       if (meta && (!meta.needsKey || key)) {
         showApp();
       } else {
+        introSection.classList.remove('active');
+        form.classList.remove('active');
         setupScreen.classList.add('active');
         if (setupProvider) setupProvider.focus();
         /* Track setup screen view */
