@@ -18,7 +18,7 @@
     var errorBox     = document.getElementById('errorBox');
     var errorMessage = document.getElementById('errorMessage');
     var resultsEl    = document.getElementById('results');
-    var submitBtn    = document.getElementById('submitBtn');
+    var submitBtn    = null;
     var tryAgainBtn  = document.getElementById('tryAgainBtn');
     var saveReportBtn = document.getElementById('saveReportBtn');
     var runAnotherBtn = document.getElementById('runAnotherBtn');
@@ -248,10 +248,7 @@
     });
 
     /* ── Checkbox max-3 logic ──────────────── */
-    var checkboxes = document.querySelectorAll('input[name="challenges"]');
-    checkboxes.forEach(function(cb) {
-      cb.addEventListener('change', enforceMaxChecked);
-    });
+    var checkboxes = [];
 
     function enforceMaxChecked() {
       var checked = document.querySelectorAll('input[name="challenges"]:checked');
@@ -336,17 +333,16 @@
       updateProgress();
     }
 
-    document.querySelectorAll('.next-btn[data-next]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+    form.addEventListener('click', function(e) {
+      var next = e.target.closest('.next-btn[data-next]');
+      var back = e.target.closest('.back-btn[data-back]');
+      if (next) {
+        if (!stepsInjected) injectRemainingSteps();
         if (!validateStep(currentStep)) return;
-        showStep(parseInt(btn.getAttribute('data-next'), 10), 'forward');
-      });
-    });
-
-    document.querySelectorAll('.back-btn[data-back]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showStep(parseInt(btn.getAttribute('data-back'), 10), 'back');
-      });
+        showStep(parseInt(next.getAttribute('data-next'), 10), 'forward');
+      } else if (back) {
+        showStep(parseInt(back.getAttribute('data-back'), 10), 'back');
+      }
     });
 
     /* ── Form Submit ───────────────────────── */
@@ -923,8 +919,140 @@
       });
     }
 
+    /* ── Lazy step injection ──────────────── */
+    var stepsInjected = false;
+
+    function injectRemainingSteps() {
+      if (stepsInjected) return;
+      stepsInjected = true;
+      var html =
+        '<div class="question-card" id="step2">' +
+        '<h2 class="question-heading">What industry are you in?</h2>' +
+        '<div class="form-group"><label for="industry">Industry</label>' +
+        '<select id="industry" required>' +
+        '<option value="">Select your industry</option>' +
+        '<option value="Automotive">Automotive</option>' +
+        '<option value="Construction">Construction</option>' +
+        '<option value="Agriculture">Agriculture / Farming</option>' +
+        '<option value="Food &amp; Hospitality">Food &amp; Hospitality</option>' +
+        '<option value="Healthcare">Healthcare</option>' +
+        '<option value="Legal &amp; Accounting">Legal &amp; Accounting</option>' +
+        '<option value="Manufacturing">Manufacturing</option>' +
+        '<option value="Non-Profit">Non-Profit</option>' +
+        '<option value="Personal Services">Personal Services</option>' +
+        '<option value="Professional Services">Professional Services</option>' +
+        '<option value="Real Estate">Real Estate</option>' +
+        '<option value="Retail">Retail</option>' +
+        '<option value="Trades">Trades</option>' +
+        '<option value="Transportation &amp; Logistics">Transportation &amp; Logistics</option>' +
+        '<option value="Other">Other</option>' +
+        '</select></div>' +
+        '<div class="step-nav has-back">' +
+        '<button type="button" class="btn-ghost back-btn" data-back="1">&larr; Back</button>' +
+        '<button type="button" class="btn btn-primary next-btn" data-next="3">Continue &rarr;</button>' +
+        '</div></div>' +
+
+        '<div class="question-card" id="step3">' +
+        '<h2 class="question-heading">Tell us a bit about your team</h2>' +
+        '<div class="form-row">' +
+        '<div class="form-group"><label for="yearsInBusiness">Years in Business</label>' +
+        '<select id="yearsInBusiness" required>' +
+        '<option value="">Select one</option>' +
+        '<option value="Under 1 year">Under 1</option>' +
+        '<option value="1-3 years">1 – 3</option>' +
+        '<option value="3-10 years">3 – 10</option>' +
+        '<option value="10+ years">10+</option>' +
+        '</select></div>' +
+        '<div class="form-group"><label for="teamSize">Team Size</label>' +
+        '<select id="teamSize" required>' +
+        '<option value="">Select one</option>' +
+        '<option value="Solo">Solo</option>' +
+        '<option value="2-5 people">2 – 5</option>' +
+        '<option value="6-20 people">6 – 20</option>' +
+        '<option value="20+ people">20+</option>' +
+        '</select></div></div>' +
+        '<div class="step-nav has-back">' +
+        '<button type="button" class="btn-ghost back-btn" data-back="2">&larr; Back</button>' +
+        '<button type="button" class="btn btn-primary next-btn" data-next="4">Continue &rarr;</button>' +
+        '</div></div>' +
+
+        '<div class="question-card" id="step4">' +
+        '<h2 class="question-heading">What are your biggest challenges right now?</h2>' +
+        '<fieldset class="form-group" id="challengeGroup" aria-describedby="challengeHint">' +
+        '<legend style="display:none">Top Challenges</legend>' +
+        '<p class="checkbox-hint" id="challengeHint">Select up to 3</p>' +
+        '<div class="checkbox-group">' +
+        '<label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>' +
+        '<label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>' +
+        '<label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>' +
+        '<label><input type="checkbox" name="challenges" value="Don&#x27;t know where to start"> Don&#x27;t know where to start</label>' +
+        '<label><input type="checkbox" name="challenges" value="Cost concerns"> Cost concerns</label>' +
+        '<label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>' +
+        '<label><input type="checkbox" name="challenges" value="Other"> Other</label>' +
+        '</div></fieldset>' +
+        '<div class="step-nav has-back">' +
+        '<button type="button" class="btn-ghost back-btn" data-back="3">&larr; Back</button>' +
+        '<button type="button" class="btn btn-primary next-btn" data-next="5">Continue &rarr;</button>' +
+        '</div></div>' +
+
+        '<div class="question-card" id="step5">' +
+        '<h2 class="question-heading">Where are you today with AI?</h2>' +
+        '<div class="form-row">' +
+        '<div class="form-group"><label for="aiUsage">Current AI Usage</label>' +
+        '<select id="aiUsage" required>' +
+        '<option value="">Select one</option>' +
+        '<option value="None">None</option>' +
+        '<option value="Tried a few things">Tried a few things</option>' +
+        '<option value="Use regularly">Use regularly</option>' +
+        '<option value="Have a dedicated process">Have a dedicated process</option>' +
+        '</select></div>' +
+        '<div class="form-group"><label for="revenueGoal">Revenue Goal (Next 12 Months)</label>' +
+        '<select id="revenueGoal" required>' +
+        '<option value="">Select one</option>' +
+        '<option value="Growth">Growth</option>' +
+        '<option value="Stability">Stability</option>' +
+        '<option value="Survival">Survival</option>' +
+        '<option value="Exit / Sale">Exit / Sale</option>' +
+        '</select></div></div>' +
+        '<div class="step-nav has-back">' +
+        '<button type="button" class="btn-ghost back-btn" data-back="4">&larr; Back</button>' +
+        '<button type="button" class="btn btn-primary next-btn" data-next="6">Continue &rarr;</button>' +
+        '</div></div>' +
+
+        '<div class="question-card" id="step6">' +
+        '<h2 class="question-heading">One last question</h2>' +
+        '<div class="form-group">' +
+        '<label for="personalData">Do you collect customer personal information?</label>' +
+        '<select id="personalData">' +
+        '<option value="">Select one (optional)</option>' +
+        '<option value="Yes — we store names, emails, and purchase history">Yes — we store customer data (names, emails, purchase history)</option>' +
+        '<option value="Yes — we handle sensitive data (health, financial, or government ID)">Yes — we handle sensitive data (health, financial, or government ID)</option>' +
+        '<option value="Minimal — we collect only what&#x27;s needed for a transaction">Minimal — we only collect what&#x27;s needed for a transaction</option>' +
+        '<option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>' +
+        '</select>' +
+        '<p class="field-hint">This helps identify Canadian privacy law (PIPEDA) considerations for your AI adoption.</p>' +
+        '</div>' +
+        '<div class="step-nav has-back">' +
+        '<button type="button" class="btn-ghost back-btn" data-back="5">&larr; Back</button>' +
+        '<button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic &rarr;</button>' +
+        '</div></div>';
+
+      form.insertAdjacentHTML('beforeend', html);
+      checkboxes = document.querySelectorAll('input[name="challenges"]');
+      checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', enforceMaxChecked);
+      });
+      submitBtn = document.getElementById('submitBtn');
+    }
+
     /* ── Boot ──────────────────────────────── */
     init();
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(injectRemainingSteps, { timeout: 1500 });
+    } else {
+      setTimeout(injectRemainingSteps, 200);
+    }
 
     /* Debug helper: clarityStats() in devtools shows funnel data. */
     window.clarityStats = function() {

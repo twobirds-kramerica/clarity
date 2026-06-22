@@ -471,3 +471,22 @@ fieldset.form-group legend {
   padding: 1rem 1.5rem;
   letter-spacing: 0.01em;
 }
+
+/* ── Step transition animations (deferred — only needed after first user interaction) ── */
+.question-card.active { animation: stepIn 0.25s ease forwards; }
+.question-card.slide-in-right { animation: stepInRight 0.25s ease forwards; }
+.question-card.slide-in-left  { animation: stepInLeft  0.25s ease forwards; }
+.question-card.slide-out-left { animation: stepOutLeft 0.2s ease forwards; }
+.question-card.slide-out-right { animation: stepOutRight 0.2s ease forwards; }
+@keyframes stepIn        { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes stepInRight   { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes stepInLeft    { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes stepOutLeft   { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-20px); } }
+@keyframes stepOutRight  { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+@media (prefers-reduced-motion: reduce) {
+  .question-card.active, .question-card.slide-in-right, .question-card.slide-in-left,
+  .question-card.slide-out-left, .question-card.slide-out-right {
+    animation: none !important;
+    transform: none !important;
+  }
+}
