@@ -373,15 +373,7 @@ fieldset.form-group legend {
 }
 
 /* ── Why I built this ────────────────────────────────────── */
-.why-built {
-  background: var(--olive-light);
-  border-top: 2px solid var(--border);
-  padding: 2.5rem 1.5rem;
-}
-.why-built-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-}
+
 .why-built h2 {
   font-size: 1.2rem;
   font-weight: 700;
