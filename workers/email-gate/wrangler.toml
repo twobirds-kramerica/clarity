@@ -1,0 +1,13 @@
+name = "clarity-email-gate"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# Deploy: wrangler deploy
+# Secrets (set after deploy):
+#   wrangler secret put EMAIL_STORAGE_URL   (optional: webhook or KV for email storage)
+#
+# KV namespace for email storage (create with: wrangler kv namespace create EMAILS)
+# Uncomment after creating the namespace:
+# [[kv_namespaces]]
+# binding = "EMAILS"
+# id = "<paste-namespace-id-here>"
