@@ -12,8 +12,7 @@
  *   llmSetProvider('ollama');                   // local, no key
  */
 
-/* Update this URL after running: cd workers/clarity-proxy && wrangler deploy */
-var CLARITY_PROXY_URL = 'https://clarity-proxy.PLACEHOLDER.workers.dev';
+var CLARITY_PROXY_URL = 'https://clarity-proxy.twobirdsinnovation.workers.dev';
 
 var LLM_PROVIDERS = {
   proxy: {
