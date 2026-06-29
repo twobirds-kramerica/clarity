@@ -611,12 +611,14 @@
       } catch(e) {}
     }
 
-    /* ── Save Report — downloads as formatted text file ── */
-    saveReportBtn.addEventListener('click', function() {
-      if (!lastReportData) return;
+    /* ── Save Report — email gate then download ── */
+    var CLARITY_WORKER_URL = 'https://clarity-email-gate.twobirdsinnovation.workers.dev';
+    var emailCapturedKey   = 'clarity_email_captured';
+
+    function buildReportText() {
       var d = lastReportData;
       var date = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-      var lines = [
+      return [
         'CLARITY AI READINESS DIAGNOSTIC REPORT',
         'Two Birds Innovation — twobirds-kramerica.github.io/clarity/',
         '================================================',
@@ -660,16 +662,79 @@
         'Questions? aaron.patzalek@gmail.com | calendly.com/twobirdsinnovation/30min',
         ''
       ].join('\n');
+    }
 
-      var blob = new Blob([lines], { type: 'text/plain;charset=utf-8;' });
+    function doReportDownload() {
+      if (!lastReportData) return;
+      var blob = new Blob([buildReportText()], { type: 'text/plain;charset=utf-8;' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       var filename = 'clarity-report-' + (lastBusinessName || 'business').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() + '-' + new Date().toISOString().slice(0, 10) + '.txt';
       a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
-
       saveReportBtn.textContent = '✓ Downloaded';
       setTimeout(function() { saveReportBtn.textContent = 'Save Report'; }, 3000);
+    }
+
+    function removeEmailGate() {
+      var existing = document.getElementById('saveEmailGate');
+      if (existing) existing.remove();
+    }
+
+    saveReportBtn.addEventListener('click', function() {
+      if (!lastReportData) return;
+
+      /* Skip gate if email already captured */
+      if (localStorage.getItem(emailCapturedKey)) {
+        doReportDownload();
+        return;
+      }
+
+      removeEmailGate();
+
+      var safeName = (lastBusinessName || 'your business').replace(/[<>]/g, '');
+      var gate = document.createElement('div');
+      gate.id = 'saveEmailGate';
+      gate.style.cssText = 'margin-top:0.75rem;padding:1rem;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);text-align:left;';
+      gate.innerHTML =
+        '<p style="font-size:0.9rem;color:var(--charcoal);margin-bottom:0.6rem;">Get a follow-up with AI tips for <strong>' + safeName + '</strong>? Optional &mdash; skip below to download now.</p>' +
+        '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">' +
+        '<input type="email" id="gateEmail" placeholder="your@email.com" autocomplete="email"' +
+        ' style="flex:1;min-width:180px;padding:0.55rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:inherit;color:var(--text);background:var(--white);">' +
+        '<button type="button" id="gateSubmitBtn" class="btn btn-accent" style="white-space:nowrap;padding:0.55rem 1rem;">Send &amp; Download</button>' +
+        '</div>' +
+        '<button type="button" id="gateSkipBtn" style="background:none;border:none;color:var(--text-light);font-size:0.82rem;cursor:pointer;text-decoration:underline;padding:0;">No thanks, just download</button>';
+
+      var actionsDiv = saveReportBtn.closest('.results-actions') || saveReportBtn.parentElement;
+      actionsDiv.insertAdjacentElement('afterend', gate);
+      document.getElementById('gateEmail').focus();
+
+      document.getElementById('gateSubmitBtn').addEventListener('click', function() {
+        var email = (document.getElementById('gateEmail').value || '').trim();
+        if (!email || !email.includes('@')) { document.getElementById('gateEmail').focus(); return; }
+        var btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        fetch(CLARITY_WORKER_URL + '/capture-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, source: 'pdf-download' })
+        })
+        .then(function() {
+          localStorage.setItem(emailCapturedKey, '1');
+          removeEmailGate();
+          doReportDownload();
+        })
+        .catch(function() {
+          /* Network failure — never block the download */
+          removeEmailGate();
+          doReportDownload();
+        });
+      });
+
+      document.getElementById('gateSkipBtn').addEventListener('click', function() {
+        removeEmailGate();
+        doReportDownload();
+      });
     });
 
     /* ── Run Another ───────────────────────── */
