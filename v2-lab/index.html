@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Clarity: AI readiness for Ontario small business | Two Birds Innovation</title>
+  <meta name="description" content="A free two-minute AI readiness check for Southwestern Ontario small businesses. Runs in your browser. Nothing stored, no sign-up.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314523D'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' font-weight='700' fill='%23F4F3EE' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+  <script>
+    /* Set theme before first paint to avoid a flash */
+    (function () {
+      try {
+        var t = localStorage.getItem("clarity-v2-theme");
+        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    }());
+  </script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/core.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="bar">
+      <a class="wordmark" href="index.html">Clarity<span class="dot">.</span></a>
+      <span class="byline">Two Birds Innovation · St. Thomas, Ontario</span>
+      <span class="header-spacer"></span>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="shell">
+        <p class="eyebrow">Free AI readiness check</p>
+        <h1>Find out where AI actually pays off in your business.</h1>
+        <p class="lead">Two minutes. Built for Southwestern Ontario trades, clinics, professional services, and local retail. You get a readiness score and your three highest-value moves, specific to your sector. No sign-up, no sales script.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#diagnostic">Start the check</a>
+          <a class="btn btn-ghost" href="#how">How it works</a>
+        </div>
+        <div class="hero-facts">
+          <span><span class="tick">✓</span> Runs in your browser</span>
+          <span><span class="tick">✓</span> Nothing stored or sent</span>
+          <span><span class="tick">✓</span> Plain answers, no jargon</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How it works ─────────────────────────────────────── -->
+    <section class="section" id="how">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-num">01</span>
+          <h2>How it works</h2>
+        </div>
+        <p class="section-sub">The diagnostic is the product, not a teaser. You get the full result whether or not you ever talk to us.</p>
+        <div class="steps">
+          <div class="step">
+            <span class="k">Tell us what you run</span>
+            <p>Pick your sector, then either paste your website or answer five quick questions. Whichever is faster for you.</p>
+          </div>
+          <div class="step">
+            <span class="k">Get your readiness score</span>
+            <p>A straight number, benchmarked against businesses like yours in the region. No grading on a curve to flatter you.</p>
+          </div>
+          <div class="step">
+            <span class="k">See your three moves</span>
+            <p>The three highest-value things to do in the next 30 days, specific to your sector. Not a generic checklist.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Diagnostic ───────────────────────────────────────── -->
+    <section class="section" id="diagnostic">
+      <div class="shell narrow">
+
+        <!-- Entry -->
+        <div id="panel-entry">
+          <div class="section-head">
+            <span class="section-num">02</span>
+            <h2>Start the check</h2>
+          </div>
+          <div class="card">
+            <label for="sector">What kind of business? <span class="hint">(so the advice is relevant, not generic)</span></label>
+            <select id="sector">
+              <option value="trades">Trades and home services (HVAC, electrical, contracting)</option>
+              <option value="clinic">Clinic or health practice (dental, physio, vet)</option>
+              <option value="prof">Professional services (accounting, legal, insurance)</option>
+              <option value="retail">Local retail or hospitality</option>
+            </select>
+          </div>
+          <div class="doors">
+            <div class="door lead-door">
+              <span class="tag">Fastest · no forms</span>
+              <h3>Paste your website</h3>
+              <p>We read your public site and fill in what we can see. No login, nothing stored.</p>
+              <label for="siteUrl" class="visually-hidden" style="position:absolute;left:-9999px;">Your website address</label>
+              <input type="url" id="siteUrl" placeholder="yourbusiness.ca" autocomplete="url">
+              <button type="button" class="btn btn-primary btn-block" id="goA">Read my site</button>
+            </div>
+            <div class="door">
+              <span class="tag">No website? No problem</span>
+              <h3>Answer five quick questions</h3>
+              <p>Same result, if your business is not really online yet. About ninety seconds.</p>
+              <button type="button" class="btn btn-ghost btn-block" id="goB">Start the questions</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Site read -->
+        <div id="panel-read" class="hidden">
+          <div class="card">
+            <h2 id="readTitle" style="font-size:1.35rem;margin-bottom:var(--s4);">Reading your site…</h2>
+            <div id="signals"></div>
+            <p class="fine" id="readNote" style="margin-top:var(--s4);"></p>
+            <button type="button" class="btn btn-primary" id="toReport" style="margin-top:var(--s5);" disabled>See my readiness and next moves</button>
+          </div>
+        </div>
+
+        <!-- Questions -->
+        <div id="panel-questions" class="hidden">
+          <div class="card">
+            <div class="flow-progress">
+              <div class="track"><div class="fill" id="qFill" style="width:0%"></div></div>
+              <span class="count" id="qCount" aria-live="polite">Question 1 of 5</span>
+            </div>
+            <h2 class="q-title" id="qTitle" tabindex="-1">Question</h2>
+            <div class="choices" id="choices"></div>
+            <div class="flow-nav">
+              <button type="button" class="link-btn hidden" id="qBack">Back</button>
+              <button type="button" class="link-btn" id="qRestart">Start over</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report -->
+        <div id="panel-report" class="hidden">
+          <div class="report" aria-live="polite">
+            <div class="report-masthead">
+              <h2>Your AI readiness report</h2>
+              <span class="meta"><span id="repSector">Sector</span> · <span id="repDate"></span> · Prepared by Two Birds Innovation</span>
+            </div>
+            <div class="report-body">
+
+              <div class="report-block">
+                <p class="label">Readiness</p>
+                <p class="readiness-line"><span class="score-val" id="scoreVal">0</span> out of 100 · <span id="scoreBand">Building</span></p>
+                <p class="readiness-context" id="scoreContext"></p>
+                <div class="band">
+                  <div class="rail">
+                    <span class="seg seg1"></span><span class="seg seg2"></span><span class="seg seg3"></span>
+                    <span class="marker" id="bandMarker" style="left:0"></span>
+                  </div>
+                  <div class="legends">
+                    <span>Getting started</span><span>Building</span><span>Ready to scale</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-block">
+                <p class="label">Your three highest-value moves · next 30 days</p>
+                <p class="fine hidden" id="drainNote" style="margin-bottom:var(--s4);"></p>
+                <div class="moves" id="moves"></div>
+              </div>
+
+              <div class="report-block">
+                <div class="monthone">
+                  <h3>What month one would look like</h3>
+                  <p>Most tools give you a score and leave. Here is what an embedded advisor would actually build with you in the first month. Real working pieces, not a slide deck:</p>
+                  <ul id="monthOneList"></ul>
+                </div>
+              </div>
+
+              <div class="report-block">
+                <p class="label">Next step</p>
+                <div class="next-step">
+                  <a class="btn btn-primary" href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener">Book a free 20-minute review</a>
+                  <button type="button" class="btn btn-ghost" id="runAgain">Run it again</button>
+                  <p class="fine">No obligation and no pitch. The diagnostic is free either way. A call is only worth it if the moves above look like your business.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Why this exists ──────────────────────────────────── -->
+    <section class="section" id="why">
+      <div class="shell">
+        <div class="section-head">
+          <span class="section-num">03</span>
+          <h2>Why this exists</h2>
+        </div>
+        <p class="trust">I spent 20 years as a senior product manager at TELUS, Staples, and Start.ca, watching the gap between big companies and small businesses widen with every technology wave. AI is the same story: enterprises get dedicated teams, small businesses get vendor pitches. <b>Clarity is the tool I wished the small businesses around me had.</b> It gives you the same quality of thinking an enterprise PM applies internally, without an IT department, a retainer, or a subscription that auto-renews.</p>
+        <div class="sig-block">
+          <strong>Aaron Patzalek</strong><br>
+          Founder, Two Birds Innovation · St. Thomas, Ontario
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">
+      <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
+      <p>Your answers never leave your browser. Nothing is stored, tracked, or sold.</p>
+      <p>v2 lab preview build · the live Clarity site is unchanged.</p>
+    </div>
+  </footer>
+
+  <script src="js/clarity-v2.js" defer></script>
+</body>
+</html>

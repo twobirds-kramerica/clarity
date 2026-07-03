@@ -1,0 +1,185 @@
+/* ============================================================================
+   Clarity v2 Design Tokens  ·  Fable pass (2026-07-03)
+   ----------------------------------------------------------------------------
+   Confident-modern identity for an Ontario SMB business diagnostic.
+   Grounded in PRODUCT.md: honest advisor, plain Canadian English, the report
+   is the product. Distinct from DCC (warm-gentle serif body) on purpose.
+
+   Type pairing (self-hosted, SIL OFL, variable):
+     Headings  Fraunces      editorial display serif, sharp and credible
+     Body/UI   Inter         crisp modern sans, superb at small sizes
+
+   Palette: deep pine green on warm paper, bronze used sparingly.
+   Evolves Clarity v1's olive/cream family; kills the generic grey-on-cream.
+
+   --------------------------------------------------------------------------
+   VERIFIED WCAG CONTRAST (computed 2026-07-03, all >= 4.5:1)
+   --------------------------------------------------------------------------
+   LIGHT
+     ink        #1B231E on paper #F4F3EE   14.5:1  AAA
+     ink        #1B231E on white           16.1:1  AAA
+     secondary  #49544D on paper            7.1:1  AAA
+     primary    #14523D on white            9.1:1  AAA
+     primary    #14523D on paper            8.2:1  AAA
+     white on primary #14523D               9.1:1  AAA   (buttons)
+     bronze-deep #6E5314 on tint #F3EBD9    6.1:1  AA+
+     error      #A5301F on white            6.9:1  AA+
+     error      #A5301F on #FBEAE7          5.9:1  AA+
+     success-deep #1D5B2A on #E7F3E9        7.1:1  AAA
+     primary on tint #E4EFE9                7.7:1  AAA
+   DARK
+     text       #E9EFEA on bg #121A16      15.2:1  AAA
+     text       #E9EFEA on surface #1B2721 13.3:1  AAA
+     secondary  #A7B8AE on surface          7.4:1  AAA
+     link/primary #7FCDA9 on bg             9.5:1  AAA
+     white on button #14523D                9.1:1  AAA
+     bronze     #E3C27C on #2E2410          8.9:1  AAA
+     error      #F2A79B on bg               9.1:1  AAA
+     success    #9ED8A8 on #14301C          8.7:1  AAA
+   ========================================================================== */
+
+/* --- Self-hosted variable fonts (SIL OFL 1.1) ----------------------------- */
+@font-face {
+  font-family: 'Fraunces';
+  src: url('../fonts/fraunces/fraunces-var-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/inter-var-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/inter/inter-italic-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg:               #F4F3EE;  /* warm paper */
+  --surface:          #FFFFFF;
+  --surface-tint:     #E4EFE9;  /* pine-tinted fill */
+  --surface-bronze:   #F3EBD9;  /* bronze-tinted fill */
+
+  /* Brand */
+  --primary:          #14523D;  /* deep pine */
+  --primary-hover:    #0E3E2E;
+  --primary-contrast: #FFFFFF;
+  --bronze:           #8C6D2F;  /* decorative rules, marks. Never small text on light. */
+  --bronze-deep:      #6E5314;  /* bronze TEXT on light fills, 6.1:1 on tint */
+
+  /* Text */
+  --ink:              #1B231E;
+  --ink-soft:         #49544D;  /* meta and captions, 7.1:1 on paper */
+  --link:             #14523D;
+  --link-hover:       #0E3E2E;
+
+  /* Structure */
+  --border:           #DCDAD1;
+  --border-strong:    #B9BCB2;
+  --rule:             #CBCDC2;
+
+  /* State */
+  --success-deep:     #1D5B2A;
+  --success-light:    #E7F3E9;
+  --error:            #A5301F;
+  --error-light:      #FBEAE7;
+
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:    'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  --fs-base: 17px;
+  --fs-sm:   0.882rem;   /* 15px */
+  --fs-caption: 0.824rem;/* 14px */
+  --fs-h1: clamp(2.1rem, 4.4vw + 1rem, 3.35rem);
+  --fs-h2: clamp(1.5rem, 1.6vw + 1rem, 1.85rem);
+  --fs-h3: 1.2rem;
+  --fs-lead: clamp(1.06rem, 0.5vw + 0.95rem, 1.22rem);
+
+  --lh-tight: 1.12;
+  --lh-body:  1.62;
+
+  /* Spacing (4px base) */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+  --s12: 48px; --s16: 64px; --s20: 80px;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(20, 30, 25, 0.07);
+  --shadow-md: 0 3px 14px rgba(20, 30, 25, 0.09);
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-1: 130ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+
+  /* Focus (visible on paper, white, and pine) */
+  --focus-ring: 3px solid #6E5314;
+  --focus-offset: 2px;
+
+  /* Layout */
+  --content-max: 880px;
+  --narrow-max: 680px;
+  --tap-min: 44px;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:               #121A16;
+  --surface:          #1B2721;
+  --surface-tint:     #1E3229;
+  --surface-bronze:   #2E2410;
+
+  --primary:          #7FCDA9;   /* headings and links on dark */
+  --primary-hover:    #A2DDC2;
+  --primary-contrast: #121A16;
+  --bronze:           #E3C27C;
+  --bronze-deep:      #E3C27C;
+
+  --ink:              #E9EFEA;
+  --ink-soft:         #A7B8AE;
+  --link:             #7FCDA9;
+  --link-hover:       #A2DDC2;
+
+  --border:           #31413A;
+  --border-strong:    #48594F;
+  --rule:             #31413A;
+
+  --success-deep:     #9ED8A8;
+  --success-light:    #14301C;
+  --error:            #F2A79B;
+  --error-light:      #3A1B14;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 3px 14px rgba(0, 0, 0, 0.5);
+
+  --focus-ring: 3px solid #E3C27C;
+}
+
+/* Solid button is theme-independent: white on pine is 9.1:1 on any page. */
+:root, html[data-theme="dark"] {
+  --btn-bg:    #14523D;
+  --btn-text:  #FFFFFF;
+  --btn-hover: #0E3E2E;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+}
