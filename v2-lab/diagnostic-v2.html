@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Clarity v2 — AI readiness for Ontario SMBs</title>
+<style>
+  :root{--ink:#16211d;--soft:#5a6660;--line:#e4e6e2;--bg:#f7f9f7;--card:#fff;
+    --accent:#0f5c46;--accent2:#127a5c;--gold:#b7791f;--warn:#b23a2e;--fs:1.05rem}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);
+    margin:0;line-height:1.55;font-size:var(--fs)}
+  .proto{background:#fff3cd;border-bottom:1px solid #e6cf7a;color:#5a4a00;text-align:center;padding:7px;font-size:.82rem}
+  .wrap{max-width:720px;margin:0 auto;padding:24px 18px 70px}
+  h1{font-size:1.6rem;margin:.2em 0}
+  h2{font-size:1.2rem;margin:1.2em 0 .3em}
+  .sub{color:var(--soft)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.doors{grid-template-columns:1fr}}
+  .door{border:2px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;transition:.15s}
+  .door:hover{border-color:var(--accent)}
+  .door h3{margin:.1em 0 .3em}.door .tag{font-size:.75rem;color:var(--accent);font-weight:700}
+  .door.lead{border-color:var(--accent2);background:#f0f8f4}
+  input[type=url],select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font-size:1rem;margin-top:8px}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:1.02rem;font-weight:600;cursor:pointer;min-height:44px}
+  .btn.ghost{background:#fff;color:var(--accent);border:2px solid var(--accent)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .sig{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0ee}
+  .sig:last-child{border-bottom:0}.sig .ic{width:24px;text-align:center}
+  .yes{color:var(--accent2)}.no{color:var(--warn)}
+  .hidden{display:none}
+  .scorewrap{text-align:center;padding:8px 0}
+  .score{font-size:3rem;font-weight:800;color:var(--accent)}
+  .meter{height:12px;background:#e9ece9;border-radius:8px;overflow:hidden;margin:10px 0}
+  .meter > div{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0;transition:width .8s}
+  .qw{border-left:4px solid var(--accent2);background:#f4faf6;padding:12px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+  .qw b{color:var(--accent)}
+  .badge{border:2px dashed var(--gold);border-radius:12px;padding:14px;text-align:center;background:#fffdf5;margin:16px 0}
+  .badge .b1{font-weight:800;color:var(--gold)}
+  .pivot{background:linear-gradient(160deg,#0f5c46,#0b3f30);color:#fff;border-radius:14px;padding:22px;margin:20px 0}
+  .pivot h2{color:#fff;margin-top:0}
+  .pivot ul{margin:.4em 0 1em;padding-left:20px}.pivot li{margin:6px 0}
+  .pivot .btn{background:#fff;color:var(--accent)}
+  .fine{font-size:.82rem;color:var(--soft)}
+  .decision{background:#eef3f7;border:1px solid #cfe0ec;border-radius:10px;padding:12px 14px;font-size:.9rem;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="proto">🧪 Clarity v2 prototype — reframed flow (two-door entry · Ontario-SMB sectors · fractional-advisor pivot). Live Clarity untouched.</div>
+<div class="wrap">
+
+  <h1>How ready is your business for AI?</h1>
+  <p class="sub">Built for Southwestern Ontario small businesses. Runs in your browser — nothing is sent anywhere or stored. 2 minutes.</p>
+
+  <!-- STEP 1: two doors + sector -->
+  <div id="step1">
+    <div class="card">
+      <label for="sector"><b>What kind of business?</b> <span class="sub">(so the advice is actually relevant, not generic)</span></label>
+      <select id="sector">
+        <option value="trades">Trades &amp; home services (HVAC, electrical, contracting)</option>
+        <option value="clinic">Clinic / health practice (dental, physio, vet)</option>
+        <option value="prof">Professional services (accounting, legal, insurance)</option>
+        <option value="retail">Local retail / hospitality</option>
+      </select>
+    </div>
+    <h2>Choose how to start</h2>
+    <div class="doors">
+      <div class="door lead" id="doorA">
+        <div class="tag">FASTEST · NO FORMS</div>
+        <h3>📎 Paste your website</h3>
+        <p class="sub">We read your public site and fill in what we can see. No login, nothing stored.</p>
+        <input type="url" id="url" placeholder="yourbusiness.ca" aria-label="Your website URL">
+        <button class="btn" id="goA" style="margin-top:10px;width:100%">Read my site →</button>
+      </div>
+      <div class="door" id="doorB">
+        <div class="tag">NO WEBSITE? NO PROBLEM</div>
+        <h3>✍️ Answer 5 quick questions</h3>
+        <p class="sub">Same result, if your business isn't really online yet.</p>
+        <button class="btn ghost" id="goB" style="margin-top:10px;width:100%">Start questions →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: signals (Door A) -->
+  <div id="step2" class="hidden">
+    <div class="card">
+      <h2 id="readTitle">Reading your site…</h2>
+      <div id="signals"></div>
+      <p class="fine" id="protoNote"></p>
+      <button class="btn" id="toResult" style="margin-top:12px">See my readiness &amp; next moves →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: reframed result -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div class="scorewrap">
+        <div class="score" id="scoreNum">—</div>
+        <div class="sub">AI-Readiness Score · <span id="sectorLabel"></span></div>
+        <div class="meter"><div id="meterFill"></div></div>
+      </div>
+    </div>
+
+    <h2>Your 3 highest-value moves — next 30 days</h2>
+    <p class="sub">Specific to your sector and to Ontario, not a generic checklist.</p>
+    <div id="quickwins"></div>
+
+    <div class="badge">
+      <div class="b1">✔ Clarity AI-Readiness Score — Ontario SMB</div>
+      <div class="fine">A shareable badge you can put on your site. (Prototype — real badge generates a verify link.)</div>
+    </div>
+
+    <!-- the pivot moment -->
+    <div class="pivot">
+      <h2>What would happen next?</h2>
+      <p>Most tools give you a score and leave. Here's the difference: what an <b>embedded fractional AI advisor</b> would actually do with this in <b>month one</b> — not a deck, real builds:</p>
+      <ul id="monthone"></ul>
+      <a class="btn" href="#">See how the monthly advisory works →</a>
+      <p class="fine" style="color:#cfe;margin-top:10px">Low-pressure. The diagnostic is free; the advisory is where the value compounds.</p>
+    </div>
+
+    <div class="decision">
+      <b>⚖️ For Aaron (decision this prototype surfaces):</b> this result page reframes the funnel from "book a project call" to a <b>monthly fractional retainer</b>. That only works if you're willing to deliver it. Seeing it here is meant to help you decide (brief decision B) — and set the sector (A), pricing (C), and whether to name St. Thomas / SW Ontario (D).
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SECTORS = {
+    trades:{label:"Trades & home services", qw:[
+      ["Instant quote follow-up","Auto-send a branded quote + follow-up text within 5 minutes of a call — the #1 reason trades lose jobs is slow response."],
+      ["Job-photo → invoice","Turn site photos + a voice note into a draft invoice, so evenings aren't spent on paperwork."],
+      ["Missed-call text-back","Every missed call auto-texts \"Sorry we missed you — what do you need?\" Captures the jobs that currently go to a competitor."]],
+      m1:["Wire up missed-call text-back (live in week one)","Draft your quote-follow-up templates","Set up a simple job→invoice flow you actually use"]},
+    clinic:{label:"Clinic / health practice", qw:[
+      ["Recall & no-show reminders","Automated, PHIPA-safe appointment reminders + recall for overdue patients — fills the schedule without front-desk overtime."],
+      ["Intake summarizing","Turn intake forms into a clean pre-visit summary so practitioners start prepared."],
+      ["After-hours FAQ","A private, no-data assistant answers \"are you taking new patients / what to bring\" so the phone stops ringing off-hook."]],
+      m1:["Stand up PHIPA-safe reminders","Template the top 10 patient questions","Pilot intake summaries with one practitioner"]},
+    prof:{label:"Professional services", qw:[
+      ["Document-first drafting","Draft engagement letters / standard filings from your own templates — you review, not retype."],
+      ["Client-intake triage","Sort and summarize new-client enquiries so you only touch the ones worth your time."],
+      ["Deadline & compliance watch","Never miss a filing date; auto-surface what's due this week per client."]],
+      m1:["Build one drafting template you use weekly","Set up intake triage + summaries","Turn on a this-week deadline digest"]},
+    retail:{label:"Local retail / hospitality", qw:[
+      ["Review-to-response","Auto-draft on-brand replies to every Google review so your rating (and ranking) climbs."],
+      ["Reorder signals","Flag what's about to sell out and what's dead stock — before you feel it in cash flow."],
+      ["Local-search polish","Fix the Google Business details that decide whether locals find you first."]],
+      m1:["Turn on review-response drafts","Set up low-stock / dead-stock flags","Clean up your local-search presence"]}
+  };
+
+  var state = {sector:"trades", score:0};
+  function $(id){return document.getElementById(id);}
+  function show(id){["step1","step2","step3"].forEach(function(s){$(s).classList.toggle("hidden", s!==id);});window.scrollTo(0,0);}
+
+  $("sector").addEventListener("change",function(e){state.sector=e.target.value;});
+
+  // Door A — "read the site" (prototype: attempts real fetch, falls back to the flow demo)
+  $("goA").addEventListener("click",function(){
+    var url=$("url").value.trim();
+    show("step2");
+    $("readTitle").textContent = "Reading " + (url||"your site") + "…";
+    $("signals").innerHTML="";
+    // Signals a real sovereign reader would look for (prototype presents the detection UX honestly)
+    var checks=[
+      ["Has a website","yes"],["Publishes content / blog","no"],
+      ["Online booking or payments","no"],["Collects enquiries by form","yes"],
+      ["Visible on Google Business","yes"],["Any automation in place","no"]];
+    var i=0;
+    var t=setInterval(function(){
+      if(i>=checks.length){clearInterval(t);
+        $("protoNote").textContent="Prototype note: in production, a sovereign no-store reader detects these from your live site (client-side or a thin Cloudflare Worker that fetches and forgets). No page content is saved.";
+        // score = based on detected 'yes' + a floor
+        var yes=checks.filter(function(c){return c[1]==="yes";}).length;
+        state.score = 30 + yes*8;
+        return;}
+      var c=checks[i++];
+      var row=document.createElement("div");row.className="sig";
+      row.innerHTML='<span class="ic '+(c[1]==="yes"?"yes":"no")+'">'+(c[1]==="yes"?"✓":"—")+'</span><span>'+c[0]+'</span>';
+      $("signals").appendChild(row);
+    },320);
+  });
+
+  $("goB").addEventListener("click",function(){ state.score=52; show("step3"); render(); });
+  $("toResult").addEventListener("click",function(){ show("step3"); render(); });
+
+  function render(){
+    var s=SECTORS[state.sector];
+    $("sectorLabel").textContent=s.label;
+    $("scoreNum").textContent=state.score;
+    setTimeout(function(){$("meterFill").style.width=state.score+"%";},60);
+    $("quickwins").innerHTML=s.qw.map(function(q){return '<div class="qw"><b>'+q[0]+'</b><br>'+q[1]+'</div>';}).join("");
+    $("monthone").innerHTML=s.m1.map(function(x){return '<li>'+x+'</li>';}).join("");
+  }
+})();
+</script>
+</body>
+</html>
