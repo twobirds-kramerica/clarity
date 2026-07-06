@@ -1,226 +1,644 @@
 <!DOCTYPE html>
 <html lang="en-CA">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex,nofollow">
-  <title>Clarity: AI readiness for Ontario small business | Two Birds Innovation</title>
-  <meta name="description" content="A free two-minute AI readiness check for Southwestern Ontario small businesses. Runs in your browser. Nothing stored, no sign-up.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314523D'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' font-weight='700' fill='%23F4F3EE' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
-  <script>
-    /* Set theme before first paint to avoid a flash */
-    (function () {
-      try {
-        var t = localStorage.getItem("clarity-v2-theme");
-        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.setAttribute("data-theme", "dark");
-        }
-      } catch (e) {}
-    }());
-  </script>
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/core.css">
+  <title>Clarity: AI Business Diagnostic | Two Birds Innovation</title>
+  <meta name="description" content="A free AI readiness diagnostic for Canadian small business. Six questions, a personalised SWOT, priority recommendations, and a concrete next step. No sign-up, nothing stored.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230066CC'/%3E%3Cpath d='M11 8l7 6-7 6' stroke='%23FFFFFF' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    /* Inter, self-hosted variable font, SIL OFL 1.1, no CDN (see fonts/FONTS.md) */
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url('fonts/inter/inter-var-latin.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url('fonts/inter/inter-italic-400-latin.woff2') format('woff2');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Two Birds brand palette */
+      --tb-blue: #0066CC;
+      --tb-blue-deep: #0053A6;      /* darkened blue for small text + hover, 6.2:1 on white */
+      --navy: #0D1B2A;
+      --warm-grey: #F5F5F5;
+      --white: #FFFFFF;
+      --teal: #00695C;              /* darkened from brand #00897B for 4.5:1+ text contrast */
+      --amber: #B45C00;             /* darkened amber for accessible attention text */
+      --text: #22303E;
+      --text-soft: #4A5866;         /* 7:1 on white */
+      --line: #DDE3E9;
+      --blue-tint: #EBF3FC;
+      --radius: 12px;
+      --measure: 68ch;
+      --shadow: 0 2px 10px rgba(13, 27, 42, 0.08);
+    }
+
+    html { scroll-behavior: smooth; color-scheme: light; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--white);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 1.0625rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--tb-blue-deep); text-underline-offset: 3px; }
+    a:hover { color: var(--navy); }
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid var(--tb-blue);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--navy);
+      color: var(--white);
+      padding: 0.6rem 1.1rem;
+      border-radius: 0 0 8px 8px;
+      z-index: 100;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0; }
+
+    .wrap {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* ── Header ─────────────────────────────── */
+    .site-header {
+      border-bottom: 1px solid var(--line);
+      background: var(--white);
+    }
+    .site-header .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+    }
+    .brand svg { display: block; }
+    .brand .by {
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+    .header-cta {
+      display: inline-block;
+      background: var(--tb-blue);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+    }
+    .header-cta:hover { background: var(--tb-blue-deep); color: var(--white); }
+
+    /* ── Hero ───────────────────────────────── */
+    .hero {
+      background: var(--navy);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+      padding: 3.5rem 0 3.75rem;
+    }
+    /* cosmos texture: subtle dots, second-look detail per brand guidelines */
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1.6px),
+        radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1.6px);
+      background-size: 190px 190px, 120px 120px;
+      background-position: 0 0, 60px 45px;
+      pointer-events: none;
+    }
+    .hero .wrap { position: relative; }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #9FC7EF;
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+      max-width: 22ch;
+      text-wrap: balance;
+      margin-bottom: 1rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: #7FB8F2;
+    }
+    .hero-sub {
+      font-size: clamp(1.05rem, 2vw, 1.2rem);
+      color: #C8D3DE;
+      max-width: 54ch;
+      margin-bottom: 1.75rem;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 48px;
+      padding: 0.8rem 1.6rem;
+      border-radius: 10px;
+      font-size: 1.02rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--tb-blue); color: var(--white); }
+    .btn-primary:hover { background: #1975D6; color: var(--white); }
+    .btn-ghost-light {
+      background: transparent;
+      color: var(--white);
+      border-color: rgba(255,255,255,0.45);
+    }
+    .btn-ghost-light:hover { border-color: var(--white); color: var(--white); }
+    .hero-fineprint {
+      font-size: 0.88rem;
+      color: #9AA8B6;
+    }
+    .hero-fineprint strong { color: #C8D3DE; font-weight: 600; }
+
+    /* ── Value: what you get ────────────────── */
+    section { padding: 3.25rem 0; }
+    .section-kicker {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tb-blue-deep);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+      letter-spacing: -0.015em;
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      text-wrap: balance;
+    }
+    .section-lede {
+      color: var(--text-soft);
+      max-width: var(--measure);
+      margin-bottom: 2rem;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .value-card {
+      background: var(--warm-grey);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.4rem 1.3rem;
+    }
+    .value-card .chev {
+      color: var(--tb-blue);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+    .value-card h3 {
+      font-size: 1.08rem;
+      color: var(--navy);
+      margin-bottom: 0.35rem;
+    }
+    .value-card p {
+      font-size: 0.95rem;
+      color: var(--text-soft);
+    }
+
+    /* ── How it works ───────────────────────── */
+    .how {
+      background: var(--blue-tint);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .steps {
+      list-style: none;
+      counter-reset: step;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    .steps li {
+      counter-increment: step;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.4rem 1.4rem;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .steps li::before {
+      content: counter(step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 50%;
+      background: var(--tb-blue);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .steps h3 { font-size: 1.1rem; color: var(--navy); margin-bottom: 0.4rem; }
+    .steps p { font-size: 0.95rem; color: var(--text-soft); }
+    .steps .step-time {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--teal);
+    }
+
+    /* ── Trust strip ────────────────────────── */
+    .trust ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+      max-width: var(--measure);
+    }
+    .trust li {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      font-size: 0.98rem;
+    }
+    .trust li svg { flex-shrink: 0; margin-top: 0.2rem; }
+    .trust li strong { color: var(--navy); }
+
+    /* ── Proof ──────────────────────────────── */
+    .proof { background: var(--warm-grey); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .proof-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .proof-card h3 { font-size: 1.05rem; color: var(--navy); }
+    .proof-card p { font-size: 0.93rem; color: var(--text-soft); flex: 1; }
+    .proof-card a { font-size: 0.92rem; font-weight: 600; }
+    .proof-tag {
+      align-self: flex-start;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+    .tag-live { background: #E1F0EC; color: var(--teal); }
+    .tag-dev { background: #FCEEDD; color: var(--amber); }
+    .proof-note {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      max-width: var(--measure);
+    }
+
+    /* ── About ──────────────────────────────── */
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: var(--measure);
+    }
+    .about p { color: var(--text-soft); margin-bottom: 0.9rem; }
+    .about p:last-of-type { margin-bottom: 0; }
+    .about .sig {
+      border-left: 4px solid var(--tb-blue);
+      padding-left: 1rem;
+      font-size: 0.95rem;
+      margin-top: 1.25rem;
+    }
+    .about .sig strong { color: var(--navy); }
+
+    /* ── Final CTA ──────────────────────────── */
+    .final-cta {
+      background: var(--navy);
+      color: var(--white);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .final-cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1.6px);
+      background-size: 150px 150px;
+      pointer-events: none;
+    }
+    .final-cta .wrap { position: relative; }
+    .final-cta h2 { color: var(--white); margin-bottom: 0.6rem; }
+    .final-cta p {
+      color: #C8D3DE;
+      max-width: 52ch;
+      margin: 0 auto 1.75rem;
+    }
+    .final-cta .hero-actions { justify-content: center; margin-bottom: 1rem; }
+    .final-cta .alt {
+      font-size: 0.92rem;
+      color: #9AA8B6;
+      margin-bottom: 0;
+    }
+    .final-cta .alt a { color: #9FC7EF; }
+
+    /* ── Footer ─────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--line);
+      padding: 1.75rem 0 2.25rem;
+      font-size: 0.88rem;
+      color: var(--text-soft);
+    }
+    .site-footer .wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .footer-links a { color: var(--text-soft); }
+
+    /* ── Larger screens ─────────────────────── */
+    @media (min-width: 660px) {
+      .value-grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .trust ul { grid-template-columns: 1fr 1fr; }
+      .proof-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 900px) {
+      .hero { padding: 4.75rem 0 5rem; }
+      section { padding: 4rem 0; }
+    }
+  </style>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
 
   <header class="site-header">
-    <div class="bar">
-      <a class="wordmark" href="index.html">Clarity<span class="dot">.</span></a>
-      <span class="byline">Two Birds Innovation · St. Thomas, Ontario</span>
-      <span class="header-spacer"></span>
-      <button type="button" class="theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button>
+    <div class="wrap">
+      <a class="brand" href="index.html" aria-label="Clarity, by Two Birds Innovation, home">
+        <!-- Two Birds chevron mark: opposing chevrons with identity circles -->
+        <svg width="34" height="34" viewBox="0 0 40 40" role="img" aria-hidden="true" focusable="false">
+          <rect width="40" height="40" rx="8" fill="#0066CC"/>
+          <path d="M13 9l9 7-9 7" stroke="#FFFFFF" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M27 17l-9 7 9 7" stroke="#FFFFFF" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="22" cy="16" r="1.7" fill="#FFFFFF"/>
+          <circle cx="18" cy="24" r="1.7" fill="#FFFFFF"/>
+        </svg>
+        <span>Clarity <span class="by">by Two Birds Innovation</span></span>
+      </a>
+      <a class="header-cta" href="../index.html">Run the diagnostic</a>
     </div>
   </header>
 
   <main id="main">
 
-    <!-- ── Hero ─────────────────────────────────────────────── -->
-    <section class="hero">
-      <div class="shell">
-        <p class="eyebrow">Free AI readiness check</p>
-        <h1>Find out where AI actually pays off in your business.</h1>
-        <p class="lead">Two minutes. Built for Southwestern Ontario trades, clinics, professional services, and local retail. You get a readiness score and your three highest-value moves, specific to your sector. No sign-up, no sales script.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#diagnostic">Start the check</a>
-          <a class="btn btn-ghost" href="#how">How it works</a>
+    <!-- ── Hero ──────────────────────────────── -->
+    <section class="hero" aria-labelledby="heroHeading">
+      <div class="wrap">
+        <p class="hero-kicker">Free AI business diagnostic &middot; Canadian-built</p>
+        <h1 id="heroHeading">Find out where your business stands with AI, <em>in plain English</em></h1>
+        <p class="hero-sub">Answer six questions about your business. Clarity gives you a personalised SWOT analysis, priority recommendations, quick wins, and one concrete next step, benchmarked against 15 Canadian industries.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="../index.html">Start the diagnostic</a>
+          <a class="btn btn-ghost-light" href="../sample-diagnostic.html">See a sample report</a>
         </div>
-        <div class="hero-facts">
-          <span><span class="tick">✓</span> Runs in your browser</span>
-          <span><span class="tick">✓</span> Nothing stored or sent</span>
-          <span><span class="tick">✓</span> Plain answers, no jargon</span>
+        <p class="hero-fineprint"><strong>No sign-up. No account. Free.</strong> Your answers are used only to generate your report and are never stored.</p>
+      </div>
+    </section>
+
+    <!-- ── Value ─────────────────────────────── -->
+    <section aria-labelledby="valueHeading">
+      <div class="wrap">
+        <p class="section-kicker">What you get</p>
+        <h2 id="valueHeading">A real diagnostic, not a lead form</h2>
+        <p class="section-lede">Clarity is built to be useful on its own. Every report is generated for your business, your industry, and your answers. It is designed to be worth reading even if you never talk to us.</p>
+        <div class="value-grid">
+          <div class="value-card">
+            <span class="chev" aria-hidden="true">&gt;</span>
+            <h3>SWOT analysis</h3>
+            <p>Strengths, weaknesses, opportunities, and threats, written for your specific business rather than a generic template.</p>
+          </div>
+          <div class="value-card">
+            <span class="chev" aria-hidden="true">&gt;</span>
+            <h3>Priority recommendations</h3>
+            <p>Where AI can actually help you first, ranked by effort and impact so you know what to ignore.</p>
+          </div>
+          <div class="value-card">
+            <span class="chev" aria-hidden="true">&gt;</span>
+            <h3>Quick wins</h3>
+            <p>Three things you can act on this week without new software, new staff, or a budget line.</p>
+          </div>
+          <div class="value-card">
+            <span class="chev" aria-hidden="true">&gt;</span>
+            <h3>One concrete next step</h3>
+            <p>A single clear action, plus an AI readiness score benchmarked against 15 Canadian industries.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ── How it works ─────────────────────────────────────── -->
-    <section class="section" id="how">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-num">01</span>
-          <h2>How it works</h2>
+    <!-- ── How it works ──────────────────────── -->
+    <section class="how" aria-labelledby="howHeading">
+      <div class="wrap">
+        <p class="section-kicker">How it works</p>
+        <h2 id="howHeading">Six questions. One useful report.</h2>
+        <p class="section-lede">The whole thing runs in your browser. One question at a time, no jargon, no trick questions.</p>
+        <ol class="steps">
+          <li>
+            <h3>Answer six questions</h3>
+            <p>Plain questions about what your business does, how it runs, and where the friction is. If you can describe your week, you can answer them.</p>
+            <span class="step-time">About 3 minutes</span>
+          </li>
+          <li>
+            <h3>Clarity analyses your answers</h3>
+            <p>AI reviews your situation against Canadian industry benchmarks. Use the built-in engine, or bring your own AI provider if you prefer.</p>
+            <span class="step-time">15 to 30 seconds</span>
+          </li>
+          <li>
+            <h3>Get a report you can act on</h3>
+            <p>SWOT, priorities, quick wins, and a next step. Print it, save it, or bring it to your business partner or your bank.</p>
+            <span class="step-time">Yours to keep</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── Trust ─────────────────────────────── -->
+    <section class="trust" aria-labelledby="trustHeading">
+      <div class="wrap">
+        <p class="section-kicker">Private by design</p>
+        <h2 id="trustHeading">Your business data stays yours</h2>
+        <p class="section-lede">Clarity was built the way we think business tools should be built: honest about what it does with your information.</p>
+        <ul>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" stroke="#00695C" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Nothing stored.</strong> Your answers are used to generate your diagnostic and are never saved or shared.</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" stroke="#00695C" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>No account, no sign-up.</strong> You do not hand over an email address to see your results.</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" stroke="#00695C" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>No subscription, no lock-in.</strong> Free to use. If you bring your own AI key, it never leaves your browser.</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" stroke="#00695C" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Built in Ontario.</strong> Made in St. Thomas for Canadian small businesses, with Canadian benchmarks and PIPEDA-aware guidance.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Proof ─────────────────────────────── -->
+    <section class="proof" aria-labelledby="proofHeading">
+      <div class="wrap">
+        <p class="section-kicker">Proof of work</p>
+        <h2 id="proofHeading">We ship what we talk about</h2>
+        <p class="section-lede">Two Birds Innovation designs and builds working products, not decks. Here is what exists today.</p>
+        <div class="proof-grid">
+          <div class="proof-card">
+            <span class="proof-tag tag-live">Designed and built</span>
+            <h3>Digital Confidence Centre</h3>
+            <p>A free digital-literacy course with 29 modules. Designed for seniors, tested against a real non-technical user persona, works for every age.</p>
+            <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener">Visit the DCC &rarr;</a>
+          </div>
+          <div class="proof-card">
+            <span class="proof-tag tag-live">Designed and built</span>
+            <h3>Career Coach</h3>
+            <p>A free AI job-application tool: CV-versus-posting analysis, cover letters, and salary negotiation prep, all in your browser.</p>
+            <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener">Visit Career Coach &rarr;</a>
+          </div>
+          <div class="proof-card">
+            <span class="proof-tag tag-dev">In development</span>
+            <h3>HAL Stack</h3>
+            <p>Our internal AI operations system: the sprint, verification, and governance machinery that builds and maintains these products. In active development.</p>
+          </div>
         </div>
-        <p class="section-sub">The diagnostic is the product, not a teaser. You get the full result whether or not you ever talk to us.</p>
-        <div class="steps">
-          <div class="step">
-            <span class="k">Tell us what you run</span>
-            <p>Pick your sector, then either paste your website or answer five quick questions. Whichever is faster for you.</p>
-          </div>
-          <div class="step">
-            <span class="k">Get your readiness score</span>
-            <p>A straight number, benchmarked against businesses like yours in the region. No grading on a curve to flatter you.</p>
-          </div>
-          <div class="step">
-            <span class="k">See your three moves</span>
-            <p>The three highest-value things to do in the next 30 days, specific to your sector. Not a generic checklist.</p>
+        <p class="proof-note">Clarity itself is part of the proof: a working AI product, designed and built in-house, free for Canadian small businesses. No invented testimonials, no made-up numbers. What you see here is what exists.</p>
+      </div>
+    </section>
+
+    <!-- ── About ─────────────────────────────── -->
+    <section class="about" aria-labelledby="aboutHeading">
+      <div class="wrap">
+        <div class="about-inner">
+          <div>
+            <p class="section-kicker">Why this exists</p>
+            <h2 id="aboutHeading">Built by a 20-year product manager, for the businesses that got left out</h2>
+            <p>I spent more than 20 years as a product manager at TELUS, Staples, and Start.ca. Every technology wave widened the gap between large enterprises and small businesses. AI is doing it again: big companies have dedicated teams and consultants, while small businesses in Southwestern Ontario get YouTube videos and vendor pitches.</p>
+            <p>Clarity gives small business owners the same quality of strategic thinking that enterprise product teams use internally, without an IT department, a consultant on retainer, or a subscription that renews itself every month.</p>
+            <div class="sig">
+              <strong>Aaron Patzalek</strong><br>
+              Founder, Two Birds Innovation &middot; St. Thomas, Ontario
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── Diagnostic ───────────────────────────────────────── -->
-    <section class="section" id="diagnostic">
-      <div class="shell narrow">
-
-        <!-- Entry -->
-        <div id="panel-entry">
-          <div class="section-head">
-            <span class="section-num">02</span>
-            <h2>Start the check</h2>
-          </div>
-          <div class="card">
-            <label for="sector">What kind of business? <span class="hint">(so the advice is relevant, not generic)</span></label>
-            <select id="sector">
-              <option value="trades">Trades and home services (HVAC, electrical, contracting)</option>
-              <option value="clinic">Clinic or health practice (dental, physio, vet)</option>
-              <option value="prof">Professional services (accounting, legal, insurance)</option>
-              <option value="retail">Local retail or hospitality</option>
-            </select>
-          </div>
-          <div class="doors">
-            <div class="door lead-door">
-              <span class="tag">Fastest · no forms</span>
-              <h3>Paste your website</h3>
-              <p>We read your public site and fill in what we can see. No login, nothing stored.</p>
-              <label for="siteUrl" class="visually-hidden" style="position:absolute;left:-9999px;">Your website address</label>
-              <input type="url" id="siteUrl" placeholder="yourbusiness.ca" autocomplete="url">
-              <button type="button" class="btn btn-primary btn-block" id="goA">Read my site</button>
-            </div>
-            <div class="door">
-              <span class="tag">No website? No problem</span>
-              <h3>Answer five quick questions</h3>
-              <p>Same result, if your business is not really online yet. About ninety seconds.</p>
-              <button type="button" class="btn btn-ghost btn-block" id="goB">Start the questions</button>
-            </div>
-          </div>
+    <!-- ── Final CTA ─────────────────────────── -->
+    <section class="final-cta" aria-labelledby="ctaHeading">
+      <div class="wrap">
+        <h2 id="ctaHeading">Three minutes to a clearer picture</h2>
+        <p>Run the diagnostic now, or look at a sample report first. Either way, you leave knowing more about where your business stands with AI than you do right now.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="../index.html">Start the free diagnostic</a>
+          <a class="btn btn-ghost-light" href="../sample-diagnostic.html">See a sample report</a>
         </div>
-
-        <!-- Site read -->
-        <div id="panel-read" class="hidden">
-          <div class="card">
-            <h2 id="readTitle" style="font-size:1.35rem;margin-bottom:var(--s4);">Reading your site…</h2>
-            <div id="signals"></div>
-            <p class="fine" id="readNote" style="margin-top:var(--s4);"></p>
-            <button type="button" class="btn btn-primary" id="toReport" style="margin-top:var(--s5);" disabled>See my readiness and next moves</button>
-          </div>
-        </div>
-
-        <!-- Questions -->
-        <div id="panel-questions" class="hidden">
-          <div class="card">
-            <div class="flow-progress">
-              <div class="track"><div class="fill" id="qFill" style="width:0%"></div></div>
-              <span class="count" id="qCount" aria-live="polite">Question 1 of 5</span>
-            </div>
-            <h2 class="q-title" id="qTitle" tabindex="-1">Question</h2>
-            <div class="choices" id="choices"></div>
-            <div class="flow-nav">
-              <button type="button" class="link-btn hidden" id="qBack">Back</button>
-              <button type="button" class="link-btn" id="qRestart">Start over</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Report -->
-        <div id="panel-report" class="hidden">
-          <div class="report" aria-live="polite">
-            <div class="report-masthead">
-              <h2>Your AI readiness report</h2>
-              <span class="meta"><span id="repSector">Sector</span> · <span id="repDate"></span> · Prepared by Two Birds Innovation</span>
-            </div>
-            <div class="report-body">
-
-              <div class="report-block">
-                <p class="label">Readiness</p>
-                <p class="readiness-line"><span class="score-val" id="scoreVal">0</span> out of 100 · <span id="scoreBand">Building</span></p>
-                <p class="readiness-context" id="scoreContext"></p>
-                <div class="band">
-                  <div class="rail">
-                    <span class="seg seg1"></span><span class="seg seg2"></span><span class="seg seg3"></span>
-                    <span class="marker" id="bandMarker" style="left:0"></span>
-                  </div>
-                  <div class="legends">
-                    <span>Getting started</span><span>Building</span><span>Ready to scale</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="report-block">
-                <p class="label">Your three highest-value moves · next 30 days</p>
-                <p class="fine hidden" id="drainNote" style="margin-bottom:var(--s4);"></p>
-                <div class="moves" id="moves"></div>
-              </div>
-
-              <div class="report-block">
-                <div class="monthone">
-                  <h3>What month one would look like</h3>
-                  <p>Most tools give you a score and leave. Here is what an embedded advisor would actually build with you in the first month. Real working pieces, not a slide deck:</p>
-                  <ul id="monthOneList"></ul>
-                </div>
-              </div>
-
-              <div class="report-block">
-                <p class="label">Next step</p>
-                <div class="next-step">
-                  <a class="btn btn-primary" href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener">Book a free 20-minute review</a>
-                  <button type="button" class="btn btn-ghost" id="runAgain">Run it again</button>
-                  <p class="fine">No obligation and no pitch. The diagnostic is free either way. A call is only worth it if the moves above look like your business.</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
+        <p class="alt">Prefer to talk it through? <a href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener">Book a free 30-minute call</a>. No obligation, no pitch.</p>
       </div>
     </section>
-
-    <!-- ── Why this exists ──────────────────────────────────── -->
-    <section class="section" id="why">
-      <div class="shell">
-        <div class="section-head">
-          <span class="section-num">03</span>
-          <h2>Why this exists</h2>
-        </div>
-        <p class="trust">I spent 20 years as a senior product manager at TELUS, Staples, and Start.ca, watching the gap between big companies and small businesses widen with every technology wave. AI is the same story: enterprises get dedicated teams, small businesses get vendor pitches. <b>Clarity is the tool I wished the small businesses around me had.</b> It gives you the same quality of thinking an enterprise PM applies internally, without an IT department, a retainer, or a subscription that auto-renews.</p>
-        <div class="sig-block">
-          <strong>Aaron Patzalek</strong><br>
-          Founder, Two Birds Innovation · St. Thomas, Ontario
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <footer class="site-footer">
-    <div class="shell">
-      <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
-      <p>Your answers never leave your browser. Nothing is stored, tracked, or sold.</p>
-      <p>v2 lab preview build · the live Clarity site is unchanged.</p>
+    <div class="wrap">
+      <p>&copy; 2026 Two Birds Innovation. Built with care in St. Thomas, Ontario, Canada.</p>
+      <div class="footer-links">
+        <a href="../privacy.html">Privacy Policy</a>
+        <a href="../terms.html">Terms</a>
+        <a href="../disclaimer.html">Disclaimer</a>
+        <a href="../sample-diagnostic.html">Sample Report</a>
+      </div>
+      <p>V2 design lab. This page is a design preview and is not indexed.</p>
     </div>
   </footer>
-
-  <script src="js/clarity-v2.js" defer></script>
-  <script src="feedback-widget.js" defer></script>
 </body>
 </html>
