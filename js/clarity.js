@@ -172,6 +172,7 @@
         getKeyLink.style.display = meta.signupUrl ? '' : 'none';
         getKeyLink.href = meta.signupUrl || '#';
         getKeyLink.textContent = meta.signupText;
+        if (window.markNewTabLink) window.markNewTabLink(getKeyLink);
       }
       if (activateBtn) {
         activateBtn.textContent = provider === 'proxy' ? 'Use built-in analysis →' : 'Connect my own service';
@@ -413,7 +414,7 @@
          from localStorage (set by the Activate flow). Anthropic callers
          still get Sonnet 4.6 by default via LLM_PROVIDERS.anthropic;
          OpenAI gets gpt-4o; Gemini gets gemini-2.0-flash; Ollama gets llama3. */
-      llmChat(prompt, { maxTokens: 2048, provider: provider, apiKey: apiKey })
+      llmChat(prompt, { maxTokens: 3072, provider: provider, apiKey: apiKey })
       .then(function(text) {
         if (!text) throw new Error('No response received from the analysis engine.');
         displayResults(businessName, industry, text, benchmarkKey);
@@ -450,8 +451,10 @@
         '3. Three numbered priority recommendations — each with a clear title, 2-3 sentence explanation, an effort rating (Low/Medium/High), and an impact rating (Low/Medium/High). Recommendations must name specific, available tools or approaches (e.g. "Claude", "Microsoft Copilot", "Zapier", "QuickBooks AI") where relevant.',
         '4. Three quick wins — concrete actions the business can do in the next 30 days. Short, punchy, one sentence each.',
         '5. A single "Suggested Next Step" — one concrete action they could take this week.',
+        '6. A competitive landscape snapshot for their primary line of business: a 2-3 sentence overview of the competitive pressures a business of their size and stage typically faces in that industry in Canada, then exactly 3 specific competitive pressures as short bullets, then one sentence on where a business like theirs can realistically stand out. Ground every point in what they told you (industry, size, years in business, systems, time sinks). Write about operations, service, pricing, and customer expectations. Do not name real competitors and do not invent statistics.',
+        '7. A market trends summary for their primary line of business: exactly 3 trends currently shaping that industry for Canadian small and mid-size businesses. Each trend needs a short plain-language title and a 1-2 sentence note on what it means for a business of their size. Focus on operations, labour, customer behaviour, and costs. Keep trends qualitative. Do not fabricate specific statistics, percentages, or dollar figures.',
         '',
-        'Use Canadian English (centre, organisation, analyse, colour, programme, etc.). Be specific — reference their industry, team size, and challenges directly. Avoid generic jargon.',
+        'Use Canadian English (centre, organisation, analyse, colour, programme, etc.). Be specific — reference their industry, team size, and challenges directly. Avoid generic jargon. Do not use em dashes anywhere in your output; use commas or periods instead.',
         '',
         'IMPORTANT: Respond in this exact JSON format with no markdown, no code fences, just raw JSON:',
         '{',
@@ -466,7 +469,17 @@
         '    {"title": "Title", "description": "Description", "effort": "Low|Medium|High", "impact": "Low|Medium|High"}',
         '  ],',
         '  "quick_wins": ["action 1", "action 2", "action 3"],',
-        '  "next_step": "The single next step they should take this week."',
+        '  "next_step": "The single next step they should take this week.",',
+        '  "competitive_landscape": {',
+        '    "summary": "2-3 sentence overview of the competitive pressures for a business of this size and stage.",',
+        '    "pressures": ["pressure 1", "pressure 2", "pressure 3"],',
+        '    "edge": "One sentence on where this business can realistically stand out."',
+        '  },',
+        '  "market_trends": [',
+        '    {"trend": "Short plain-language title", "note": "What it means for a business this size."},',
+        '    {"trend": "Short plain-language title", "note": "What it means for a business this size."},',
+        '    {"trend": "Short plain-language title", "note": "What it means for a business this size."}',
+        '  ]',
         '}',
         '',
         'Business Details:',
@@ -572,6 +585,9 @@
         recsEl.appendChild(div);
       });
 
+      // Effort vs. Payback Matrix (plots the recommendations above)
+      renderEffortMatrix(data.recommendations || []);
+
       // Quick Wins
       var qwEl = document.getElementById('quickWins');
       var quickWins = data.quick_wins || [];
@@ -603,6 +619,12 @@
         }
       }
 
+      // Competitive Landscape Snapshot (built from what the user told us)
+      renderCompetitiveLandscape(data.competitive_landscape);
+
+      // Market Trends Summary (industry-specific, clearly labelled as synthesised)
+      renderMarketTrends(data.market_trends, industry);
+
       // Industry benchmark context note (surfaces the sector note from INDUSTRY_BENCHMARKS)
       var benchNoteEl = document.getElementById('benchmarkContextNote');
       if (benchNoteEl) {
@@ -628,6 +650,91 @@
         stats.last_industry = (typeof industry !== 'undefined') ? industry : 'unknown';
         localStorage.setItem('clarity_stats', JSON.stringify(stats));
       } catch(e) {}
+    }
+
+    /* ── Effort vs. Payback Matrix ───────────── */
+    /* Plots the priority recommendations on a 2x2 grid: effort (x) vs.
+       payback (y). Low/Medium/High map to fixed positions; overlapping
+       points are nudged sideways so every number stays visible. */
+    function renderEffortMatrix(recs) {
+      var el = document.getElementById('effortMatrix');
+      if (!el) return;
+      recs = (recs || []).filter(function(r) { return r && r.title; });
+      if (!recs.length) { el.innerHTML = ''; return; }
+
+      var POS = { low: 18, medium: 50, high: 82 };
+      var used = {};
+      var dots = '';
+      var legend = '';
+      var described = [];
+
+      recs.forEach(function(rec, i) {
+        var effort = String(rec.effort || 'Medium').toLowerCase();
+        var impact = String(rec.impact || 'Medium').toLowerCase();
+        var x = POS[effort] || 50;
+        var y = 100 - (POS[impact] || 50); /* high payback sits at the top */
+        var key = x + ',' + y;
+        var bump = used[key] || 0;
+        used[key] = bump + 1;
+        x = Math.min(90, x + bump * 9); /* nudge duplicates right */
+        dots += '<span class="matrix-dot" style="left:' + x + '%;top:' + y + '%;" aria-hidden="true">' + (i + 1) + '</span>';
+        legend += '<li><span class="matrix-legend-num" aria-hidden="true">' + (i + 1) + '</span>' + escapeHtml(rec.title) +
+          '<span class="matrix-legend-meta">Effort: ' + escapeHtml(rec.effort || 'Medium') + ', payback: ' + escapeHtml(rec.impact || 'Medium') + '</span></li>';
+        described.push('Recommendation ' + (i + 1) + ', ' + rec.title + ': ' + (rec.effort || 'Medium').toLowerCase() + ' effort, ' + (rec.impact || 'Medium').toLowerCase() + ' payback');
+      });
+
+      el.innerHTML =
+        '<h3>Effort vs. Payback</h3>' +
+        '<p class="matrix-note">Where each recommendation sits. The closer to the top left, the sooner it pays for itself.</p>' +
+        '<div class="matrix-wrap">' +
+          '<span class="matrix-axis-y" aria-hidden="true">Payback &rarr;</span>' +
+          '<div class="matrix-plot" role="img" aria-label="' + escapeHtml('Effort versus payback matrix. ' + described.join('. ') + '.') + '">' +
+            '<div class="matrix-quad matrix-quad-tl"><span>Do these first</span></div>' +
+            '<div class="matrix-quad matrix-quad-tr"><span>Worth planning</span></div>' +
+            '<div class="matrix-quad matrix-quad-bl"><span>Nice to have</span></div>' +
+            '<div class="matrix-quad matrix-quad-br"><span>Think twice</span></div>' +
+            dots +
+          '</div>' +
+          '<span class="matrix-axis-x" aria-hidden="true">Effort &rarr;</span>' +
+        '</div>' +
+        '<ol class="matrix-legend">' + legend + '</ol>';
+    }
+
+    /* ── Competitive Landscape Snapshot ──────── */
+    /* Built by the analysis from what the user told us about their
+       industry, size, and situation. No live market scan, no named
+       competitors, no invented statistics. */
+    function renderCompetitiveLandscape(cl) {
+      var el = document.getElementById('competitiveLandscape');
+      if (!el) return;
+      if (!cl || !cl.summary) { el.innerHTML = ''; return; }
+      var pressures = (cl.pressures || []).map(function(p) {
+        return '<li>' + escapeHtml(p) + '</li>';
+      }).join('');
+      el.innerHTML =
+        '<h3>Competitive Landscape</h3>' +
+        '<p>' + escapeHtml(cl.summary) + '</p>' +
+        (pressures ? '<ul class="comp-pressures">' + pressures + '</ul>' : '') +
+        (cl.edge ? '<p class="comp-edge"><strong>Where you can stand out:</strong> ' + escapeHtml(cl.edge) + '</p>' : '') +
+        '<p class="synth-note">Based on what you told us about your business and how businesses like yours typically compete. Not a live market scan.</p>';
+    }
+
+    /* ── Market Trends Summary ───────────────── */
+    /* Industry-specific, qualitative. Clearly labelled as synthesised;
+       live economic figures come from the Bank of Canada section below. */
+    function renderMarketTrends(trends, industry) {
+      var el = document.getElementById('marketTrends');
+      if (!el) return;
+      trends = (trends || []).filter(function(t) { return t && t.trend; });
+      if (!trends.length) { el.innerHTML = ''; return; }
+      var cards = trends.map(function(t) {
+        return '<div class="trend-card"><h4>' + escapeHtml(t.trend) + '</h4>' +
+          (t.note ? '<p>' + escapeHtml(t.note) + '</p>' : '') + '</div>';
+      }).join('');
+      el.innerHTML =
+        '<h3>Market Trends' + (industry ? ': ' + escapeHtml(industry) : '') + '</h3>' +
+        cards +
+        '<p class="synth-note">General direction of your industry for Canadian small and mid-size businesses, written for your situation. Qualitative, not sourced statistics. Live economic figures appear in the Canadian Economic Context section below.</p>';
     }
 
     /* ── Save Report — email gate then download ── */
@@ -673,12 +780,25 @@
         'SUGGESTED NEXT STEP',
         '-------------------',
         d.next_step || '',
-        '',
+        ''
+      ].concat(d.competitive_landscape && d.competitive_landscape.summary ? [
+        'COMPETITIVE LANDSCAPE',
+        '---------------------',
+        d.competitive_landscape.summary,
+        (d.competitive_landscape.pressures || []).map(function(p) { return '  * ' + p; }).join('\n'),
+        d.competitive_landscape.edge ? 'Where you can stand out: ' + d.competitive_landscape.edge : '',
+        ''
+      ] : []).concat((d.market_trends || []).length ? [
+        'MARKET TRENDS',
+        '-------------',
+        (d.market_trends || []).map(function(t) { return '  * ' + (t.trend || '') + (t.note ? ' - ' + t.note : ''); }).join('\n'),
+        ''
+      ] : []).concat([
         '================================================',
         'Generated by Clarity — a free Two Birds Innovation tool.',
         'Questions? Book a free 30-minute discovery call: cal.com/twobirds-4n5ajg/30min',
         ''
-      ].join('\n');
+      ]).join('\n');
     }
 
     function doReportDownload() {
@@ -953,7 +1073,30 @@
         "Ask an AI tool to turn your 3 most common job scopes into reusable quote templates with standard line items.",
         "Record yourself explaining your onboarding process for a new job, then paste the transcript into Claude and ask it to turn it into a one-page checklist."
       ],
-      next_step: "This week: open a free Claude account (claude.ai) and ask it to write a follow-up email template for a quoted plumbing job. Use your own voice — paste in a rough draft and ask it to polish. Send that template to your next 5 leads and see if your conversion rate changes."
+      next_step: "This week: open a free Claude account (claude.ai) and ask it to write a follow-up email template for a quoted plumbing job. Use your own voice — paste in a rough draft and ask it to polish. Send that template to your next 5 leads and see if your conversion rate changes.",
+      competitive_landscape: {
+        summary: "Acme competes in a crowded regional trades market where most shops win work on relationships and response time, not price alone. At ten years in with a lean crew, the pressure is less about finding leads and more about quoting fast enough to win the work already coming in.",
+        pressures: [
+          "Larger regional contractors can quote and schedule faster, which wins the time-sensitive jobs.",
+          "Skilled-labour shortages push wages up and make peak-season capacity the limiting factor.",
+          "Customers increasingly expect same-day quotes and easy booking, even from small shops."
+        ],
+        edge: "A decade of local trust and referral work is the edge: faster follow-up on quotes would convert demand Acme already has, without spending a dollar on advertising."
+      },
+      market_trends: [
+        {
+          trend: "Speed of quoting decides more jobs",
+          note: "Customers gather several quotes in a day. Shops that respond first with a clear written estimate win a growing share of the work."
+        },
+        {
+          trend: "Software is now standard on the office side",
+          note: "Scheduling, invoicing, and job-tracking tools are common in shops of every size, and customers notice when the paperwork side runs smoothly."
+        },
+        {
+          trend: "Labour stays tight",
+          note: "Hiring licensed trades remains hard across Ontario, so the shops that grow are the ones getting more billable hours out of the crew they already have."
+        }
+      ]
     };
 
     var showSampleBtn = document.getElementById('showSampleBtn');

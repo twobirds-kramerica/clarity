@@ -98,7 +98,7 @@
       --max-width: 760px;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; color-scheme: light; }
 
     body {
       font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -545,9 +545,12 @@
         </div>
         <div class="swot-grid" id="swotGrid"></div>
         <div class="recommendations" id="recommendations"></div>
+        <div class="effort-matrix" id="effortMatrix"></div>
         <div class="quick-wins" id="quickWins"></div>
         <div class="next-step" id="nextStep"></div>
         <div class="pipeda-note" id="pipedaNote" style="display:none"></div>
+        <div class="comp-landscape" id="competitiveLandscape"></div>
+        <div class="market-trends" id="marketTrends"></div>
         <div id="benchmarkContextNote"></div>
         <div id="econContextPlaceholder" style="min-height:115px"></div>
         <div class="cta-card" id="ctaCard">
@@ -665,6 +668,27 @@
           + '</div>';
       })
       .catch(function () {}); // silent fail — card stays absent
+  }());
+  </script>
+  <!-- External-link affordance: visible arrow + screen-reader note on every new-tab link -->
+  <style>.new-tab-note{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}</style>
+  <script>
+  (function () {
+    function decorate(a) {
+      if (a.querySelector('.new-tab-note')) return;
+      var icon = document.createElement('span');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = ' ↗';
+      var note = document.createElement('span');
+      note.className = 'new-tab-note';
+      note.textContent = ' (opens in a new tab)';
+      a.appendChild(icon);
+      a.appendChild(note);
+    }
+    /* clarity.js re-writes the Get-a-credential link text on provider change;
+       it calls this to restore the new-tab affordance. */
+    window.markNewTabLink = decorate;
+    document.querySelectorAll('a[target="_blank"]').forEach(decorate);
   }());
   </script>
 </body>

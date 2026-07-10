@@ -281,6 +281,162 @@
 }
 .next-step p { font-size: 0.92rem; }
 
+/* ── Effort vs. Payback Matrix ───────────────────────────── */
+.effort-matrix { margin-bottom: 1.75rem; }
+.effort-matrix:empty, .comp-landscape:empty, .market-trends:empty { display: none; }
+.effort-matrix h3 {
+  font-size: 1rem;
+  color: var(--olive-dark);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--olive-light);
+}
+.matrix-note { font-size: 0.82rem; color: var(--text-light); margin-bottom: 0.75rem; }
+.matrix-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+.matrix-axis-y {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+}
+.matrix-axis-x {
+  grid-column: 2;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+}
+.matrix-plot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+}
+.matrix-quad { padding: 0.45rem 0.6rem; }
+.matrix-quad span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--charcoal-light);
+}
+.matrix-quad-tl { background: var(--olive-light); }
+.matrix-quad-tr { background: #EEF1ED; }
+.matrix-quad-bl { background: var(--cream); }
+.matrix-quad-br { background: #F2EDEA; }
+.matrix-dot {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: 50%;
+  background: var(--olive);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 2px solid var(--white);
+  box-shadow: 0 1px 3px rgba(44, 44, 44, 0.3);
+}
+.matrix-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  font-size: 0.86rem;
+  color: var(--text-light);
+}
+.matrix-legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+.matrix-legend-num {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  align-self: center;
+  background: var(--olive);
+  color: var(--white);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.matrix-legend-meta { font-size: 0.78rem; color: var(--charcoal-light); }
+
+/* ── Competitive Landscape ───────────────────────────────── */
+.comp-landscape {
+  padding: 1.25rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--olive);
+  border-radius: 8px;
+  margin-bottom: 1.75rem;
+}
+.comp-landscape h3 {
+  font-size: 1rem;
+  color: var(--olive-dark);
+  margin-bottom: 0.6rem;
+}
+.comp-landscape p { font-size: 0.9rem; color: var(--text); margin-bottom: 0.6rem; }
+.comp-pressures {
+  padding-left: 1.1rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-light);
+}
+.comp-pressures li { margin-bottom: 0.3rem; }
+.comp-edge {
+  padding: 0.75rem 1rem;
+  background: var(--olive-light);
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+.comp-edge strong { color: var(--olive-dark); }
+.synth-note {
+  font-size: 0.76rem;
+  color: var(--charcoal-light);
+  margin: 0.5rem 0 0;
+}
+
+/* ── Market Trends ───────────────────────────────────────── */
+.market-trends { margin-bottom: 1.75rem; }
+.market-trends h3 {
+  font-size: 1rem;
+  color: var(--olive-dark);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--olive-light);
+}
+.trend-card {
+  padding: 0.85rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+}
+.trend-card h4 { font-size: 0.9rem; color: var(--charcoal); margin-bottom: 0.25rem; }
+.trend-card p { font-size: 0.86rem; color: var(--text-light); margin: 0; line-height: 1.5; }
+
 /* ── Consultation CTA ────────────────────────────────────── */
 .cta-card {
   padding: 1.5rem;
@@ -361,6 +517,7 @@ fieldset.form-group legend {
   .results-header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .swot-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .qw-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .matrix-quad, .matrix-dot, .matrix-legend-num, .comp-edge, .trend-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff; }
   main { max-width: 100%; padding: 0; }
