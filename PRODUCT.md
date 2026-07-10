@@ -1,19 +1,21 @@
-# Product: Clarity — AI Business Diagnostic
+# Product: Clarity — Business Operations Check-Up
 
 **Status:** Live  
 **URL:** https://twobirds-kramerica.github.io/clarity/  
 **Repo:** `C:\twobirds\clarity\` (twobirds-kramerica/clarity)  
 **Owner:** Aaron Patzalek — Two Birds Innovation
 
+**Positioning (revised 2026-07-10, see `hal-stack/product-intelligence/clarity-v3-positioning-brief-2026-07-10.md` and `hal-stack/personas/product-personas/clarity-personas.md`):** operations expertise, not an AI tool. AI is part of the mechanism, never the pitch. Never position Aaron as an AI practitioner or Clarity as an AI diagnostic in any user-facing copy.
+
 ## Users
 
-Small and medium business owners in Southwestern Ontario, aged 35–60. Typically a trades business, professional services firm, healthcare admin, or retail operator. They've heard about AI but don't know where to start. They're skeptical of vendor pitches. They don't have an internal IT person. They're time-poor and decision-fatigued. They're arriving from a cold email, a LinkedIn referral, or word of mouth from a peer.
+Small and medium business owners in Southwestern Ontario, aged 35–60 (personas: Mike the trades shop owner, Dana the health practice owner, Paul the mid-size operations GM — see personas file above). Typically a trades business, professional services firm, healthcare admin, or retail operator. They are tired of hearing about AI, not curious about it. They're skeptical of vendor pitches. They don't have an internal IT person. They're time-poor and decision-fatigued. They're arriving from a cold email, a LinkedIn referral, or word of mouth from a peer.
 
-Primary task: run a 6-question diagnostic, receive a personalised SWOT + action plan, and decide whether to book a call with Aaron.
+Primary task: answer six questions about how the business actually runs, receive a personalised SWOT + effort/payback-rated recommendations + a peer benchmark, and decide whether to book a call with Aaron.
 
 ## Product Purpose
 
-Free AI readiness diagnostic for Canadian SMEs. Not a lead magnet — a genuine diagnostic that produces useful output even if the user never books a call. Secondary purpose: qualify leads before they reach Aaron so calls start with context.
+Free operations check-up for Canadian SMEs. Not a lead magnet, a genuine diagnostic that produces useful output even if the user never books a call. Secondary purpose: qualify leads before they reach Aaron so calls start with context.
 
 Success looks like: a business owner runs the diagnostic, understands where they stand relative to their industry, and either books a call or shares the tool with a peer.
 
