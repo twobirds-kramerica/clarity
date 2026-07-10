@@ -17,7 +17,7 @@ var CLARITY_PROXY_URL = 'https://clarity-proxy.twobirdsinnovation.workers.dev';
 var LLM_PROVIDERS = {
   proxy: {
     name: 'Clarity (built-in)',
-    defaultModel: 'claude-sonnet-4-6-20250929',
+    defaultModel: 'claude-sonnet-4-6',
     buildRequest: function(apiKey, model, prompt, system, maxTokens) {
       var body = { model: model, max_tokens: maxTokens || 2048, messages: [{ role: 'user', content: prompt }] };
       if (system) body.system = system;
@@ -34,7 +34,7 @@ var LLM_PROVIDERS = {
   anthropic: {
     name: 'Claude (Anthropic)',
     url: 'https://api.anthropic.com/v1/messages',
-    defaultModel: 'claude-sonnet-4-6-20250929',
+    defaultModel: 'claude-sonnet-4-6',
     buildRequest: function(apiKey, model, prompt, system, maxTokens) {
       var body = { model: model, max_tokens: maxTokens || 2048, messages: [{ role: 'user', content: prompt }] };
       if (system) body.system = system;

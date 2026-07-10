@@ -66,12 +66,9 @@ Voice: confident but not arrogant. "Here's what we found" not "Congratulations o
 4. Next Step (concrete action item)
 5. PIPEDA privacy note (conditional — personal data only)
 6. Canadian Economic Context (Bank of Canada Valet API)
-
-## Report Outputs (planned — follow-on sprint)
-
-7. Effort/Benefit Matrix
-8. Competitive Landscape Snapshot
-9. Market Trends Summary (industry-specific)
+7. Effort vs. Payback Matrix (2x2 CSS-grid plot of the priority recommendations)
+8. Competitive Landscape Snapshot (synthesised from the user's own answers; labelled, no invented statistics)
+9. Market Trends Summary (industry-specific, qualitative, labelled as synthesised; live figures stay in the Bank of Canada section)
 
 ## Lead-Gen Flow
 
