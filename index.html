@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clarity: AI Business Diagnostic | Two Birds Innovation</title>
-  <meta name="description" content="Free AI-powered business diagnostic tool. Answer a few questions and get a SWOT analysis, priority recommendations, quick wins, and a suggested next step for your business.">
-  <meta property="og:title" content="Clarity: AI Business Diagnostic">
-  <meta property="og:description" content="Free AI-powered business diagnostic. Get a SWOT analysis and actionable recommendations in minutes.">
+  <title>Clarity: Free Operations Check-Up for Canadian Small Businesses | Two Birds Innovation</title>
+  <meta name="description" content="Free operations check-up for Canadian small businesses. Answer six questions and get a SWOT analysis, effort-versus-payback recommendations, quick wins, and an industry benchmark. No sign-up.">
+  <meta property="og:title" content="Clarity: Free Small Business Operations Check-Up">
+  <meta property="og:description" content="Find where your business leaks time and money. A free operations check-up: SWOT analysis, effort-versus-payback recommendations, and an industry benchmark in minutes.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://twobirds-kramerica.github.io/clarity/">
   <meta property="og:locale" content="en_CA">
@@ -18,8 +18,8 @@
       {
         "@type": "WebApplication",
         "@id": "https://twobirds-kramerica.github.io/clarity/#app",
-        "name": "Clarity: AI Business Diagnostic",
-        "description": "Free AI-powered business readiness diagnostic for Canadian SMEs. Answers 6 questions and delivers a SWOT analysis, priority recommendations, quick wins, and an AI readiness score with industry benchmarks.",
+        "name": "Clarity: Small Business Operations Check-Up",
+        "description": "Free operations check-up for Canadian SMEs. Answers 6 questions and delivers a SWOT analysis, effort-versus-payback recommendations, quick wins, and a readiness score with industry benchmarks.",
         "url": "https://twobirds-kramerica.github.io/clarity/",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
@@ -30,40 +30,24 @@
           "availability": "https://schema.org/InStock"
         },
         "featureList": [
-          "AI readiness score with Canadian industry benchmarks",
+          "Readiness score with Canadian industry benchmarks",
           "SWOT analysis (Strengths, Weaknesses, Opportunities, Threats)",
-          "Priority recommendations for AI adoption",
+          "Priority recommendations with effort and payback ratings",
           "Quick wins for immediate action",
           "No sign-up required",
           "Results shareable as PDF"
         ],
         "inLanguage": "en-CA",
-        "creator": { "@id": "https://twobirds-kramerica.github.io/aaron-patzalek/#person" },
         "provider": { "@id": "https://twobirds-kramerica.github.io/two-birds-innovation/#org" }
-      },
-      {
-        "@type": "Person",
-        "@id": "https://twobirds-kramerica.github.io/aaron-patzalek/#person",
-        "name": "Aaron Patzalek",
-        "jobTitle": "Founder & AI Consultant",
-        "url": "https://twobirds-kramerica.github.io/aaron-patzalek/",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "St. Thomas",
-          "addressRegion": "ON",
-          "addressCountry": "CA"
-        },
-        "worksFor": { "@id": "https://twobirds-kramerica.github.io/two-birds-innovation/#org" }
       },
       {
         "@type": "LocalBusiness",
         "@id": "https://twobirds-kramerica.github.io/two-birds-innovation/#org",
         "name": "Two Birds Innovation",
-        "description": "AI consulting and implementation for small and medium-sized businesses in Southwestern Ontario. Helps SMEs adopt AI without losing control of their data or vendor independence.",
+        "description": "Operations consulting for small and medium-sized businesses in Southwestern Ontario. Helps SMEs find and fix the places their operations leak time and money.",
         "url": "https://twobirds-kramerica.github.io/two-birds-innovation/",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": "St. Thomas",
           "addressRegion": "ON",
           "addressCountry": "CA"
         },
@@ -71,13 +55,12 @@
           "@type": "AdministrativeArea",
           "name": "Southwestern Ontario, Canada"
         },
-        "founder": { "@id": "https://twobirds-kramerica.github.io/aaron-patzalek/#person" },
         "makesOffer": {
           "@type": "Offer",
           "itemOffered": {
             "@type": "Service",
-            "name": "AI Readiness Assessment",
-            "description": "Structured diagnostic to assess a business's AI readiness across operations, technology, data, and people."
+            "name": "Business Operations Assessment",
+            "description": "Structured check-up that assesses a business's operations across process, systems, data, and people."
           }
         }
       }
@@ -208,8 +191,26 @@
       box-shadow: var(--shadow);
     }
     .intro.active { display: block; }
-    .intro h2 { font-size: 1.2rem; color: var(--olive-dark); margin-bottom: 0.5rem; }
+    .intro h2 { font-size: 1.35rem; color: var(--olive-dark); margin-bottom: 0.5rem; text-wrap: balance; }
     .intro p { font-size: 0.92rem; color: var(--text-light); }
+    .symptom-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .symptom-card {
+      background: var(--olive-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.84rem;
+      color: var(--charcoal-light);
+      line-height: 1.4;
+    }
+    @media (max-width: 600px) {
+      .symptom-strip { grid-template-columns: 1fr; }
+    }
 
     /* ── Form ──────────────────────────────────── */
     .diagnostic-form {
@@ -441,49 +442,48 @@
   <a href="#main" class="skip-link">Skip to main content</a>
 
   <header class="site-header" role="banner">
-    <h1><span>Clarity</span>: AI Business Diagnostic</h1>
-    <p>By Two Birds Innovation &middot; St. Thomas, Ontario</p>
+    <h1><span>Clarity</span>: The Small Business Operations Check-Up</h1>
+    <p>By Two Birds Innovation</p>
   </header>
 
   <main id="main" role="main">
 
     <!-- ── Setup Screen ──────────────────────── -->
     <div class="setup-screen" id="setupScreen" aria-labelledby="setupHeading">
-      <h2 id="setupHeading">Is your business ready for AI?</h2>
-      <p class="setup-sub">Answer 7 questions. Get a personalised SWOT analysis, priority recommendations, and a concrete next step — benchmarked against 15 Canadian industries.</p>
-
-      <a href="#" id="showSampleBtn" class="btn btn-primary" style="display:inline-block;width:100%;box-sizing:border-box;margin-bottom:0.75rem;text-align:center;text-decoration:none;">See a sample diagnostic &rarr;</a>
-      <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1.5rem;">No sign-up. No API key. Free to try.</p>
-
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:0.82rem;color:var(--text-light);white-space:nowrap;">or run your own diagnostic</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-      </div>
+      <h2 id="setupHeading">Advanced settings</h2>
+      <p class="setup-sub" style="text-align:left;"><strong>Analysis engine.</strong> Built-in analysis (recommended) works out of the box. No setup, no account, nothing to configure. If your organisation runs its own language-model service or holds its own service credentials, you can connect them here. Most people should leave this alone.</p>
 
       <div class="form-group">
-        <label for="setupProvider">AI provider</label>
+        <label for="setupProvider">Analysis engine</label>
         <select id="setupProvider">
-          <option value="proxy" selected>Clarity (built-in, no key needed)</option>
-          <option value="anthropic">Claude (Anthropic — your own key)</option>
-          <option value="openai">GPT-4o (OpenAI — your own key)</option>
-          <option value="gemini">Gemini (Google — your own key)</option>
-          <option value="ollama">Ollama (local, no key)</option>
+          <option value="proxy" selected>Built-in analysis (recommended)</option>
+          <option value="anthropic">Anthropic Claude (your own credential)</option>
+          <option value="openai">OpenAI GPT-4o (your own credential)</option>
+          <option value="gemini">Google Gemini (your own credential)</option>
+          <option value="ollama">Ollama (local, no credential)</option>
         </select>
       </div>
       <div class="form-group" id="setupApiKeyGroup">
-        <label for="setupApiKey"><span id="setupApiKeyLabel">API key</span></label>
+        <label for="setupApiKey"><span id="setupApiKeyLabel">Service credential</span></label>
         <input type="password" id="setupApiKey" placeholder="sk-ant-..." autocomplete="off" aria-required="true">
+        <p class="field-hint">Paste your service credential above. It is kept in your browser only and never sent to us.</p>
       </div>
-      <button type="button" class="btn btn-secondary" id="activateBtn" style="width:100%;box-sizing:border-box;">Use my own API key</button>
-      <a href="#" id="getKeyLink" target="_blank" rel="noopener" class="setup-link">Get a free API key &rarr;</a>
-      <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-light);">Your key never leaves your browser. Costs a few cents per diagnostic. No subscription.</p>
+      <button type="button" class="btn btn-secondary" id="activateBtn" style="width:100%;box-sizing:border-box;">Use built-in analysis &rarr;</button>
+      <a href="#" id="getKeyLink" target="_blank" rel="noopener" class="setup-link">Get a credential &rarr;</a>
+      <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-light);">For technical users only. Your credential never leaves your browser.</p>
+      <button type="button" class="btn-ghost" id="setupBackBtn" style="margin-top:1rem;">&larr; Back to the check-up</button>
     </div>
 
-    <!-- ── Intro ─────────────────────────────── -->
+    <!-- ── Intro / Hero ──────────────────────── -->
     <div class="intro active" id="introSection">
-      <h2>Get a clear picture of your business's AI readiness</h2>
-      <p>Answer a few quick questions about your business. Clarity uses AI to generate a personalised SWOT analysis, priority recommendations, quick wins, and a concrete next step — all in under a minute.</p>
+      <h2>Find where your business leaks time and money</h2>
+      <p>A free operations check-up for Canadian small and mid-size businesses. Answer six questions about how your business actually runs. Get a SWOT analysis (strengths, weaknesses, opportunities, threats), recommendations rated by effort and payback, and a benchmark against businesses like yours. No sign-up, no sales pitch.</p>
+      <p style="margin-top:0.6rem;font-weight:600;color:var(--charcoal);">Six questions, about three minutes. Your report takes under a minute more.</p>
+      <div class="symptom-strip" aria-label="Common symptoms Clarity finds">
+        <div class="symptom-card">After-hours calls going to voicemail?</div>
+        <div class="symptom-card">Admin hours you can't bill?</div>
+        <div class="symptom-card">Twenty known problems, no idea which fix pays back first?</div>
+      </div>
     </div>
 
     <!-- ── Diagnostic Form ───────────────────── -->
@@ -496,10 +496,11 @@
 
       <!-- Step 1: Business Name -->
       <div class="question-card active" id="step1">
-        <h2 class="question-heading">What's your business called?</h2>
+        <h2 class="question-heading">Business name</h2>
         <div class="form-group">
-          <label for="businessName">Business Name</label>
-          <input type="text" id="businessName" placeholder="e.g. Maple Leaf Bakery" autocomplete="organization">
+          <label for="businessName">Business name</label>
+          <span class="hint">We use this to personalise your report. It stays in your browser.</span>
+          <input type="text" id="businessName" placeholder="e.g. Lakeside Mechanical" autocomplete="organization">
         </div>
         <div class="step-nav">
           <a href="#" id="showSampleBtn2" style="font-size:0.82rem;color:var(--text-light);align-self:center;">See a sample first &rarr;</a>
@@ -550,10 +551,10 @@
         <div id="benchmarkContextNote"></div>
         <div id="econContextPlaceholder" style="min-height:115px"></div>
         <div class="cta-card" id="ctaCard">
-          <h3>Ready to turn these insights into action?</h3>
-          <p style="margin-bottom:1rem;">This report shows <em>where</em> to focus. A free 30-minute call shows you <em>how</em> &mdash; and whether a full AI Readiness Review makes sense for your business.</p>
-          <a class="cta-primary-action" href="https://calendly.com/twobirdsinnovation/30min" target="_blank" rel="noopener">Book my free 30-minute AI review &rarr;</a>
-          <p style="font-size:0.82rem;color:var(--text-warm);margin-bottom:1rem;">No obligation. No pitch. Just an honest conversation about whether AI fits your situation.</p>
+          <h3>Want to walk through your report with the person who built the tool?</h3>
+          <p style="margin-bottom:1rem;">A free 20-minute discovery call. No pitch, no obligation. Bring your report; leave with your first move confirmed.</p>
+          <a class="cta-primary-action" href="https://cal.com/twobirds-4n5ajg/30min" target="_blank" rel="noopener">Book a free 20-minute discovery call &rarr;</a>
+          <p style="font-size:0.82rem;color:var(--text-warm);margin-bottom:1rem;">An honest conversation about which fix pays back first for your business.</p>
 
           <!-- Lead capture — submits to Formspree; configure FORMSPREE_ENDPOINT in clarity.js -->
           <form id="leadCaptureForm" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;" novalidate>
@@ -563,8 +564,7 @@
           </form>
           <p id="leadCaptureConfirm" style="display:none;font-size:0.85rem;color:var(--olive);font-weight:600;margin-bottom:0.75rem;">&#x2713; Thanks &mdash; Aaron will follow up within 24 hours.</p>
 
-          <p style="font-size:0.78rem;color:var(--text-warm);margin-top:0.75rem;">Aaron Patzalek &nbsp;&middot;&nbsp; 20-year Senior PM &nbsp;&middot;&nbsp; St. Thomas, Ontario</p>
-          <p style="font-size:0.78rem;color:var(--text-warm);margin-top:0.5rem;">Proof of shipping: <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener" style="color:#4A5640;">Digital Confidence Centre</a> &nbsp;&middot;&nbsp; <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener" style="color:#4A5640;">Career Coach</a></p>
+          <p style="font-size:0.78rem;color:var(--text-warm);margin-top:0.75rem;">Aaron &nbsp;&middot;&nbsp; Founder, Two Birds Innovation &nbsp;&middot;&nbsp; <a href="about.html" style="color:#4A5640;">About Clarity</a></p>
         </div>
 
         <!-- Cross-promo: other free tools from Two Birds Innovation -->
@@ -574,7 +574,7 @@
           <ul style="list-style:none;padding:0;margin:0;font-size:0.9rem;">
             <li style="margin-bottom:0.5rem;">
               <a href="https://twobirds-kramerica.github.io/career-coach/" target="_blank" rel="noopener" style="color:var(--olive);">Career Coach →</a>
-              <span style="color:var(--text-light);">AI-powered job-application tool. CV-vs-posting analysis, cover letters, salary negotiation.</span>
+              <span style="color:var(--text-light);">Job-application tool. CV-vs-posting analysis, cover letters, salary negotiation.</span>
             </li>
             <li>
               <a href="https://twobirds-kramerica.github.io/digital-confidence/" target="_blank" rel="noopener" style="color:var(--olive);">Digital Confidence Centre →</a>
@@ -594,31 +594,27 @@
 
   <section class="why-built" id="why-built" aria-labelledby="whyBuiltHeading">
     <div class="why-built-inner">
-      <h2 id="whyBuiltHeading">Why I built this</h2>
+      <h2 id="whyBuiltHeading" style="font-size:1.1rem;">What you get</h2>
       <div class="why-built-content">
-        <p>I spent 20+ years as a product manager at TELUS, Staples, and Start.ca. In that time, I watched the gap between large enterprises and small businesses grow wider with every technology wave.</p>
-        <p>When AI arrived, it was the same story. Big companies had dedicated teams, outside consultants, and technology budgets. Small businesses in Southwestern Ontario had YouTube videos and vendor pitches that turned confusion into expense.</p>
-        <p>I built Clarity because I wanted small business owners to have access to the same quality of strategic thinking that enterprise PMs apply internally &mdash; without needing an IT department, a consultant on retainer, or a subscription that auto-renews every month.</p>
-        <p>It runs on a secure proxy I built. Your business data is used only to generate your diagnostic and is never stored or shared. No account. No API key. No subscription. No lock-in. Just a clear picture of where you stand with AI, and what to do next.</p>
-        <div class="why-built-sig">
-          <strong>Aaron Patzalek</strong><br>
-          Founder, Two Birds Innovation &mdash; St. Thomas, Ontario<br>
-          20-year Senior PM &nbsp;&middot;&nbsp; <a href="https://twobirds-kramerica.github.io/two-birds-innovation/" target="_blank" rel="noopener">twobirds-innovation.ca</a>
-        </div>
+        <p>Six questions about how your business runs. One report: your strengths, your gaps, and which fix pays back first, benchmarked against businesses like yours.</p>
+        <p style="margin-top:0.5rem;"><strong>Free. No account. Your answers never leave your browser.</strong></p>
       </div>
     </div>
   </section>
 
   <footer class="site-footer" role="contentinfo">
-    <p>&copy; 2026 Two Birds Innovation. Built with care in Ontario, Canada.</p>
-    <p id="providerNote">Your API key and business data never leave your browser except to call the provider directly.</p>
+    <p>Built in Ontario, Canada <span aria-hidden="true">🍁</span></p>
+    <p>Your answers stay in your browser. Nothing is stored on our servers.</p>
+    <p id="providerNote">Your answers are analysed by Clarity's built-in analysis engine. Nothing you enter is stored on our servers.</p>
     <div class="footer-links">
-      <button type="button" id="resetKeyLink" class="footer-link-btn">Change AI provider</button>
       <a href="sample-diagnostic.html" class="footer-link-btn" style="text-decoration:none;">Sample Report</a>
+      <a href="about.html" class="footer-link-btn" style="text-decoration:none;">About</a>
       <a href="privacy.html" class="footer-link-btn" style="text-decoration:none;">Privacy Policy</a>
       <a href="terms.html" class="footer-link-btn" style="text-decoration:none;">Terms</a>
       <a href="disclaimer.html" class="footer-link-btn" style="text-decoration:none;">Disclaimer</a>
+      <button type="button" id="resetKeyLink" class="footer-link-btn">Advanced settings</button>
     </div>
+    <p>&copy; 2026 Two Birds Innovation.</p>
   </footer>
 
   <script src="llm-provider.js" defer></script>

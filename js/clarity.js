@@ -54,7 +54,7 @@
     /* ── Provider metadata (mirrors llm-provider.js) ── */
     var PROVIDER_META = {
       proxy: {
-        label:      'Clarity (built-in)',
+        label:      'Built-in analysis',
         keyLabel:   '',
         placeholder:'',
         signupUrl:  '',
@@ -62,31 +62,31 @@
         needsKey:   false
       },
       anthropic: {
-        label:      'Claude (Anthropic)',
-        keyLabel:   'Anthropic API key',
+        label:      'Anthropic Claude',
+        keyLabel:   'Anthropic service credential',
         placeholder:'sk-ant-...',
         signupUrl:  'https://console.anthropic.com/',
-        signupText: 'Get a free Anthropic API key →',
+        signupText: 'Get an Anthropic credential →',
         needsKey:   true
       },
       openai: {
-        label:      'GPT-4o (OpenAI)',
-        keyLabel:   'OpenAI API key',
+        label:      'OpenAI GPT-4o',
+        keyLabel:   'OpenAI service credential',
         placeholder:'sk-...',
         signupUrl:  'https://platform.openai.com/api-keys',
-        signupText: 'Get an OpenAI API key →',
+        signupText: 'Get an OpenAI credential →',
         needsKey:   true
       },
       gemini: {
-        label:      'Gemini (Google)',
-        keyLabel:   'Google AI Studio API key',
+        label:      'Google Gemini',
+        keyLabel:   'Google AI Studio service credential',
         placeholder:'AIza...',
         signupUrl:  'https://aistudio.google.com/apikey',
-        signupText: 'Get a free Gemini API key →',
+        signupText: 'Get a Gemini credential →',
         needsKey:   true
       },
       ollama: {
-        label:      'Ollama (local, no key)',
+        label:      'Ollama (local)',
         keyLabel:   '',
         placeholder:'',
         signupUrl:  'https://ollama.com/download',
@@ -149,17 +149,17 @@
       var provider = getProvider();
       var meta = PROVIDER_META[provider] || PROVIDER_META.proxy;
       if (provider === 'proxy') {
-        note.textContent = 'Powered by Clarity\'s built-in AI. Your business data is used only to generate your report and is never stored or shared.';
+        note.textContent = 'Your answers are analysed by Clarity\'s built-in analysis engine. Nothing you enter is stored on our servers.';
       } else {
-        note.textContent = 'Provider: ' + meta.label +
-          '. Your key and business data never leave your browser except to call ' +
+        note.textContent = 'Analysis engine: ' + meta.label +
+          '. Your credential and business details stay in your browser and are sent only to ' +
           meta.label + ' directly.';
       }
     }
 
     function renderSetupForProvider(provider) {
       var meta = PROVIDER_META[provider] || PROVIDER_META.proxy;
-      if (setupApiKeyLabel) setupApiKeyLabel.textContent = meta.keyLabel || 'API key';
+      if (setupApiKeyLabel) setupApiKeyLabel.textContent = meta.keyLabel || 'Service credential';
       if (setupApiKey) {
         setupApiKey.placeholder = meta.placeholder;
         setupApiKey.value = '';
@@ -174,7 +174,7 @@
         getKeyLink.textContent = meta.signupText;
       }
       if (activateBtn) {
-        activateBtn.textContent = provider === 'proxy' ? 'Use Clarity (built-in) →' : 'Use my own API key';
+        activateBtn.textContent = provider === 'proxy' ? 'Use built-in analysis →' : 'Connect my own service';
       }
     }
 
@@ -224,35 +224,36 @@
       renderActiveProviderNote();
     });
 
-    /* ── Reset API Key + provider ──────────── */
+    /* ── Advanced settings (analysis engine) ─ */
+    /* Opens the settings panel without wiping the stored configuration;
+       the Activate flow overwrites it only when the user saves a change. */
     resetKeyLink.addEventListener('click', function(e) {
       e.preventDefault();
-      try {
-        localStorage.removeItem('llm_provider');
-        localStorage.removeItem('llm_api_key');
-        localStorage.removeItem('llm_model');
-        localStorage.removeItem('clarity_api_key');
-        localStorage.removeItem('clarity-api-key');
-      } catch(e) {}
       hideApp();
       hideAll();
       setupApiKey.value = '';
-      /* Default back to the built-in proxy — the no-key path is the product
-         default; BYOK providers remain selectable in the dropdown. */
-      if (setupProvider) setupProvider.value = 'proxy';
-      renderSetupForProvider('proxy');
+      if (setupProvider) setupProvider.value = getProvider();
+      renderSetupForProvider(getProvider());
       setupScreen.classList.add('active');
       if (setupProvider) setupProvider.focus();
-      renderActiveProviderNote();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+
+    var setupBackBtn = document.getElementById('setupBackBtn');
+    if (setupBackBtn) {
+      setupBackBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showApp();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
 
     /* ── Checkbox max-3 logic ──────────────── */
     var checkboxes = [];
 
     function enforceMaxChecked() {
       var checked = document.querySelectorAll('input[name="challenges"]:checked');
-      var labels = document.querySelectorAll('.checkbox-group label');
+      var labels = document.querySelectorAll('#challengeGroup .checkbox-group label');
       if (checked.length >= 3) {
         labels.forEach(function(lbl) {
           var input = lbl.querySelector('input');
@@ -286,10 +287,20 @@
         var name = document.getElementById('businessName').value.trim();
         if (!name) { document.getElementById('businessName').focus(); return false; }
       } else if (step === 2) {
-        if (!document.getElementById('industry').value) { document.getElementById('industry').focus(); return false; }
+        var selected = getSelectedIndustries();
+        if (selected.length === 0) {
+          var firstInd = document.querySelector('input[name="industries"]');
+          if (firstInd) firstInd.focus();
+          return false;
+        }
+        if (selected.length >= 2 && !getPrimaryIndustry()) {
+          var primarySel = document.getElementById('primaryIndustry');
+          if (primarySel) primarySel.focus();
+          return false;
+        }
       } else if (step === 3) {
-        if (!document.getElementById('yearsInBusiness').value) { document.getElementById('yearsInBusiness').focus(); return false; }
         if (!document.getElementById('teamSize').value) { document.getElementById('teamSize').focus(); return false; }
+        if (!document.getElementById('yearsInBusiness').value) { document.getElementById('yearsInBusiness').focus(); return false; }
       } else if (step === 4) {
         if (document.querySelectorAll('input[name="challenges"]:checked').length === 0) {
           var firstCb = document.querySelector('input[name="challenges"]');
@@ -297,8 +308,7 @@
           return false;
         }
       } else if (step === 5) {
-        if (!document.getElementById('aiUsage').value) { document.getElementById('aiUsage').focus(); return false; }
-        if (!document.getElementById('revenueGoal').value) { document.getElementById('revenueGoal').focus(); return false; }
+        if (!document.getElementById('systemsLevel').value) { document.getElementById('systemsLevel').focus(); return false; }
       }
       return true;
     }
@@ -363,27 +373,30 @@
       var meta         = PROVIDER_META[provider] || PROVIDER_META.anthropic;
       var apiKey       = getApiKey();
       var businessName = document.getElementById('businessName').value.trim();
-      var industry     = document.getElementById('industry').value;
+      var industries   = getSelectedIndustries();
+      var primary      = getPrimaryIndustry();
       var years        = document.getElementById('yearsInBusiness').value;
       var teamSize     = document.getElementById('teamSize').value;
       var challenges   = getCheckedChallenges();
-      var aiUsage      = document.getElementById('aiUsage').value;
-      var revenueGoal  = document.getElementById('revenueGoal').value;
+      var systemsLevel = document.getElementById('systemsLevel').value;
+      var ownerGoal    = ((document.getElementById('ownerGoal') || {}).value || '').trim();
       var personalData = (document.getElementById('personalData') || {}).value || '';
 
       // Validate
       if (meta.needsKey && !apiKey) {
-        showError('No API key found. Please reset and re-enter your key.');
+        showError('No service credential found. Open Advanced settings at the bottom of the page and re-enter it, or switch to the built-in analysis.');
         return;
       }
-      if (!businessName || !industry || !years || !teamSize || !aiUsage || !revenueGoal) {
+      if (!businessName || !primary || !years || !teamSize || !systemsLevel) {
         showError('Please complete all fields before submitting.');
         return;
       }
       if (challenges.length === 0) {
-        showError('Please select at least one challenge.');
+        showError('Please select at least one time sink.');
         return;
       }
+      var industry     = primary.label;
+      var benchmarkKey = primary.benchmark;
 
       lastBusinessName = businessName;
 
@@ -394,7 +407,7 @@
       submitBtn.textContent = 'Analysing...';
       document.getElementById('diagnosticForm').setAttribute('aria-busy', 'true');
 
-      var prompt = buildPrompt(businessName, industry, years, teamSize, challenges, aiUsage, revenueGoal, personalData);
+      var prompt = buildPrompt(businessName, industries, primary, years, teamSize, challenges, systemsLevel, ownerGoal, personalData);
 
       /* Provider-aware call: llmChat picks the provider + default model
          from localStorage (set by the Activate flow). Anthropic callers
@@ -402,28 +415,31 @@
          OpenAI gets gpt-4o; Gemini gets gemini-2.0-flash; Ollama gets llama3. */
       llmChat(prompt, { maxTokens: 2048, provider: provider, apiKey: apiKey })
       .then(function(text) {
-        if (!text) throw new Error('No response received from the API.');
-        displayResults(businessName, industry, text);
+        if (!text) throw new Error('No response received from the analysis engine.');
+        displayResults(businessName, industry, text, benchmarkKey);
       })
       .catch(function(err) {
         /* Proxy failures surface as cryptic network errors — give the
            no-key user a path forward instead of a dead end. */
         if (provider === 'proxy') {
-          showError('Clarity’s built-in AI is temporarily unavailable. You can see a sample diagnostic right now, or choose your own AI provider using the Change AI provider link at the bottom of the page.');
+          showError('Clarity’s built-in analysis engine is temporarily unavailable. You can see a sample report right now, or try again in a few minutes.');
         } else {
-          showError(err.message || 'An unexpected error occurred. Please check your API key and try again.');
+          showError(err.message || 'That credential didn’t work. You can fix it under Advanced settings, or switch back to the built-in analysis, which needs no setup.');
         }
       })
       .finally(function() {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Generate My Diagnostic';
+        submitBtn.textContent = 'Generate my report';
         loadingEl.classList.remove('active');
         document.getElementById('diagnosticForm').setAttribute('aria-busy', 'false');
       });
     }
 
     /* ── Build Prompt ──────────────────────── */
-    function buildPrompt(name, industry, years, teamSize, challenges, aiUsage, revenueGoal, personalData) {
+    function buildPrompt(name, industries, primary, years, teamSize, challenges, systemsLevel, ownerGoal, personalData) {
+      var secondary = industries
+        .filter(function(s) { return s.label !== primary.label; })
+        .map(function(s) { return s.label; });
       return [
         'You are a senior business consultant specialising in AI transformation for Canadian small and medium businesses in Ontario.',
         '',
@@ -455,12 +471,13 @@
         '',
         'Business Details:',
         '- Name: ' + name,
-        '- Industry: ' + industry,
+        '- Primary line of business (benchmark against this): ' + primary.label,
+        secondary.length ? ('- Also operates in: ' + secondary.join('; ')) : '',
         '- Years in business: ' + years,
         '- Team size: ' + teamSize,
-        '- Top challenges: ' + challenges.join(', '),
-        '- Current AI usage: ' + aiUsage,
-        '- Revenue goal (next 12 months): ' + revenueGoal,
+        '- Biggest weekly time sinks: ' + challenges.join(', '),
+        '- How their systems connect today: ' + systemsLevel,
+        ownerGoal ? ('- The owner\'s stated priority for the next year: ' + ownerGoal) : '',
         personalData ? ('- Customer personal data: ' + personalData) : ''
       ].filter(Boolean).concat(
         personalData && personalData.indexOf('No') === -1 ? [
@@ -471,9 +488,11 @@
     }
 
     /* ── Display Results ───────────────────── */
-    /* rawTextOrData: string (from API) or pre-parsed object (demo mode) */
-    function displayResults(name, industry, rawTextOrData) {
+    /* rawTextOrData: string (from API) or pre-parsed object (demo mode).
+       benchmarkKey: INDUSTRY_BENCHMARKS lookup key; defaults to industry. */
+    function displayResults(name, industry, rawTextOrData, benchmarkKey) {
       hideAll();
+      benchmarkKey = benchmarkKey || industry;
 
       var data;
       if (rawTextOrData && typeof rawTextOrData === 'object') {
@@ -500,12 +519,12 @@
       if (readinessLine && data.readiness_score) {
         var score = parseInt(data.readiness_score, 10);
         if (!isNaN(score) && score >= 1 && score <= 10) {
-          var benchmark = INDUSTRY_BENCHMARKS[industry];
-          var lineText = 'AI Readiness: ' + score + '/10';
+          var benchmark = INDUSTRY_BENCHMARKS[benchmarkKey];
+          var lineText = 'Readiness: ' + score + '/10';
           if (benchmark) {
             var diff = score - benchmark.score;
             var rel = diff > 0 ? 'above' : diff < 0 ? 'below' : 'at';
-            lineText += ' (' + rel + ' the ' + industry + ' sector average of ' + benchmark.score + '/10)';
+            lineText += ' (' + rel + ' the ' + benchmarkKey + ' sector average of ' + benchmark.score + '/10)';
           }
           var bandNote = score <= 3
             ? 'Most businesses at this stage benefit from documenting processes before adopting AI tools.'
@@ -587,9 +606,9 @@
       // Industry benchmark context note (surfaces the sector note from INDUSTRY_BENCHMARKS)
       var benchNoteEl = document.getElementById('benchmarkContextNote');
       if (benchNoteEl) {
-        var benchmarkEntry = INDUSTRY_BENCHMARKS[industry];
+        var benchmarkEntry = INDUSTRY_BENCHMARKS[benchmarkKey];
         if (benchmarkEntry && benchmarkEntry.note) {
-          benchNoteEl.innerHTML = '<div class="benchmark-note"><strong>' + escapeHtml(industry) + ' sector context:</strong> ' + escapeHtml(benchmarkEntry.note) + '</div>';
+          benchNoteEl.innerHTML = '<div class="benchmark-note"><strong>' + escapeHtml(benchmarkKey) + ' sector context:</strong> ' + escapeHtml(benchmarkEntry.note) + '</div>';
         } else {
           benchNoteEl.innerHTML = '';
         }
@@ -619,13 +638,13 @@
       var d = lastReportData;
       var date = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
       return [
-        'CLARITY AI READINESS DIAGNOSTIC REPORT',
+        'CLARITY BUSINESS OPERATIONS REPORT',
         'Two Birds Innovation — twobirds-kramerica.github.io/clarity/',
         '================================================',
         '',
         'Business: ' + (lastBusinessName || 'Not specified'),
         'Date: ' + date,
-        'AI Readiness Score: ' + (d.readiness_score ? d.readiness_score + ' / 10' : 'N/A'),
+        'Readiness Score: ' + (d.readiness_score ? d.readiness_score + ' / 10' : 'N/A'),
         '',
         'SWOT ANALYSIS',
         '-------------',
@@ -657,7 +676,7 @@
         '',
         '================================================',
         'Generated by Clarity — a free Two Birds Innovation tool.',
-        'Questions? aaron.patzalek@gmail.com | calendly.com/twobirdsinnovation/30min',
+        'Questions? Book a free 20-minute discovery call: cal.com/twobirds-4n5ajg/30min',
         ''
       ].join('\n');
     }
@@ -810,24 +829,14 @@
       if (leadConfirm) leadConfirm.style.display = '';
     }
 
-    /* mailto fallback — guarantees a lead is never lost if Web3Forms is
-       unreachable. Shared by Path 3 and the Web3Forms failure handler. */
-    /* Web3Forms unreachable: do NOT hijack the screen with location.href and do
-       NOT claim success. Offer an honest, manual fallback the user chooses to click. */
+    /* Fallback when the form backend is unreachable: do NOT claim success and
+       do NOT publish an email address on the funnel (positioning brief 2026-07-10,
+       section 6). Offer the booking link as the honest manual path instead. */
     function leadMailtoFallback(email, business, score, topRec) {
-      var subject = encodeURIComponent('Clarity follow-up request — ' + business);
-      var body = encodeURIComponent(
-        'Hi Aaron, please follow up on my Clarity diagnostic.\n\n' +
-        'Email: ' + email + '\n' +
-        'Business: ' + business + '\n' +
-        'Readiness score: ' + score + '\n' +
-        'Top rec: ' + topRec
-      );
-      var mailtoUrl = 'mailto:aaron.patzalek@gmail.com?subject=' + subject + '&body=' + body;
       if (leadSubmitBtn) { leadSubmitBtn.disabled = false; leadSubmitBtn.textContent = 'Email me a follow-up'; }
       if (leadConfirm) {
         leadConfirm.style.display = '';
-        leadConfirm.innerHTML = 'Automatic send didn’t go through. <a href="' + mailtoUrl + '" style="color:#4A5640;font-weight:700;">Click here to email Aaron directly</a> (or write to aaron.patzalek@gmail.com).';
+        leadConfirm.innerHTML = 'Automatic send didn’t go through. <a href="https://cal.com/twobirds-4n5ajg/30min" target="_blank" rel="noopener" style="color:#4A5640;font-weight:700;">Book a free 20-minute discovery call instead</a> and bring your report along.';
       }
     }
 
@@ -898,7 +907,7 @@
     /* ── Demo Mode ─────────────────────────── */
     var SAMPLE_DATA = {
       readiness_score: 3,
-      pipeda_note: 'Riverside Plumbing collects customer contact information (name, address, phone) for job scheduling. Under PIPEDA, you must obtain consent before using customer data with third-party AI tools like ChatGPT — avoid pasting customer names or addresses into AI prompts. Consider a simple privacy notice on your booking form stating that contact data is used for service coordination only.',
+      pipeda_note: 'Acme Mechanical collects customer contact information (name, address, phone) for job scheduling. Under PIPEDA, you must obtain consent before using customer data with third-party AI tools like ChatGPT — avoid pasting customer names or addresses into AI prompts. Consider a simple privacy notice on your booking form stating that contact data is used for service coordination only.',
       strengths: [
         "Strong customer relationships built over a decade in the trades — clients trust you and refer others, giving you a reliable base to introduce new tools gradually.",
         "Lean team structure means any AI workflow you adopt can be deployed across the whole business quickly, without complex change-management processes.",
@@ -959,7 +968,7 @@
       } catch(e) {}
       setupScreen.classList.remove('active');
       if (demoBanner) demoBanner.style.display = '';
-      displayResults('Riverside Plumbing & Heating', 'Trades', SAMPLE_DATA);
+      displayResults('Acme Mechanical (Sample Business)', 'Trades', SAMPLE_DATA);
     }
 
     if (showSampleBtn) {
@@ -995,51 +1004,63 @@
     function injectRemainingSteps() {
       if (stepsInjected) return;
       stepsInjected = true;
+      var industryOptions = [
+        { label: 'Automotive repair and service', benchmark: 'Automotive' },
+        { label: 'Construction and skilled trades (plumbing, HVAC, electrical, general contracting)', benchmark: 'Trades' },
+        { label: 'Health and wellness practice (massage, physio, chiropractic, osteopathy, clinic)', benchmark: 'Healthcare' },
+        { label: 'Manufacturing and fabrication', benchmark: 'Manufacturing' },
+        { label: 'Professional services (accounting, legal, consulting, design)', benchmark: 'Professional Services' },
+        { label: 'Restaurant, cafe, or food service', benchmark: 'Food & Hospitality' },
+        { label: 'Retail (in-store, online, or both)', benchmark: 'Retail' },
+        { label: 'Transportation, shipping, and warehousing', benchmark: 'Transportation & Logistics' },
+        { label: 'Property, landscaping, and cleaning services', benchmark: 'Trades' },
+        { label: 'Personal services (salon, fitness, training, childcare)', benchmark: 'Personal Services' },
+        { label: 'Agriculture and food production', benchmark: 'Agriculture' }
+      ];
+      var industryCheckboxes = industryOptions.map(function(opt) {
+        return '<label><input type="checkbox" name="industries" value="' + opt.label.replace(/"/g, '&quot;') + '" data-benchmark="' + opt.benchmark + '"> ' + opt.label + '</label>';
+      }).join('');
+
       var html =
         '<div class="question-card" id="step2">' +
-        '<h2 class="question-heading">What industry are you in?</h2>' +
-        '<div class="form-group"><label for="industry">Industry</label>' +
-        '<select id="industry" required>' +
-        '<option value="">Select your industry</option>' +
-        '<option value="Automotive">Automotive</option>' +
-        '<option value="Construction">Construction</option>' +
-        '<option value="Agriculture">Agriculture / Farming</option>' +
-        '<option value="Food &amp; Hospitality">Food &amp; Hospitality</option>' +
-        '<option value="Healthcare">Healthcare</option>' +
-        '<option value="Legal &amp; Accounting">Legal &amp; Accounting</option>' +
-        '<option value="Manufacturing">Manufacturing</option>' +
-        '<option value="Non-Profit">Non-Profit</option>' +
-        '<option value="Personal Services">Personal Services</option>' +
-        '<option value="Professional Services">Professional Services</option>' +
-        '<option value="Real Estate">Real Estate</option>' +
-        '<option value="Retail">Retail</option>' +
-        '<option value="Trades">Trades</option>' +
-        '<option value="Transportation &amp; Logistics">Transportation &amp; Logistics</option>' +
-        '<option value="Other">Other</option>' +
-        '</select></div>' +
+        '<h2 class="question-heading">What does your business do?</h2>' +
+        '<fieldset class="form-group" id="industryGroup" aria-describedby="industryHint">' +
+        '<legend style="display:none">Business areas</legend>' +
+        '<p class="checkbox-hint" id="industryHint">Select every area that applies. Most businesses span more than one.</p>' +
+        '<div class="checkbox-group">' + industryCheckboxes + '</div>' +
+        '<div style="margin-top:0.75rem;">' +
+        '<label for="industryOther" style="font-weight:600;font-size:0.9rem;">Something else</label>' +
+        '<input type="text" id="industryOther" placeholder="Describe it in a few words (optional)">' +
+        '</div></fieldset>' +
+        '<div class="form-group" id="primaryIndustryGroup" style="display:none;">' +
+        '<label for="primaryIndustry">Which of these brings in the most revenue?</label>' +
+        '<span class="hint">We&#x27;ll benchmark you against that one.</span>' +
+        '<select id="primaryIndustry"><option value="">Select one</option></select>' +
+        '</div>' +
         '<div class="step-nav has-back">' +
         '<button type="button" class="btn-ghost back-btn" data-back="1">&larr; Back</button>' +
         '<button type="button" class="btn btn-primary next-btn" data-next="3">Continue &rarr;</button>' +
         '</div></div>' +
 
         '<div class="question-card" id="step3">' +
-        '<h2 class="question-heading">Tell us a bit about your team</h2>' +
+        '<h2 class="question-heading">How big is the operation?</h2>' +
         '<div class="form-row">' +
-        '<div class="form-group"><label for="yearsInBusiness">Years in Business</label>' +
+        '<div class="form-group"><label for="teamSize">People in the business, including you</label>' +
+        '<select id="teamSize" required>' +
+        '<option value="">Select one</option>' +
+        '<option value="Just me">Just me</option>' +
+        '<option value="2 to 4 people">2 to 4</option>' +
+        '<option value="5 to 19 people">5 to 19</option>' +
+        '<option value="20 to 99 people">20 to 99</option>' +
+        '<option value="100 or more people">100 or more</option>' +
+        '</select></div>' +
+        '<div class="form-group"><label for="yearsInBusiness">Years in business</label>' +
         '<select id="yearsInBusiness" required>' +
         '<option value="">Select one</option>' +
         '<option value="Under 1 year">Under 1</option>' +
-        '<option value="1-3 years">1 – 3</option>' +
-        '<option value="3-10 years">3 – 10</option>' +
-        '<option value="10+ years">10+</option>' +
-        '</select></div>' +
-        '<div class="form-group"><label for="teamSize">Team Size</label>' +
-        '<select id="teamSize" required>' +
-        '<option value="">Select one</option>' +
-        '<option value="Solo">Solo</option>' +
-        '<option value="2-5 people">2 – 5</option>' +
-        '<option value="6-20 people">6 – 20</option>' +
-        '<option value="20+ people">20+</option>' +
+        '<option value="1-3 years">1 to 3</option>' +
+        '<option value="3-10 years">3 to 10</option>' +
+        '<option value="10+ years">10 or more</option>' +
         '</select></div></div>' +
         '<div class="step-nav has-back">' +
         '<button type="button" class="btn-ghost back-btn" data-back="2">&larr; Back</button>' +
@@ -1047,18 +1068,19 @@
         '</div></div>' +
 
         '<div class="question-card" id="step4">' +
-        '<h2 class="question-heading">What are your biggest challenges right now?</h2>' +
+        '<h2 class="question-heading">Where does the day go?</h2>' +
         '<fieldset class="form-group" id="challengeGroup" aria-describedby="challengeHint">' +
-        '<legend style="display:none">Top Challenges</legend>' +
-        '<p class="checkbox-hint" id="challengeHint">Select up to 3</p>' +
+        '<legend style="display:none">Biggest time sinks</legend>' +
+        '<p class="checkbox-hint" id="challengeHint">Which of these eat the most time in a typical week? Select up to 3.</p>' +
         '<div class="checkbox-group">' +
-        '<label><input type="checkbox" name="challenges" value="Too many tools"> Too many tools</label>' +
-        '<label><input type="checkbox" name="challenges" value="Not enough time"> Not enough time</label>' +
-        '<label><input type="checkbox" name="challenges" value="Staff resistance"> Staff resistance</label>' +
-        '<label><input type="checkbox" name="challenges" value="Don&#x27;t know where to start"> Don&#x27;t know where to start</label>' +
-        '<label><input type="checkbox" name="challenges" value="Cost concerns"> Cost concerns</label>' +
-        '<label><input type="checkbox" name="challenges" value="Security worries"> Security worries</label>' +
-        '<label><input type="checkbox" name="challenges" value="Other"> Other</label>' +
+        '<label><input type="checkbox" name="challenges" value="Answering and returning calls"> Answering and returning calls</label>' +
+        '<label><input type="checkbox" name="challenges" value="Scheduling and reminders"> Scheduling and reminders</label>' +
+        '<label><input type="checkbox" name="challenges" value="Quoting and invoicing"> Quoting and invoicing</label>' +
+        '<label><input type="checkbox" name="challenges" value="Paperwork and intake forms"> Paperwork and intake forms</label>' +
+        '<label><input type="checkbox" name="challenges" value="Chasing payments"> Chasing payments</label>' +
+        '<label><input type="checkbox" name="challenges" value="Tracking jobs or orders"> Tracking jobs or orders</label>' +
+        '<label><input type="checkbox" name="challenges" value="Staff coordination"> Staff coordination</label>' +
+        '<label><input type="checkbox" name="challenges" value="Something else"> Something else</label>' +
         '</div></fieldset>' +
         '<div class="step-nav has-back">' +
         '<button type="button" class="btn-ghost back-btn" data-back="3">&larr; Back</button>' +
@@ -1066,45 +1088,41 @@
         '</div></div>' +
 
         '<div class="question-card" id="step5">' +
-        '<h2 class="question-heading">Where are you today with AI?</h2>' +
-        '<div class="form-row">' +
-        '<div class="form-group"><label for="aiUsage">Current AI Usage</label>' +
-        '<select id="aiUsage" required>' +
+        '<h2 class="question-heading">How do your systems talk to each other?</h2>' +
+        '<div class="form-group">' +
+        '<label for="systemsLevel">Where things stand today</label>' +
+        '<select id="systemsLevel" required>' +
         '<option value="">Select one</option>' +
-        '<option value="None">None</option>' +
-        '<option value="Tried a few things">Tried a few things</option>' +
-        '<option value="Use regularly">Use regularly</option>' +
-        '<option value="Have a dedicated process">Have a dedicated process</option>' +
+        '<option value="Mostly on paper">Mostly on paper</option>' +
+        '<option value="Digital tools, but they don&#x27;t connect; we re-enter things by hand">Digital tools, but they don&#x27;t connect; we re-enter things by hand</option>' +
+        '<option value="Partly connected">Partly connected</option>' +
+        '<option value="Well connected">Well connected</option>' +
         '</select></div>' +
-        '<div class="form-group"><label for="revenueGoal">Revenue Goal (Next 12 Months)</label>' +
-        '<select id="revenueGoal" required>' +
-        '<option value="">Select one</option>' +
-        '<option value="Growth">Growth</option>' +
-        '<option value="Stability">Stability</option>' +
-        '<option value="Survival">Survival</option>' +
-        '<option value="Exit / Sale">Exit / Sale</option>' +
-        '</select></div></div>' +
         '<div class="step-nav has-back">' +
         '<button type="button" class="btn-ghost back-btn" data-back="4">&larr; Back</button>' +
         '<button type="button" class="btn btn-primary next-btn" data-next="6">Continue &rarr;</button>' +
         '</div></div>' +
 
         '<div class="question-card" id="step6">' +
-        '<h2 class="question-heading">One last question</h2>' +
+        '<h2 class="question-heading">If one thing ran smoother a year from now, what should it be?</h2>' +
+        '<div class="form-group">' +
+        '<label for="ownerGoal">Your answer</label>' +
+        '<input type="text" id="ownerGoal" placeholder="Plain words are fine. &#x27;Stop losing after-hours calls&#x27; is a perfect answer.">' +
+        '</div>' +
         '<div class="form-group">' +
         '<label for="personalData">Do you collect customer personal information?</label>' +
         '<select id="personalData">' +
         '<option value="">Select one (optional)</option>' +
-        '<option value="Yes — we store names, emails, and purchase history">Yes — we store customer data (names, emails, purchase history)</option>' +
-        '<option value="Yes — we handle sensitive data (health, financial, or government ID)">Yes — we handle sensitive data (health, financial, or government ID)</option>' +
-        '<option value="Minimal — we collect only what&#x27;s needed for a transaction">Minimal — we only collect what&#x27;s needed for a transaction</option>' +
-        '<option value="No — we do not collect or store personal information">No — we do not collect or store personal information</option>' +
+        '<option value="Yes: we store names, emails, and purchase history">Yes: we store customer data (names, emails, purchase history)</option>' +
+        '<option value="Yes: we handle sensitive data (health, financial, or government ID)">Yes: we handle sensitive data (health, financial, or government ID)</option>' +
+        '<option value="Minimal: we collect only what&#x27;s needed for a transaction">Minimal: we only collect what&#x27;s needed for a transaction</option>' +
+        '<option value="No: we do not collect or store personal information">No: we do not collect or store personal information</option>' +
         '</select>' +
-        '<p class="field-hint">This helps identify Canadian privacy law (PIPEDA) considerations for your AI adoption.</p>' +
+        '<p class="field-hint">Helps us flag Canadian privacy (PIPEDA) considerations in your report.</p>' +
         '</div>' +
         '<div class="step-nav has-back">' +
         '<button type="button" class="btn-ghost back-btn" data-back="5">&larr; Back</button>' +
-        '<button type="submit" class="btn btn-primary" id="submitBtn">Generate My Diagnostic &rarr;</button>' +
+        '<button type="submit" class="btn btn-primary" id="submitBtn">Generate my report &rarr;</button>' +
         '</div></div>';
 
       form.insertAdjacentHTML('beforeend', html);
@@ -1112,7 +1130,55 @@
       checkboxes.forEach(function(cb) {
         cb.addEventListener('change', enforceMaxChecked);
       });
+      document.querySelectorAll('input[name="industries"]').forEach(function(cb) {
+        cb.addEventListener('change', refreshPrimaryIndustry);
+      });
+      var otherInput = document.getElementById('industryOther');
+      if (otherInput) otherInput.addEventListener('input', refreshPrimaryIndustry);
       submitBtn = document.getElementById('submitBtn');
+    }
+
+    /* ── Industry multi-select helpers ─────── */
+    function getSelectedIndustries() {
+      var selected = [];
+      document.querySelectorAll('input[name="industries"]:checked').forEach(function(cb) {
+        selected.push({ label: cb.value, benchmark: cb.getAttribute('data-benchmark') || 'Other' });
+      });
+      var otherInput = document.getElementById('industryOther');
+      var otherVal = otherInput ? otherInput.value.trim() : '';
+      if (otherVal) selected.push({ label: otherVal, benchmark: 'Other' });
+      return selected;
+    }
+
+    function refreshPrimaryIndustry() {
+      var group = document.getElementById('primaryIndustryGroup');
+      var select = document.getElementById('primaryIndustry');
+      if (!group || !select) return;
+      var selected = getSelectedIndustries();
+      if (selected.length < 2) {
+        group.style.display = 'none';
+        select.innerHTML = '<option value="">Select one</option>';
+        return;
+      }
+      var previous = select.value;
+      select.innerHTML = '<option value="">Select one</option>' + selected.map(function(s) {
+        return '<option value="' + s.label.replace(/"/g, '&quot;') + '">' + s.label + '</option>';
+      }).join('');
+      if (previous && selected.some(function(s) { return s.label === previous; })) {
+        select.value = previous;
+      }
+      group.style.display = '';
+    }
+
+    function getPrimaryIndustry() {
+      var selected = getSelectedIndustries();
+      if (selected.length === 0) return null;
+      if (selected.length === 1) return selected[0];
+      var select = document.getElementById('primaryIndustry');
+      var chosen = select ? select.value : '';
+      var match = null;
+      selected.forEach(function(s) { if (s.label === chosen) match = s; });
+      return match;
     }
 
     /* ── Boot ──────────────────────────────── */
