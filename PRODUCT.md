@@ -69,6 +69,8 @@ Voice: confident but not arrogant. "Here's what we found" not "Congratulations o
 7. Effort vs. Payback Matrix (2x2 CSS-grid plot of the priority recommendations)
 8. Competitive Landscape Snapshot (synthesised from the user's own answers; labelled, no invented statistics)
 9. Market Trends Summary (industry-specific, qualitative, labelled as synthesised; live figures stay in the Bank of Canada section)
+10. TIM WOODS Waste Scan (2-4 of the 8 classic lean-manufacturing wastes -- Transport, Inventory, Motion, Waiting, Overproduction, Overprocessing, Defects, Skills -- that show up in the owner's answers)
+11. Fishbone (Ishikawa) Root-Cause Breakdown (one plain-sentence problem statement, one likely cause each in People, Process, Tools & Systems, Environment)
 
 ## Lead-Gen Flow
 

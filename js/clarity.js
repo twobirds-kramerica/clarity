@@ -414,7 +414,7 @@
          from localStorage (set by the Activate flow). Anthropic callers
          still get Sonnet 4.6 by default via LLM_PROVIDERS.anthropic;
          OpenAI gets gpt-4o; Gemini gets gemini-2.0-flash; Ollama gets llama3. */
-      llmChat(prompt, { maxTokens: 3072, provider: provider, apiKey: apiKey })
+      llmChat(prompt, { maxTokens: 4096, provider: provider, apiKey: apiKey })
       .then(function(text) {
         if (!text) throw new Error('No response received from the analysis engine.');
         displayResults(businessName, industry, text, benchmarkKey);
@@ -453,6 +453,8 @@
         '5. A single "Suggested Next Step" — one concrete action they could take this week.',
         '6. A competitive landscape snapshot for their primary line of business: a 2-3 sentence overview of the competitive pressures a business of their size and stage typically faces in that industry in Canada, then exactly 3 specific competitive pressures as short bullets, then one sentence on where a business like theirs can realistically stand out. Ground every point in what they told you (industry, size, years in business, systems, time sinks). Write about operations, service, pricing, and customer expectations. Do not name real competitors and do not invent statistics.',
         '7. A market trends summary for their primary line of business: exactly 3 trends currently shaping that industry for Canadian small and mid-size businesses. Each trend needs a short plain-language title and a 1-2 sentence note on what it means for a business of their size. Focus on operations, labour, customer behaviour, and costs. Keep trends qualitative. Do not fabricate specific statistics, percentages, or dollar figures.',
+        '8. A TIM WOODS waste scan: TIM WOODS is the lean-manufacturing checklist of eight sources of operational waste (Transport, Inventory, Motion, Waiting, Overproduction, Overprocessing, Defects, Skills). Identify the 2 to 4 wastes that most clearly show up in what this owner told you, not all eight, and not the ones that do not fit. For each, name the waste and write a 1-2 sentence note tying it directly to their stated time sinks, systems level, or team size. Do not invent a waste that has no basis in their answers.',
+        '9. A fishbone (Ishikawa) root-cause breakdown for the single biggest problem in their answers (usually their top time sink or their one-year goal). State the problem in one plain sentence, then give one likely root cause in each of these four categories: People, Process, Tools & Systems, Environment. Skip a category only if it genuinely does not apply; do not force a weak cause into every box.',
         '',
         'Use Canadian English (centre, organisation, analyse, colour, programme, etc.). Be specific — reference their industry, team size, and challenges directly. Avoid generic jargon. Do not use em dashes anywhere in your output; use commas or periods instead.',
         '',
@@ -479,7 +481,19 @@
         '    {"trend": "Short plain-language title", "note": "What it means for a business this size."},',
         '    {"trend": "Short plain-language title", "note": "What it means for a business this size."},',
         '    {"trend": "Short plain-language title", "note": "What it means for a business this size."}',
-        '  ]',
+        '  ],',
+        '  "tim_woods": [',
+        '    {"waste": "Waiting|Motion|Transport|Inventory|Overproduction|Overprocessing|Defects|Skills", "note": "How this waste shows up for them, 1-2 sentences."}',
+        '  ],',
+        '  "fishbone": {',
+        '    "problem": "One plain sentence naming the core problem.",',
+        '    "causes": [',
+        '      {"category": "People", "cause": "One likely root cause."},',
+        '      {"category": "Process", "cause": "One likely root cause."},',
+        '      {"category": "Tools & Systems", "cause": "One likely root cause."},',
+        '      {"category": "Environment", "cause": "One likely root cause."}',
+        '    ]',
+        '  }',
         '}',
         '',
         'Business Details:',
@@ -625,6 +639,12 @@
       // Market Trends Summary (industry-specific, clearly labelled as synthesised)
       renderMarketTrends(data.market_trends, industry);
 
+      // TIM WOODS waste scan (only the wastes that showed up in their answers)
+      renderTimWoods(data.tim_woods);
+
+      // Fishbone (Ishikawa) root-cause breakdown of their biggest problem
+      renderFishbone(data.fishbone);
+
       // Industry benchmark context note (surfaces the sector note from INDUSTRY_BENCHMARKS)
       var benchNoteEl = document.getElementById('benchmarkContextNote');
       if (benchNoteEl) {
@@ -737,6 +757,45 @@
         '<p class="synth-note">General direction of your industry for Canadian small and mid-size businesses, written for your situation. Qualitative, not sourced statistics. Live economic figures appear in the Canadian Economic Context section below.</p>';
     }
 
+    /* ── TIM WOODS Waste Scan ─────────────────── */
+    /* Lean-manufacturing's eight sources of waste. Only the ones the
+       analysis ties to the owner's own answers are shown; not a full
+       eight-item checklist every time. */
+    function renderTimWoods(items) {
+      var el = document.getElementById('timWoods');
+      if (!el) return;
+      items = (items || []).filter(function(w) { return w && w.waste; });
+      if (!items.length) { el.innerHTML = ''; return; }
+      var cards = items.map(function(w) {
+        return '<div class="waste-card"><h4>' + escapeHtml(w.waste) + '</h4>' +
+          (w.note ? '<p>' + escapeHtml(w.note) + '</p>' : '') + '</div>';
+      }).join('');
+      el.innerHTML =
+        '<h3>Where Time and Money Leak (TIM WOODS)</h3>' +
+        '<p class="matrix-note">Eight classic sources of operational waste from lean manufacturing, adapted for a service business. Only the ones showing up in your answers are listed.</p>' +
+        '<div class="waste-grid">' + cards + '</div>' +
+        '<p class="synth-note">TIM WOODS: Transport, Inventory, Motion, Waiting, Overproduction, Overprocessing, Defects, Skills. Based on what you told us, not an on-site audit.</p>';
+    }
+
+    /* ── Fishbone (Ishikawa) Root-Cause Breakdown ── */
+    /* Traces the owner's single biggest problem back to one likely
+       cause in each of People, Process, Tools & Systems, Environment. */
+    function renderFishbone(fb) {
+      var el = document.getElementById('fishbone');
+      if (!el) return;
+      if (!fb || !fb.problem) { el.innerHTML = ''; return; }
+      var causes = (fb.causes || []).filter(function(c) { return c && c.cause; });
+      var cards = causes.map(function(c) {
+        return '<div class="fishbone-branch"><h4>' + escapeHtml(c.category || 'Cause') + '</h4>' +
+          '<p>' + escapeHtml(c.cause) + '</p></div>';
+      }).join('');
+      el.innerHTML =
+        '<h3>Root Cause: Fishbone Analysis</h3>' +
+        '<p class="fishbone-problem"><strong>The problem:</strong> ' + escapeHtml(fb.problem) + '</p>' +
+        (cards ? '<div class="fishbone-grid">' + cards + '</div>' : '') +
+        '<p class="synth-note">An Ishikawa (fishbone) diagram traces one problem back to its likely causes across people, process, tools, and environment. Based on your answers, not an on-site audit.</p>';
+    }
+
     /* ── Save Report — email gate then download ── */
     var CLARITY_WORKER_URL = 'https://clarity-email-gate.twobirdsinnovation.workers.dev';
     var emailCapturedKey   = 'clarity_email_captured';
@@ -792,6 +851,17 @@
         'MARKET TRENDS',
         '-------------',
         (d.market_trends || []).map(function(t) { return '  * ' + (t.trend || '') + (t.note ? ' - ' + t.note : ''); }).join('\n'),
+        ''
+      ] : []).concat((d.tim_woods || []).length ? [
+        'TIM WOODS — WHERE TIME AND MONEY LEAK',
+        '--------------------------------------',
+        (d.tim_woods || []).map(function(w) { return '  * ' + (w.waste || '') + (w.note ? ' - ' + w.note : ''); }).join('\n'),
+        ''
+      ] : []).concat(d.fishbone && d.fishbone.problem ? [
+        'ROOT CAUSE: FISHBONE ANALYSIS',
+        '------------------------------',
+        'The problem: ' + d.fishbone.problem,
+        (d.fishbone.causes || []).map(function(c) { return '  * ' + (c.category || '') + ': ' + (c.cause || ''); }).join('\n'),
         ''
       ] : []).concat([
         '================================================',
@@ -1096,7 +1166,30 @@
           trend: "Labour stays tight",
           note: "Hiring licensed trades remains hard across Ontario, so the shops that grow are the ones getting more billable hours out of the crew they already have."
         }
-      ]
+      ],
+      tim_woods: [
+        {
+          waste: "Waiting",
+          note: "Quotes sit unsent for days after a site visit, so leads cool off before a number ever reaches them."
+        },
+        {
+          waste: "Motion",
+          note: "Job details get re-typed from a paper intake sheet into the invoicing tool, then again into the scheduling board."
+        },
+        {
+          waste: "Defects",
+          note: "Missed follow-ups on quoted jobs mean rework chasing customers who have already gone with someone else."
+        }
+      ],
+      fishbone: {
+        problem: "Quoted jobs are won or lost on how fast Acme follows up, and that follow-up is inconsistent.",
+        causes: [
+          { category: "People", cause: "Follow-up falls to whoever has a free minute, so it depends on who is least busy that week." },
+          { category: "Process", cause: "There is no set day or trigger for a follow-up call or message after a quote goes out." },
+          { category: "Tools & Systems", cause: "Quotes and job status live in separate places, so nothing flags an unanswered quote automatically." },
+          { category: "Environment", cause: "Peak season overlaps with the busiest quoting period, leaving the least time free exactly when follow-up matters most." }
+        ]
+      }
     };
 
     var showSampleBtn = document.getElementById('showSampleBtn');
