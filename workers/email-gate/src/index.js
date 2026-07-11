@@ -34,6 +34,27 @@ function isValidEmail(email) {
     email.length <= 254;
 }
 
+/* Rate limiting (S-WORKER-HARDENING-001, 2026-07-11): reuses the fixed-window
+   KV counter pattern shipped in clarity/workers/clarity-proxy (ad13056) --
+   self-expiring keys via KV expirationTtl, no cleanup job needed. Reuses the
+   existing EMAILS KV binding with a "rl:" key prefix rather than a new
+   namespace, since this worker already has one bound. */
+const IP_LIMIT_PER_HOUR = 10;
+const IP_LIMIT_WINDOW_SECONDS = 3600;
+
+function clientIp(request) {
+  return request.headers.get('CF-Connecting-IP') || 'unknown';
+}
+
+async function checkAndIncrement(env, key, limit, windowSeconds) {
+  const current = parseInt((await env.EMAILS.get(key)) || '0', 10);
+  if (current >= limit) {
+    return { blocked: true, count: current, limit };
+  }
+  await env.EMAILS.put(key, String(current + 1), { expirationTtl: windowSeconds });
+  return { blocked: false, count: current + 1, limit };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -52,6 +73,17 @@ export default {
 
     // Email capture
     if (url.pathname === '/capture-email' && request.method === 'POST') {
+      if (env.EMAILS) {
+        const ip = clientIp(request);
+        const limit = await checkAndIncrement(env, `rl:${ip}`, IP_LIMIT_PER_HOUR, IP_LIMIT_WINDOW_SECONDS);
+        if (limit.blocked) {
+          return Response.json({ error: 'Too many requests. Please try again later.' }, {
+            status: 429,
+            headers: { ...cors, 'Retry-After': '3600' },
+          });
+        }
+      }
+
       let body;
       try {
         body = await request.json();
