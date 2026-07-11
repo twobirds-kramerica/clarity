@@ -5,6 +5,10 @@
  *   POST /          — forwards Anthropic API calls from
  *                     twobirds-kramerica.github.io/clarity/ with the
  *                     server-side key (the Clarity built-in provider).
+ *   POST /career-coach — same forwarding for the Career Coach built-in
+ *                     provider (v2 lab), with its OWN per-IP and daily
+ *                     rate-limit buckets so one product cannot exhaust
+ *                     the other's capacity. Added 2026-07-11 (ADR-0029).
  *   POST /feedback  — accepts beta feedback from any twobirds-kramerica
  *                     GitHub Pages product and stores it in the
  *                     twobirds-beta-feedback KV namespace. No PII beyond
@@ -53,6 +57,13 @@ const IP_LIMIT_WINDOW_SECONDS = 3600;
 const DAILY_GLOBAL_LIMIT      = 300; // Anthropic proxy route, all IPs combined
 const DAILY_WINDOW_SECONDS    = 86400;
 const FEEDBACK_IP_LIMIT_PER_HOUR = 10; // /feedback is free but KV storage is not infinite
+
+/* Career Coach (/career-coach route) — separate buckets so Career Coach
+   traffic never eats Clarity's capacity or vice versa. A verdict costs a
+   fraction of a Clarity diagnostic (Haiku-class model, ~1.5K output tokens),
+   so the caps can be a little more generous per IP. */
+const CC_IP_LIMIT_PER_HOUR  = 10;
+const CC_DAILY_GLOBAL_LIMIT = 300;
 
 function clientIp(request) {
   return request.headers.get('CF-Connecting-IP') || 'unknown';
@@ -217,16 +228,24 @@ export default {
 
       /* Abuse protection — checked before spending any API credits. Per-IP
          first (cheap, catches the common case), then the daily global cap
-         (catches a distributed attack spread across many IPs). */
-      const ipLimit = await checkAndIncrement(env, `ip:${ip}`, IP_LIMIT_PER_HOUR, IP_LIMIT_WINDOW_SECONDS);
+         (catches a distributed attack spread across many IPs). The
+         /career-coach route uses its own KV buckets and caps (ADR-0029)
+         so the two products cannot exhaust each other's capacity. */
+      const isCareerCoach = url.pathname === '/career-coach';
+      const ipKey      = isCareerCoach ? `cc:ip:${ip}` : `ip:${ip}`;
+      const ipCap      = isCareerCoach ? CC_IP_LIMIT_PER_HOUR : IP_LIMIT_PER_HOUR;
+      const dailyCap   = isCareerCoach ? CC_DAILY_GLOBAL_LIMIT : DAILY_GLOBAL_LIMIT;
+
+      const ipLimit = await checkAndIncrement(env, ipKey, ipCap, IP_LIMIT_WINDOW_SECONDS);
       if (ipLimit.blocked) {
         return rateLimitedResponse(safeOrigin, 'Too many requests from this connection. Please try again in an hour.');
       }
 
       const today = new Date().toISOString().slice(0, 10);
-      const dailyLimit = await checkAndIncrement(env, `daily:${today}`, DAILY_GLOBAL_LIMIT, DAILY_WINDOW_SECONDS);
+      const dailyKey = isCareerCoach ? `cc:daily:${today}` : `daily:${today}`;
+      const dailyLimit = await checkAndIncrement(env, dailyKey, dailyCap, DAILY_WINDOW_SECONDS);
       if (dailyLimit.blocked) {
-        return rateLimitedResponse(safeOrigin, 'This service has reached its daily capacity. Please try again tomorrow.');
+        return rateLimitedResponse(safeOrigin, 'This service has reached its daily capacity. Please try again tomorrow, or add your own API key for unlimited use.');
       }
 
       const body = await request.text();
