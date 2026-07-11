@@ -26,10 +26,20 @@
  * (blocks a single bot/script hammering the endpoint) and a daily global cap
  * (blocks a distributed attack spread across many IPs). Both use the
  * RATELIMIT KV namespace with self-expiring keys (no cleanup job needed).
+ *
+ * Low-credit alert (S-CLARITY-CREDIT-ALERT, 2026-07-10): if Anthropic
+ * returns a billing-related 4xx (out of credits / invalid key), this posts
+ * one Slack alert (reusing the same webhook as Talon's Golden Ticket alerts)
+ * and then stays silent for the rest of the day (RATELIMIT KV, key
+ * `alert:lowcredit:{date}`) so a burst of failed requests doesn't spam the
+ * channel. Requires the SLACK_WEBHOOK_URL secret:
+ *   wrangler secret put SLACK_WEBHOOK_URL
  */
 
 const ALLOWED_ORIGIN = 'https://twobirds-kramerica.github.io';
 const ANTHROPIC_API  = 'https://api.anthropic.com/v1/messages';
+const CLARITY_PER_SCAN_COST_NOTE =
+  'Approx cost per diagnostic: a few cents (Sonnet 4.6, ~$3/$15 per million input/output tokens). $5 in credits covers roughly 100+ typical reports.';
 
 /* Feedback limits — keep entries small and PII-light */
 const FEEDBACK_MAX_MESSAGE = 4000;
@@ -76,6 +86,55 @@ function corsHeaders(origin) {
 
 function clip(value, max) {
   return String(value == null ? '' : value).slice(0, max);
+}
+
+/* Detects the billing-shaped errors Anthropic returns (out of credits,
+   invalid/revoked key). Anthropic's error `type` field is stable API
+   surface; the message-text check is a fallback in case the type ever
+   changes shape. */
+function isBillingError(status, responseText) {
+  if (status !== 400 && status !== 401 && status !== 403) return false;
+  const lower = responseText.toLowerCase();
+  return (
+    lower.includes('credit balance is too low') ||
+    lower.includes('"type":"invalid_request_error"') && lower.includes('credit') ||
+    lower.includes('invalid x-api-key') ||
+    lower.includes('authentication_error')
+  );
+}
+
+/* Fire-and-forget Slack alert, rate-limited to once per calendar day so a
+   burst of failed requests during an outage doesn't spam the channel. Never
+   throws — a notification failure must not affect the user-facing response. */
+async function maybeAlertLowCredit(env, status, responseText) {
+  if (!env.SLACK_WEBHOOK_URL) return;
+  if (!isBillingError(status, responseText)) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const alertKey = `alert:lowcredit:${today}`;
+  const already = await env.RATELIMIT.get(alertKey);
+  if (already) return;
+  await env.RATELIMIT.put(alertKey, '1', { expirationTtl: DAILY_WINDOW_SECONDS });
+
+  const message = [
+    ':warning: *Clarity is down for real users* — the Anthropic API call just failed with a billing error.',
+    `Status ${status}. This blocks every live diagnostic report on twobirds-kramerica.github.io/clarity/ until fixed.`,
+    '',
+    '*To fix:* console.anthropic.com/settings/billing -> Add funds (or check the key is still valid).',
+    CLARITY_PER_SCAN_COST_NOTE,
+    '',
+    'This alert fires at most once per day even if many requests fail.',
+  ].join('\n');
+
+  try {
+    await fetch(env.SLACK_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message }),
+    });
+  } catch (e) {
+    /* Notification is best-effort — swallow errors, never affect the response. */
+  }
 }
 
 async function handleFeedback(request, env, safeOrigin) {
@@ -183,6 +242,9 @@ export default {
       });
 
       const responseBody = await upstream.text();
+
+      /* Best-effort, does not block the response to the user. */
+      await maybeAlertLowCredit(env, upstream.status, responseBody);
 
       return new Response(responseBody, {
         status: upstream.status,
