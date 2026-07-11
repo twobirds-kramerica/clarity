@@ -198,7 +198,11 @@ export default {
   async fetch(request, env) {
     try {
       const origin = request.headers.get('Origin') || '';
-      const safeOrigin = origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN;
+      /* localhost is allowed for local dev/QA runs. CORS is not the security
+         boundary here (non-browser clients skip it entirely); the rate
+         limits below are what protect the API spend. */
+      const isLocalDev = /^http:\/\/localhost(:\d+)?$/.test(origin);
+      const safeOrigin = (origin === ALLOWED_ORIGIN || isLocalDev) ? origin : ALLOWED_ORIGIN;
 
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(safeOrigin) });
