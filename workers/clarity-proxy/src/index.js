@@ -65,6 +65,17 @@ const FEEDBACK_IP_LIMIT_PER_HOUR = 10; // /feedback is free but KV storage is no
 const CC_IP_LIMIT_PER_HOUR  = 10;
 const CC_DAILY_GLOBAL_LIMIT = 300;
 
+/* Career Coach GENERATION calls (tailored CV + cover letter, 2026-07-11):
+   these are long-output Sonnet/Haiku calls (~4K max_tokens) that cost an
+   order of magnitude more than a triage verdict, and in the product they
+   are credit-gated client-side. The client gate is UX, not security, so
+   the worker enforces its own tighter buckets: any /career-coach request
+   asking for a big completion is counted against the generation caps.
+   Worst-case daily exposure at these caps: 60 x ~$0.114 = ~$7. */
+const CC_GEN_TOKEN_THRESHOLD  = 2500; // max_tokens above this = generation-class call
+const CC_GEN_IP_LIMIT_PER_HOUR = 5;
+const CC_GEN_DAILY_GLOBAL_LIMIT = 60;
+
 function clientIp(request) {
   return request.headers.get('CF-Connecting-IP') || 'unknown';
 }
@@ -236,9 +247,25 @@ export default {
          /career-coach route uses its own KV buckets and caps (ADR-0029)
          so the two products cannot exhaust each other's capacity. */
       const isCareerCoach = url.pathname === '/career-coach';
-      const ipKey      = isCareerCoach ? `cc:ip:${ip}` : `ip:${ip}`;
-      const ipCap      = isCareerCoach ? CC_IP_LIMIT_PER_HOUR : IP_LIMIT_PER_HOUR;
-      const dailyCap   = isCareerCoach ? CC_DAILY_GLOBAL_LIMIT : DAILY_GLOBAL_LIMIT;
+
+      /* Read the body up front so generation-class calls (big max_tokens)
+         can be told apart from cheap triage verdicts and counted against
+         their own, tighter buckets. Unparseable bodies are treated as
+         generation-class (fail closed on the expensive tier). */
+      const body = await request.text();
+      let isGeneration = false;
+      if (isCareerCoach) {
+        try {
+          const parsed = JSON.parse(body);
+          isGeneration = Number(parsed && parsed.max_tokens) > CC_GEN_TOKEN_THRESHOLD;
+        } catch (e) {
+          isGeneration = true;
+        }
+      }
+
+      const ipKey    = isCareerCoach ? (isGeneration ? `cc:gen:ip:${ip}` : `cc:ip:${ip}`) : `ip:${ip}`;
+      const ipCap    = isCareerCoach ? (isGeneration ? CC_GEN_IP_LIMIT_PER_HOUR : CC_IP_LIMIT_PER_HOUR) : IP_LIMIT_PER_HOUR;
+      const dailyCap = isCareerCoach ? (isGeneration ? CC_GEN_DAILY_GLOBAL_LIMIT : CC_DAILY_GLOBAL_LIMIT) : DAILY_GLOBAL_LIMIT;
 
       const ipLimit = await checkAndIncrement(env, ipKey, ipCap, IP_LIMIT_WINDOW_SECONDS);
       if (ipLimit.blocked) {
@@ -246,13 +273,11 @@ export default {
       }
 
       const today = new Date().toISOString().slice(0, 10);
-      const dailyKey = isCareerCoach ? `cc:daily:${today}` : `daily:${today}`;
+      const dailyKey = isCareerCoach ? (isGeneration ? `cc:gen:daily:${today}` : `cc:daily:${today}`) : `daily:${today}`;
       const dailyLimit = await checkAndIncrement(env, dailyKey, dailyCap, DAILY_WINDOW_SECONDS);
       if (dailyLimit.blocked) {
         return rateLimitedResponse(safeOrigin, 'This service has reached its daily capacity. Please try again tomorrow, or add your own API key for unlimited use.');
       }
-
-      const body = await request.text();
 
       const upstream = await fetch(ANTHROPIC_API, {
         method: 'POST',
