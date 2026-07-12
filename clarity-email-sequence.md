@@ -2,7 +2,7 @@
 **Created:** 2026-06-10 (T3-5)
 **Purpose:** 3-email sequence to keep leads warm after diagnostic completion and move toward a booking.
 **Trigger:** Send when a prospect completes the Clarity diagnostic — during a live demo, after sharing the link, or when email collection is wired to the form.
-**From:** aaron.patzalek@gmail.com (or aaronpatzalek@gmail.com)
+**From:** the Two Birds Innovation sending address (see private vault for account details)
 
 ---
 

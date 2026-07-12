@@ -159,7 +159,7 @@ This is the section where the audit scope gets opinionated. Aaron asked specific
 
 ### Current state
 - **The offer:** Free diagnostic → "Book a Free 30-Minute Call" → CA$2,500 AI Workflow Audit (described, not listed on a pricing page).
-- **The CTA:** `mailto:aaron.patzalek@gmail.com` with a pre-filled subject and body referencing the diagnostic.
+- **The CTA:** a `mailto:` link with a pre-filled subject and body referencing the diagnostic.
 - **The funnel:** No email capture *before* the diagnostic, no email *after* if the user doesn't click the CTA. Every non-mailto-clicker is lost forever.
 - **Social proof:** None.
 - **Trust signals:** "Aaron Patzalek · 20-year Senior PM · St. Thomas, Ontario" on the CTA card. Accurate and local but thin.
