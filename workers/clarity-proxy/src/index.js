@@ -31,6 +31,12 @@
  * (blocks a distributed attack spread across many IPs). Both use the
  * RATELIMIT KV namespace with self-expiring keys (no cleanup job needed).
  *
+ * Origin allow-list (hardening audit 2026-07-16): browser requests whose
+ * Origin header is present but not allow-listed (production GH Pages origin
+ * or http://localhost:* for dev) are rejected 403 before any KV write or
+ * Anthropic spend. Requests with no Origin (curl/server-to-server) pass —
+ * the rate limits remain the boundary for those. See the comment in fetch().
+ *
  * Low-credit alert (S-CLARITY-CREDIT-ALERT, 2026-07-10): if Anthropic
  * returns a billing-related 4xx (out of credits / invalid key), this posts
  * one Slack alert (reusing the same webhook as Talon's Golden Ticket alerts)
@@ -209,11 +215,32 @@ export default {
   async fetch(request, env) {
     try {
       const origin = request.headers.get('Origin') || '';
-      /* localhost is allowed for local dev/QA runs. CORS is not the security
-         boundary here (non-browser clients skip it entirely); the rate
-         limits below are what protect the API spend. */
+      /* Origin allow-list (hardening audit 2026-07-16). Two layers:
+         1. CORS headers are only ever issued for the allow-listed production
+            origin (both Clarity and Career Coach are served from the same
+            GitHub Pages origin) or http://localhost:* for local dev/QA.
+         2. A browser request carrying a NON-allow-listed Origin is rejected
+            with 403 before any rate-limit KV write or Anthropic spend —
+            CORS alone would only stop the page READING the response, but a
+            no-preflight "simple" POST would still fire and burn credits.
+         Note the honest limits: CORS + Origin checks are browser-enforced
+         signals only. Non-browser clients (curl, scripts) send no Origin —
+         or can forge one — and pass straight through; for those, the rate
+         limits below remain the actual spend-protection boundary, exactly
+         as the original design intended. This is additive defense against
+         drive-by third-party WEBSITES, not a replacement for rate limits. */
       const isLocalDev = /^http:\/\/localhost(:\d+)?$/.test(origin);
+      const originAllowed = origin === '' || origin === ALLOWED_ORIGIN || isLocalDev;
       const safeOrigin = (origin === ALLOWED_ORIGIN || isLocalDev) ? origin : ALLOWED_ORIGIN;
+
+      if (!originAllowed) {
+        /* No CORS headers on purpose — the browser blocks the response,
+           and nothing downstream (KV counters, Anthropic) is touched. */
+        return new Response(
+          JSON.stringify({ error: { message: 'Origin not allowed.' } }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
 
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders(safeOrigin) });
@@ -304,7 +331,7 @@ export default {
     } catch (e) {
       return new Response(
         JSON.stringify({ error: { message: 'Worker exception.', detail: String(e && e.stack || e && e.message || e) } }),
-        { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+        { status: 502, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN } }
       );
     }
   },
