@@ -4,3 +4,6 @@
 .env.production
 .playwright-cli/
 **/.wrangler/
+
+# Local QA screenshots (evidence only, not site content)
+_qa/
