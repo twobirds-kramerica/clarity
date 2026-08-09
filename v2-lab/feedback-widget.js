@@ -67,7 +67,7 @@
     ".ffw-panel h2{margin:0 0 4px;font-size:19px}",
     ".ffw-panel .ffw-sub{color:#445;margin:0 0 14px;font-size:13px}",
     ".ffw-field-label{font-weight:700;margin:12px 0 6px}",
-    ".ffw-review-text{width:100%;min-height:96px;border:1px solid #9aa7a1;border-radius:8px;padding:10px 12px;font:inherit;resize:vertical}",
+    ".ffw-review-text{width:100%;min-height:96px;border:1px solid #9aa7a1;border-radius:8px;padding:10px 12px;font:inherit;resize:vertical;background:#fff;color:#101418}",
     ".ffw-pinlist{list-style:none;margin:0;padding:0}",
     ".ffw-pinlist li{display:flex;gap:10px;align-items:flex-start;border:1px solid #dde5e2;border-radius:8px;padding:8px 10px;margin-bottom:8px}",
     ".ffw-pinlist .ffw-pin-num{flex:0 0 auto;background:#c62828;color:#fff;border-radius:999px;width:24px;height:24px;line-height:24px;text-align:center;font-weight:800;font-size:13px}",
@@ -537,8 +537,8 @@
     var discardBtn = elt("button", "ffw-btn ffw-btn-danger", "Discard");
     discardBtn.type = "button";
     discardBtn.addEventListener("click", abortAll);
-    actions.appendChild(sendBtn);
     actions.appendChild(discardBtn);
+    actions.appendChild(sendBtn);
 
     panel.appendChild(actions);
     panel.appendChild(status);
