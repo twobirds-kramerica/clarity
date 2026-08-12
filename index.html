@@ -635,7 +635,7 @@
       <a href="disclaimer.html" class="footer-link-btn" style="text-decoration:none;">Disclaimer</a>
       <button type="button" id="resetKeyLink" class="footer-link-btn">Advanced settings</button>
     </div>
-    <p>&copy; 2026 Two Birds Innovation.</p>
+    <p>&copy; <span id="copyright-year">2026</span> Two Birds Innovation.</p>
   </footer>
 
   <script src="llm-provider.js" defer></script>
@@ -709,5 +709,6 @@
     document.querySelectorAll('a[target="_blank"]').forEach(decorate);
   }());
   </script>
+<script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

@@ -163,9 +163,10 @@
     </section>
 
     <footer class="footer">
-      <p>&copy; 2026 Two Birds Innovation</p>
+      <p>&copy; <span id="copyright-year">2026</span> Two Birds Innovation</p>
       <p class="footer-links"><a href="index.html">Clarity</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></p>
     </footer>
   </div>
+<script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

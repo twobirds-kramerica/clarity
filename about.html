@@ -58,7 +58,7 @@
     <footer>
       <p>Built in Ontario, Canada <span aria-hidden="true">🍁</span></p>
       <p><a href="index.html">Clarity</a> &nbsp;&middot;&nbsp; <a href="sample-diagnostic.html">Sample Report</a> &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="terms.html">Terms</a> &nbsp;&middot;&nbsp; <a href="disclaimer.html">Disclaimer</a></p>
-      <p>&copy; 2026 Two Birds Innovation.</p>
+      <p>&copy; <span id="copyright-year">2026</span> Two Birds Innovation.</p>
     </footer>
   </div>
   <!-- External-link affordance: visible arrow + screen-reader note on every new-tab link -->
@@ -78,5 +78,6 @@
     });
   }());
   </script>
+<script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
