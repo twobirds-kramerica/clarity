@@ -46,6 +46,11 @@ function clientIp(request) {
   return request.headers.get('CF-Connecting-IP') || 'unknown';
 }
 
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(str)));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function checkAndIncrement(env, key, limit, windowSeconds) {
   const current = parseInt((await env.EMAILS.get(key)) || '0', 10);
   if (current >= limit) {
@@ -101,7 +106,14 @@ export default {
 
       // Store in KV if bound (optional — worker functions without KV)
       if (env.EMAILS) {
-        const key = `${ts}-${email.replace(/[^a-z0-9@.]/g, '_')}`;
+        // Key on a hash, not the raw address (S-SECURITY-WORKER-URL-PII-
+        // HARDENING-001, 2026-08-15): the old key was `${ts}-${email}`, so
+        // the subscriber list was readable from a KV key listing alone,
+        // without reading a single value. The address itself still lives in
+        // the value, unchanged. New writes only -- existing keys are left
+        // as-is (PRODUCTION DELETION GUARD; no bulk rewrite/migration here).
+        const emailHash = await sha256Hex(email);
+        const key = `${ts}-${emailHash}`;
         await env.EMAILS.put(key, JSON.stringify({ email, source, ts }), {
           expirationTtl: 60 * 60 * 24 * 365, // 1 year
         });
