@@ -141,7 +141,11 @@
 .swot-s { background: var(--olive-light); border: 1px solid #A8BA9E; }
 .swot-s h3 { color: var(--olive-dark); }
 .swot-w { background: var(--cream); border: 1px solid var(--accent-light); }
-.swot-w h3 { color: var(--accent); }
+/* --accent (#8B7355) on --cream (#F5F3EE) measures 4.05:1, failing WCAG AA
+   4.5:1 for this 0.95rem heading (below the large-text threshold even bold).
+   Darkened for this heading only -- known-audit-issue P1 SWOT card colours,
+   S-PORTFOLIO-EXTERNAL-AUDIT-RESUME-001, 2026-08-24. Measures 5.24:1. */
+.swot-w h3 { color: #766248; }
 .swot-o { background: #EEF1ED; border: 1px solid #B5C4AF; }
 .swot-o h3 { color: #3D5232; }
 .swot-t { background: #F2EDEA; border: 1px solid #D4B99A; }
